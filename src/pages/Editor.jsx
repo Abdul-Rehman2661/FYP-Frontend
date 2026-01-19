@@ -3,6 +3,13 @@ import Header from "../components/Header.jsx"
 import BottomNavigation from "../components/BottomNavigation.jsx"
 import SaveFile from "../components/SaveFile.jsx";
 import OpenFile from "../components/OpenFile.jsx";
+import {
+    PlayIcon,
+    ArrowPathIcon,
+    FolderOpenIcon,
+    ArrowDownTrayIcon
+} from "@heroicons/react/24/outline";
+
 
 function Editor() {
     const [displayModel, setDisplayModel] = useState(false);
@@ -13,38 +20,29 @@ function Editor() {
             <Header />
             <div className="p-4 pt-16 min-h-screen bg-gray-100 pb-16">
                 <div className="space-y-4 p-4 bg-white rounded-xl">
-                    <div className="flex flex-nowrap justify-center items-center gap-2 bg-white p-2 ">
+                    <div className="flex items-center gap-2 bg-white p-2">
 
-                        <button className="flex items-center gap-1 px-5 py-1.5 bg-blue-900 text-white text-xs rounded">
+                        <button className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white text-xs rounded">
+                            <PlayIcon className="h-4 w-4" />
                             Run
                         </button>
 
-                        <button className="flex items-center gap-1 px-5 py-1.5 bg-blue-900 text-white text-xs rounded">
+                        <button className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white text-xs rounded">
+                            <ArrowPathIcon className="h-4 w-4" />
                             Compile
                         </button>
 
-                        <button
-                            onClick={() => setDisplayModel(true)}
-                            className="flex items-center gap-1 px-5 py-1 text-xs rounded border border-blue-900 text-blue-900 hover:bg-blue-900 hover:text-white transition"
-                        >
+                        <button className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-900 text-blue-900 text-xs rounded hover:bg-blue-900 hover:text-white transition">
+                            <ArrowDownTrayIcon className="h-4 w-4" />
                             Save
                         </button>
-                        {displayModel && (
-                            <SaveFile onClose={() => setDisplayModel(false)} />
-                        )}
 
-                        <button
-                            onClick={() => setShowModal(true)}
-                            className="flex items-center gap-1 px-5 py-1 text-xs rounded border border-blue-900 text-blue-900 hover:bg-blue-900 hover:text-white transition"
-                        >
+                        <button className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-900 text-blue-900 text-xs rounded hover:bg-blue-900 hover:text-white transition">
+                            <FolderOpenIcon className="h-4 w-4" />
                             Open
                         </button>
-                        {showModal && (
-                            <OpenFile onClose={() => setShowModal(false)} />
-                        )}
 
                     </div>
-
 
                     {/* Code Editor Box */}
                     <div className="border rounded-lg bg-white p-3 h-80 overflow-auto text-sm font-mono text-gray-500">

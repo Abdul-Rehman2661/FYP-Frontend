@@ -5,6 +5,7 @@ import SaveFile from "../components/SaveFile.jsx";
 import OpenFile from "../components/OpenFile.jsx";
 
 function Editor() {
+    const [displayModel, setDisplayModel] = useState(false);
     const [showModal, setShowModal] = useState(false);
 
     return (
@@ -12,39 +13,36 @@ function Editor() {
             <Header />
             <div className="p-4 pt-16 min-h-screen bg-gray-100 pb-16">
                 <div className="space-y-4 p-4 bg-white rounded-xl">
-                    <div className="flex justify-between bg-gray-100">
-                        <button
-                            type="button"
-                            className="px-6 py-1 bg-blue-900 rounded text-sm text-white "
-                        >
-                             Run
+                    <div className="flex flex-nowrap justify-center items-center gap-2 bg-white p-2 ">
+
+                        <button className="flex items-center gap-1 px-5 py-1.5 bg-blue-900 text-white text-xs rounded">
+                            Run
                         </button>
-                        <button
-                            type="button"
-                            className="px-6 py-1 bg-blue-900 rounded text-sm text-white "
-                        >
-                            Run Step
+
+                        <button className="flex items-center gap-1 px-5 py-1.5 bg-blue-900 text-white text-xs rounded">
+                            Compile
                         </button>
+
                         <button
-                            type="button"
-                            onClick={() => setShowModal(true)}
-                            className="px-6 py-1 bg-transparent rounded text-sm text-blue-900 border border-blue-900 hover:bg-blue-900 hover:text-white transition-colors duration-300"
+                            onClick={() => setDisplayModel(true)}
+                            className="flex items-center gap-1 px-5 py-1 text-xs rounded border border-blue-900 text-blue-900 hover:bg-blue-900 hover:text-white transition"
                         >
                             Save
                         </button>
-                               {showModal && (
-                                <SaveFile onClose={() => setShowModal(false)} />
-                              )}
+                        {displayModel && (
+                            <SaveFile onClose={() => setDisplayModel(false)} />
+                        )}
+
                         <button
-                            type="button"
                             onClick={() => setShowModal(true)}
-                            className="px-6 py-1 bg-transparent rounded text-sm text-blue-900 border border-blue-900 hover:bg-blue-900 hover:text-white "
+                            className="flex items-center gap-1 px-5 py-1 text-xs rounded border border-blue-900 text-blue-900 hover:bg-blue-900 hover:text-white transition"
                         >
                             Open
                         </button>
-                          {showModal && (
-                                <OpenFile onClose={() => setShowModal(false)} />
-                              )}
+                        {showModal && (
+                            <OpenFile onClose={() => setShowModal(false)} />
+                        )}
+
                     </div>
 
 

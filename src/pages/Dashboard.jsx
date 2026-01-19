@@ -13,6 +13,7 @@ function Dashboard() {
           <h2 className="text-xl text-blue-900 font-semibold text-center mb-4">
             Architecture Dashboard
           </h2>
+          <p className="text-center text-gray-700 mb-4 text-sm">Manage and explore your computer architecture designs</p>
 
           {architectures.length === 0 ? (
             <p className="text-center text-red-500 mt-10">

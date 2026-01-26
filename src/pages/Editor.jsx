@@ -32,16 +32,20 @@ function Editor() {
                             Compile
                         </button>
 
-                        <button className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-900 text-blue-900 text-xs rounded hover:bg-blue-900 hover:text-white transition">
+                        <button className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-900 text-blue-900 text-xs rounded hover:bg-blue-900 hover:text-white transition"
+                            type="button" onClick={() => setDisplayModel(true)}
+                        >
                             <ArrowDownTrayIcon className="h-4 w-4" />
                             Save
                         </button>
+                        {displayModel && (<SaveFile onClose={() => setDisplayModel(false)} />)}
 
-                        <button className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-900 text-blue-900 text-xs rounded hover:bg-blue-900 hover:text-white transition">
+                        <button className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-900 text-blue-900 text-xs rounded hover:bg-blue-900 hover:text-white transition"
+                            type="button" onClick={() => setShowModal(true)}>
                             <FolderOpenIcon className="h-4 w-4" />
                             Open
                         </button>
-
+                        {showModal && (<OpenFile onClose={() => setShowModal(false)} />)}
                     </div>
 
                     {/* Code Editor Box */}

@@ -14,7 +14,7 @@ function BottomNavigation() {
   return (
     <footer
       className="fixed bottom-0 left-1/2 -translate-x-1/2
-      w-full max-w-[420px] bg-white border-t"
+      w-full lg:max-w-full bg-white border-t"
     >
       <div className="flex justify-around py-2 text-[11px]">
 

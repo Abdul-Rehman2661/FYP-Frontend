@@ -7,7 +7,7 @@ const Header = () => {
     <header
       className="
     fixed top-0 left-1/2 -translate-x-1/2
-    w-full max-w-[420px]
+    w-full lg:max-w-full
     bg-blue-900 px-4 py-3
     flex items-center justify-center gap-2
     z-50

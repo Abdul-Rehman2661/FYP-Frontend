@@ -7,9 +7,9 @@ import Editor from "./pages/Editor.jsx";
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-400 flex justify-center">
+    <div className="min-h-screen bg-white flex justify-center">
       <div
-        className="w-full max-w-[420px] min-h-screen bg-white
+        className="w-full min-h-screen bg-white
         shadow-2xl border"
       >
         <Routes>

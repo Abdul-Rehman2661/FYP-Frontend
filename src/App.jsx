@@ -9,7 +9,7 @@ function App() {
   return (
     <div className="min-h-screen bg-white flex justify-center">
       <div
-        className="w-full min-h-screen bg-white
+        className="w-full min-h-screen bg-gray-100
         shadow-2xl border"
       >
         <Routes>

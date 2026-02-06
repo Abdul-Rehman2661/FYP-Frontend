@@ -25,7 +25,7 @@ function Dashboard() {
         <div className="w-full max-w-sm lg:max-w-7xl px-4 lg:px-10">
 
           {/* Title */}
-          <h2 className="text-xl text-blue-900 font-semibold text-center mb-1 lg:text-2xl">
+          <h2 className="text-xl text-blue-900 font-bold text-center mb-1 lg:text-2xl lg:mt-14">
             My Architectures
           </h2>
 

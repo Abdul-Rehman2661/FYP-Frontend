@@ -31,9 +31,11 @@ function Detail() {
             <Header />
             <div className="p-4 pt-16 min-h-screen bg-gray-100 pb-16">
                 <div className="space-y-4 p-4 bg-white rounded-xl">
-                    <h2 className="text-xl text-blue-900 text-center mb-4">
-                        Architecture Details
+                    <h2 className="text-xl text-blue-900 text-center font-bold">
+                        Details
                     </h2>
+
+                    <p className="text-center text-blue-900 text-sm">Technical specifications and reference manual.</p>
 
                     {/* BASIC INFO */}
                     <div className="space-y-2 text-sm">

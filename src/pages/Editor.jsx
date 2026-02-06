@@ -1,79 +1,98 @@
 import { useState } from "react";
-import Header from "../components/Header.jsx"
-import BottomNavigation from "../components/BottomNavigation.jsx"
+import Header from "../components/Header.jsx";
+import BottomNavigation from "../components/BottomNavigation.jsx";
 import SaveFile from "../components/SaveFile.jsx";
 import OpenFile from "../components/OpenFile.jsx";
 import {
-    PlayIcon,
-    ArrowPathIcon,
-    FolderOpenIcon,
-    ArrowDownTrayIcon
+  PlayIcon,
+  ArrowPathIcon,
+  FolderOpenIcon,
+  ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
 
-
 function Editor() {
-    const [displayModel, setDisplayModel] = useState(false);
-    const [showModal, setShowModal] = useState(false);
+  const [displayModel, setDisplayModel] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
-    return (
-        <>
-            <Header />
-            <div className="p-4 pt-16 min-h-screen bg-gray-100 pb-16">
-                <div className="space-y-4 p-4 bg-white rounded-xl">
-                    <div className="flex items-center gap-2 bg-white p-2">
+  return (
+    <>
+      <Header />
 
-                        <button className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white text-xs rounded">
-                            <PlayIcon className="h-4 w-4" />
-                            Run
-                        </button>
+      <h2 className="text-blue-900 font-bold text-center mb-1 text-2xl lg:mt-20 mt-14">
+        Program Editor
+      </h2>
 
-                        <button className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white text-xs rounded">
-                            <ArrowPathIcon className="h-4 w-4" />
-                            Compile
-                        </button>
+      <div className="min-h-screen bg-gray-100">
+        <div className="w-full rounded-xl p-5 space-y-4 lg:max-w-full lg:shadow">
+          <div className="flex items-center justify-center gap-2 bg-gray-100">
+            <button className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white text-xs rounded">
+              <PlayIcon className="h-4 w-4" />
+              Run
+            </button>
 
-                        <button className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-900 text-blue-900 text-xs rounded hover:bg-blue-900 hover:text-white transition"
-                            type="button" onClick={() => setDisplayModel(true)}
-                        >
-                            <ArrowDownTrayIcon className="h-4 w-4" />
-                            Save
-                        </button>
-                        {displayModel && (<SaveFile onClose={() => setDisplayModel(false)} />)}
+            <button className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white text-xs rounded">
+              <ArrowPathIcon className="h-4 w-4" />
+              Compile
+            </button>
 
-                        <button className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-900 text-blue-900 text-xs rounded hover:bg-blue-900 hover:text-white transition"
-                            type="button" onClick={() => setShowModal(true)}>
-                            <FolderOpenIcon className="h-4 w-4" />
-                            Open
-                        </button>
-                        {showModal && (<OpenFile onClose={() => setShowModal(false)} />)}
-                    </div>
+            <button
+              type="button"
+              onClick={() => setDisplayModel(true)}
+              className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 border border-blue-900 text-blue-900 text-xs rounded hover:bg-blue-900 hover:text-white transition"
+            >
+              <ArrowDownTrayIcon className="h-4 w-4" />
+              Save
+            </button>
 
-                    {/* Code Editor Box */}
-                    <div className="border rounded-lg bg-white p-3 h-80 overflow-auto text-sm font-mono text-gray-500">
-                        <p>LOAD R1, [0x13]</p>
-                        <p>LOAD R2, [0x0D]</p>
-                        <p>ADD R1, R2</p>
-                        <p>SUB R3, R1</p>
-                        <p>STORE [0x00], R1</p>
-                        <p>STORE [0x01], R3</p>
-                    </div>
+            {displayModel && (
+              <SaveFile onClose={() => setDisplayModel(false)} />
+            )}
 
-                    {/* Error Display */}
-                    <div className="bg-blue-50 rounded-lg p-3 h-60">
-                        <p className="text-sm font-semibold text-gray-700 mb-1">
-                            Error Display
-                        </p>
-                        <div className="bg-white border rounded-md p-2 h-40 text-sm text-gray-500">
-                            No Errors
-                        </div>
-                    </div>
+            <button
+              type="button"
+              onClick={() => setShowModal(true)}
+              className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 border border-blue-900 text-blue-900 text-xs rounded hover:bg-blue-900 hover:text-white transition"
+            >
+              <FolderOpenIcon className="h-4 w-4" />
+              Open
+            </button>
 
+            {showModal && <OpenFile onClose={() => setShowModal(false)} />}
+          </div>
 
-                </div>
+          <div className="flex justify-center bg-gray-100">
+            <button className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white text-xs rounded">
+              <ArrowPathIcon className="h-4 w-4" />
+              Compare
+            </button>
+          </div>
+
+          <div className="flex flex-col lg:flex-row gap-2 lg:gap-5 border rounded-lg bg-white p-3 overflow-auto text-sm font-mono text-gray-500">
+            <textarea
+              className="p-5 rounded-xl bg-gray-100 lg:w-* w-full focus:ring-gray-300"
+              placeholder={`LOAD R1, [0x13]
+                            LOAD R2, [0x0D]
+                            ADD R1, R2
+                            SUB R3, R1
+                            STORE [0x00], R1
+                            STORE [0x01], R3`}
+            />
+
+            <div className="bg-blue-50 rounded-lg p-3 h-60 mt-5 lg:w-* w-full">
+              <p className="text-sm font-semibold text-gray-700 mb-1">
+                Error Display
+              </p>
+              <div className="bg-white border rounded-md p-2 h-40 text-sm text-gray-500">
+                No Errors
+              </div>
             </div>
-            <BottomNavigation />
-        </>
-    );
+          </div>
+        </div>
+      </div>
+
+      <BottomNavigation />
+    </>
+  );
 }
 
 export default Editor;

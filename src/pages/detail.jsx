@@ -276,7 +276,7 @@ function Detail() {
         </div>
       </div>
 
-            {/* Addressing Modes Card */}
+      {/* Addressing Modes Card */}
       <div className="m-4 p-6 mb-20 bg-white rounded-xl border border-gray-200 shadow-md">
         <div className="flex items-center gap-2 mb-6 text-blue-900 font-semibold">
           <CodeBracketIcon className="w-6 h-6" />

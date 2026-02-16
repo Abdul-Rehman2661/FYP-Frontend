@@ -9,8 +9,11 @@ import {
   FolderOpenIcon,
   ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
+import { useNavigate } from "react-router-dom";
 
 function Editor() {
+
+  const navigate = useNavigate();
   const [displayModel, setDisplayModel] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
@@ -25,7 +28,9 @@ function Editor() {
       <div className="min-h-screen bg-gray-100">
         <div className="w-full rounded-xl p-5 space-y-4 lg:max-w-full lg:shadow">
           <div className="flex items-center justify-center gap-2 bg-gray-100">
-            <button className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white text-xs rounded">
+            <button className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white text-xs rounded"
+            onClick={()=> navigate("/registervis")}
+            >
               <PlayIcon className="h-4 w-4" />
               Run
             </button>
@@ -61,15 +66,17 @@ function Editor() {
           </div>
 
           <div className="flex justify-center bg-gray-100">
-            <button className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white text-xs rounded">
+            <button className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white text-xs rounded"
+            onClick={() => navigate("/compare")}
+            >
               <ArrowPathIcon className="h-4 w-4" />
               Compare
             </button>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-2 lg:gap-5 border rounded-lg bg-white p-3text-sm font-mono text-gray-500">
+          <div className="flex flex-col lg:flex-row gap-2 lg:gap-5 border rounded-lg bg-white p-3 text-sm font-mono text-gray-500">
             <textarea
-              className="p-5 rounded-xl bg-gray-100 lg:w-* w-full h-64 focus:ring-gray-300"
+              className="p-5 lg:m-5 rounded-xl bg-gray-100 lg:w-* w-full h-64 focus:ring-gray-300"
               placeholder={`LOAD R1, [0x13] 
 LOAD R2, [0x0D]
 ADD R1, R2

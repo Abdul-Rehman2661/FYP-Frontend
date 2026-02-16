@@ -17,10 +17,8 @@ function CpuDesign() {
   const [noOfRegisters, setNoOfRegisters] = useState("");
   const [noOfInstructions, setNoOfInstructions] = useState("");
 
-  // Saved preview state
   const [savedData, setSavedData] = useState(null);
 
-  // ✅ Restore data when coming back from Register screen
   useEffect(() => {
     if (location.state) {
       const data = location.state;

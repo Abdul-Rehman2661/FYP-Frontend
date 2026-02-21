@@ -10,6 +10,7 @@ import RegisterVisualization from "./pages/RegisterVisualization.jsx";
 import Memory from "./pages/Memory.jsx";
 import BackButton from "./components/BackButton.jsx";
 import Debugging from "./pages/Debugging.jsx";
+import Update from "./pages/Update.jsx";
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
           <Route path="/memory" element={<Memory />} />
           <Route path="/Back" element={<BackButton />} />
           <Route path="/debugging" element={<Debugging />} />
+          <Route path="/update/:id" element={<Update />} />
         </Routes>
       </div>
     </div>

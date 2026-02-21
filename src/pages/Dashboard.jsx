@@ -18,12 +18,8 @@ function Dashboard() {
       <Header />
 
       <div className="min-h-screen bg-gray-100 flex justify-center pt-14 pb-20">
-        {/* 
-          MOBILE: max-w-sm (unchanged)
-          LAPTOP: wide dashboard container
-        */}
-        <div className="w-full max-w-sm lg:max-w-7xl px-4 lg:px-10">
 
+        <div className="w-full max-w-sm lg:max-w-7xl px-4 lg:px-10">
           {/* Title */}
           <h2 className="text-xl text-blue-900 font-bold text-center mb-1 lg:text-2xl lg:mt-14">
             My Architectures
@@ -34,9 +30,7 @@ function Dashboard() {
           </p>
 
           {architectures.length === 0 ? (
-            <p className="text-center text-red-500 mt-10">
-              No Architecture
-            </p>
+            <p className="text-center text-red-500 mt-10">No Architecture</p>
           ) : (
             <div className="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-6">
               {architectures.map((arch) => (
@@ -65,24 +59,28 @@ function Dashboard() {
                       {arch.memorySize}
                     </p>
                     <p>
-                      <span className="font-medium">Bus:</span>{" "}
-                      {arch.busSize}
+                      <span className="font-medium">Bus:</span> {arch.busSize}
                     </p>
                   </div>
 
                   {/* Buttons */}
                   <div className="flex gap-2 mt-4">
-                    <button className="
+                    <button
+                      className="
                       flex-1 py-1.5 text-sm rounded
                       bg-blue-900 text-white hover:text-gray-400
-                    ">
+                    "
+                    >
                       Use
                     </button>
 
-                    <button className="
+                    <button
+                      onClick={() => navigate(`/update/${arch.id}`)}
+                      className="
                       flex-1 py-1.5 text-sm rounded
                       bg-blue-900 text-white hover:text-gray-400
-                    ">
+                      "
+                    >
                       Update
                     </button>
 

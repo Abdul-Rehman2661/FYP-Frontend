@@ -5,7 +5,6 @@ import AddRegister from "../components/AddRegister.jsx";
 import { useNavigate, useLocation } from "react-router-dom";
 
 function CpuDesign() {
-  const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -168,10 +167,6 @@ function CpuDesign() {
             >
               Next
             </button>
-
-            {showModal && (
-              <AddRegister onClose={() => setShowModal(false)} />
-            )}
           </form>
         </div>
       </div>

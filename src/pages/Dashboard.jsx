@@ -74,15 +74,14 @@ function Dashboard() {
                   <div className="flex gap-2 mt-4">
                     <button className="
                       flex-1 py-1.5 text-sm rounded
-                      bg-blue-900 text-white
+                      bg-blue-900 text-white hover:text-gray-400
                     ">
                       Use
                     </button>
 
                     <button className="
                       flex-1 py-1.5 text-sm rounded
-                      border border-blue-900 text-blue-900
-                      hover:bg-blue-900 hover:text-white transition
+                      bg-blue-900 text-white hover:text-gray-400
                     ">
                       Update
                     </button>
@@ -90,9 +89,8 @@ function Dashboard() {
                     <button
                       onClick={() => navigate(`/detail/${arch.id}`)}
                       className="
-                        flex-1 py-1.5 text-sm rounded
-                        border border-blue-900 text-blue-900
-                        hover:bg-blue-900 hover:text-white transition
+                      flex-1 py-1.5 text-sm rounded
+                      bg-blue-900 text-white hover:text-gray-400
                       "
                     >
                       Details

@@ -8,6 +8,8 @@ import Register from "./pages/Register.jsx";
 import Compare from "./pages/Compare.jsx";
 import RegisterVisualization from "./pages/RegisterVisualization.jsx";
 import Memory from "./pages/Memory.jsx";
+import BackButton from "./components/BackButton.jsx";
+import Debugging from "./pages/Debugging.jsx";
 
 function App() {
   return (
@@ -26,6 +28,8 @@ function App() {
           <Route path="/compare" element={<Compare />} />
           <Route path="/registervis" element={<RegisterVisualization />} />
           <Route path="/memory" element={<Memory />} />
+          <Route path="/Back" element={<BackButton />} />
+          <Route path="/debugging" element={<Debugging />} />
         </Routes>
       </div>
     </div>

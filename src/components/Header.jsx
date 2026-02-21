@@ -1,5 +1,6 @@
 import React from "react";
 import { CpuChipIcon } from "@heroicons/react/24/outline";
+import BackButton from "../components/BackButton.jsx";
 
 
 const Header = () => {
@@ -13,6 +14,7 @@ const Header = () => {
     z-50
   "
     >
+      <BackButton />
       <CpuChipIcon className="h-5 w-5 text-white" />
 
       <h3 className="text-white text-sm font-semibold lg:text-lg">

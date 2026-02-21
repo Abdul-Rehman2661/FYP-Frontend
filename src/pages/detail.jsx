@@ -173,7 +173,7 @@ function Detail() {
                     LOAD
                   </td>
                   <td className="w-1/3 px-4 py-2 border border-blue-100">
-                    10100001
+                    00
                   </td>
                   <td className="w-1/3 px-4 py-2 border border-blue-100">
                     LOAD - M[addr]
@@ -184,7 +184,7 @@ function Detail() {
                     STORE
                   </td>
                   <td className="w-1/3 px-4 py-2 border border-blue-100">
-                    10110010
+                    01
                   </td>
                   <td className="w-1/3 px-4 py-2 border border-blue-100">
                     STORE - M[addr]
@@ -195,7 +195,7 @@ function Detail() {
                     ADD
                   </td>
                   <td className="w-1/3 px-4 py-2 border border-blue-100">
-                    11000011
+                    10
                   </td>
                   <td className="w-1/3 px-4 py-2 border border-blue-100">
                     ADD - R1, R3
@@ -206,7 +206,7 @@ function Detail() {
                     SUB
                   </td>
                   <td className="w-1/3 px-4 py-2 border border-blue-100">
-                    11010100
+                    11
                   </td>
                   <td className="w-1/3 px-4 py-2 border border-blue-100">
                     SUB - R3, R4

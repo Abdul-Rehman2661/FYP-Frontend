@@ -12,7 +12,7 @@ function Memory() {
   return (
     <>
       <Header />
-      <div className="p-4 pt-16 min-h-screen bg-gray-100 pb-16 flex justify-center">
+      <div className="p-4 pt-20 min-h-screen bg-gray-100 pb-16 flex justify-center">
         <div
           className="
             w-full

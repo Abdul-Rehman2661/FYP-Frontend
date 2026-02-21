@@ -12,7 +12,6 @@ import {
 import { useNavigate } from "react-router-dom";
 
 function Editor() {
-
   const navigate = useNavigate();
   const [displayModel, setDisplayModel] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -28,14 +27,18 @@ function Editor() {
       <div className="min-h-screen bg-gray-100">
         <div className="w-full rounded-xl p-5 space-y-4 lg:max-w-full lg:shadow">
           <div className="flex items-center justify-center gap-2 bg-gray-100">
-            <button className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white text-xs rounded"
-            onClick={()=> navigate("/registervis")}
+            <button
+              className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white text-xs rounded"
+              onClick={() => navigate("/registervis")}
             >
               <PlayIcon className="h-4 w-4" />
               Run
             </button>
 
-            <button className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white text-xs rounded">
+            <button
+              className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white text-xs rounded"
+              onClick={() => navigate("/debugging")}
+            >
               <ArrowPathIcon className="h-4 w-4" />
               Compile
             </button>
@@ -66,8 +69,9 @@ function Editor() {
           </div>
 
           <div className="flex justify-center bg-gray-100">
-            <button className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white text-xs rounded"
-            onClick={() => navigate("/compare")}
+            <button
+              className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white text-xs rounded"
+              onClick={() => navigate("/compare")}
             >
               <ArrowPathIcon className="h-4 w-4" />
               Compare

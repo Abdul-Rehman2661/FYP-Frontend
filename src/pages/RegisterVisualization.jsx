@@ -72,7 +72,7 @@ function RegisterVisualization() {
           <div className="h-full">
             <p className="text-gray-800 pt-8 mb-2">Output</p>
             <div className="border border-gray-300 rounded-lg h-48 w-full bg-gray-100 overflow-y-auto">
-              <p className="text-gray-800 p-4 text-gray-400 font-mono">System Ready...</p>
+              <p className="p-4 text-gray-400 font-mono">No Output to display...</p>
             </div>
           </div>
         </div>

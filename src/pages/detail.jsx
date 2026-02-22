@@ -118,25 +118,25 @@ function Detail() {
                 <tr className=" p-4 text-black">
                   <td className="w-1/2 px-4 py-2 border border-blue-100">R1</td>
                   <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    16-bits
+                    16-bit
                   </td>
                 </tr>
                 <tr className=" p-4 text-black">
                   <td className="w-1/2 px-4 py-2 border border-blue-100">R2</td>
                   <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    16-bits
+                    16-bit
                   </td>
                 </tr>
                 <tr className=" p-4 text-black">
                   <td className="w-1/2 px-4 py-2 border border-blue-100">R3</td>
                   <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    16-bits
+                    16-bit
                   </td>
                 </tr>
                 <tr className=" p-4 text-black">
                   <td className="w-1/2 px-4 py-2 border border-blue-100">R4</td>
                   <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    16-bits
+                    16-bit
                   </td>
                 </tr>
               </tbody>
@@ -176,7 +176,7 @@ function Detail() {
                     00
                   </td>
                   <td className="w-1/3 px-4 py-2 border border-blue-100">
-                    LOAD - M[addr]
+                    LOAD = R1, M[0x02]
                   </td>
                 </tr>
                 <tr className=" p-4 text-black">
@@ -187,7 +187,7 @@ function Detail() {
                     01
                   </td>
                   <td className="w-1/3 px-4 py-2 border border-blue-100">
-                    STORE - M[addr]
+                     M[0x04] = R3
                   </td>
                 </tr>
                 <tr className=" p-4 text-black">
@@ -198,7 +198,7 @@ function Detail() {
                     10
                   </td>
                   <td className="w-1/3 px-4 py-2 border border-blue-100">
-                    ADD - R1, R3
+                    R1 = R1 + R2
                   </td>
                 </tr>
                 <tr className=" p-4 text-black">
@@ -209,7 +209,7 @@ function Detail() {
                     11
                   </td>
                   <td className="w-1/3 px-4 py-2 border border-blue-100">
-                    SUB - R3, R4
+                    R2 = R2 - R3
                   </td>
                 </tr>
               </tbody>
@@ -222,7 +222,7 @@ function Detail() {
       <div className="m-4 p-6 bg-white rounded-xl border border-gray-200 shadow-md">
         <div className="flex items-center gap-2 mb-6 text-blue-900 font-semibold">
           <CodeBracketIcon className="w-6 h-6" />
-          <span>Instruction Set</span>
+          <span>Action</span>
         </div>
 
         <div className="mt-5">

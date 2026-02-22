@@ -18,7 +18,7 @@ const Header = () => {
       <CpuChipIcon className="h-5 w-5 text-white" />
 
       <h3 className="text-white text-sm font-semibold lg:text-lg">
-        Computer Architecture Tool Kit
+        Computer Architecture ToolKit
       </h3>
     </header>
 

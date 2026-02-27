@@ -5,10 +5,66 @@ export const architectures = [
     memorySize: "128 Bytes",
     busSize: "8-bit",
     stackSize: "16 bytes",
-    registers: ["R0", "R1", "R2", "R3"],
-    instructions: ["ADD", "SUB", "MUL", "DIV"],
+    registers: [
+      {
+        name: "R1",
+        Size: "16-bits",
+      },
+      {
+        name: "R2",
+        Size: "16-bits",
+      },
+      {
+        name: "R3",
+        Size: "16-bits",
+      },
+      {
+        name: "R4",
+        Size: "16-bits",
+      },
+    ],
+    instructions: [
+      {
+        mnemonic: "LOAD",
+        opcode: "00",
+        instructionSet: "LOAD R1, M[0x02]",
+      },
+      {
+        mnemonic: "SUB",
+        opcode: "00",
+        instructionSet: "R2 = R2 - R3",
+      },
+      {
+        mnemonic: "ADD",
+        opcode: "00",
+        instructionSet: "R1 = R1 + R2",
+      },
+      {
+        mnemonic: "STORE",
+        opcode: "00",
+        instructionSet: "M[0x04] = R3",
+      },
+    ],
+    action: [
+      {
+        nmenonic: "LOAD",
+        action: "	R1 = M[0X01]",
+      },
+      {
+        nmenonic: "STORE",
+        action: "M[0X05] = R3",
+      },
+    ],
+    addressingModes: [
+      {
+        name: "Direct",
+        instruction: "	LOAD $10"
+      }
+    ],
     totalRegisters: 4,
     totalInstructions: 4,
+    flagRegister: "Zero",
+    flagRegisterSize: "1 bit",
     createdAt: "2024-01-10",
     updatedAt: "2024-02-15",
   },
@@ -18,8 +74,62 @@ export const architectures = [
     memorySize: "256 Bytes",
     busSize: "16-bit",
     stackSize: "16-bit",
-    registers: ["R0", "R1", "R2", "R3", "R4", "R5"],
-    instructions: ["ADD", "SUB", "LOAD", "STORE"],
+    registers: [
+      {
+        name: "R1",
+        Size: "16-bits",
+      },
+      {
+        name: "R2",
+        Size: "16-bits",
+      },
+      {
+        name: "R3",
+        Size: "16-bits",
+      },
+      {
+        name: "R4",
+        Size: "16-bits",
+      },
+    ],
+    instructions: [
+      {
+        mnemonic: "LOAD",
+        opcode: "00",
+        instructionSet: "LOAD R1, M[0x02]",
+      },
+      {
+        mnemonic: "SUB",
+        opcode: "00",
+        instructionSet: "R2 = R2 - R3",
+      },
+      {
+        mnemonic: "ADD",
+        opcode: "00",
+        instructionSet: "R1 = R1 + R2",
+      },
+      {
+        mnemonic: "STORE",
+        opcode: "00",
+        instructionSet: "M[0x04] = R3",
+      },
+    ],
+    action: [
+      {
+        nmenonic: "LOAD",
+        action: "	R1 = M[0X01]",
+      },
+      {
+        nmenonic: "STORE",
+        action: "M[0X05] = R3",
+      },
+    ],
+    addressingModes: [
+      {
+        name: "Direct",
+        instruction: "	LOAD $10"
+      }
+    ],
     totalRegisters: 6,
     totalInstructions: 4,
     createdAt: "2024-02-01",
@@ -31,8 +141,62 @@ export const architectures = [
     memorySize: "256 Bytes",
     busSize: "16-bit",
     stackSize: "16-bit",
-    registers: ["R0", "R1", "R2", "R3", "R4", "R5"],
-    instructions: ["ADD", "SUB", "LOAD", "STORE"],
+    registers: [
+      {
+        name: "R1",
+        Size: "16-bits",
+      },
+      {
+        name: "R2",
+        Size: "16-bits",
+      },
+      {
+        name: "R3",
+        Size: "16-bits",
+      },
+      {
+        name: "R4",
+        Size: "16-bits",
+      },
+    ],
+    instructions: [
+      {
+        mnemonic: "LOAD",
+        opcode: "00",
+        instructionSet: "LOAD R1, M[0x02]",
+      },
+      {
+        mnemonic: "SUB",
+        opcode: "00",
+        instructionSet: "R2 = R2 - R3",
+      },
+      {
+        mnemonic: "ADD",
+        opcode: "00",
+        instructionSet: "R1 = R1 + R2",
+      },
+      {
+        mnemonic: "STORE",
+        opcode: "00",
+        instructionSet: "M[0x04] = R3",
+      },
+    ],
+    action: [
+      {
+        nmenonic: "LOAD",
+        action: "	R1 = M[0X01]",
+      },
+      {
+        nmenonic: "STORE",
+        action: "M[0X05] = R3",
+      },
+    ],
+    addressingModes: [
+      {
+        name: "Direct",
+        instruction: "	LOAD $10"
+      }
+    ],
     totalRegisters: 6,
     totalInstructions: 4,
     createdAt: "2024-02-01",
@@ -44,8 +208,62 @@ export const architectures = [
     memorySize: "256 Bytes",
     busSize: "16-bit",
     stackSize: "16-bit",
-    registers: ["R0", "R1", "R2", "R3", "R4", "R5"],
-    instructions: ["ADD", "SUB", "LOAD", "STORE"],
+    registers: [
+      {
+        name: "R1",
+        Size: "16-bits",
+      },
+      {
+        name: "R2",
+        Size: "16-bits",
+      },
+      {
+        name: "R3",
+        Size: "16-bits",
+      },
+      {
+        name: "R4",
+        Size: "16-bits",
+      },
+    ],
+    instructions: [
+      {
+        mnemonic: "LOAD",
+        opcode: "00",
+        instructionSet: "LOAD R1, M[0x02]",
+      },
+      {
+        mnemonic: "SUB",
+        opcode: "00",
+        instructionSet: "R2 = R2 - R3",
+      },
+      {
+        mnemonic: "ADD",
+        opcode: "00",
+        instructionSet: "R1 = R1 + R2",
+      },
+      {
+        mnemonic: "STORE",
+        opcode: "00",
+        instructionSet: "M[0x04] = R3",
+      },
+    ],
+    action: [
+      {
+        nmenonic: "LOAD",
+        action: "	R1 = M[0X01]",
+      },
+      {
+        nmenonic: "STORE",
+        action: "M[0X05] = R3",
+      },
+    ],
+    addressingModes: [
+      {
+        name: "Direct",
+        instruction: "	LOAD $10"
+      }
+    ],
     totalRegisters: 6,
     totalInstructions: 4,
     createdAt: "2024-02-01",
@@ -57,8 +275,62 @@ export const architectures = [
     memorySize: "256 Bytes",
     busSize: "16-bit",
     stackSize: "16-bit",
-    registers: ["R0", "R1", "R2", "R3", "R4", "R5"],
-    instructions: ["ADD", "SUB", "LOAD", "STORE"],
+    registers: [
+      {
+        name: "R1",
+        Size: "16-bits",
+      },
+      {
+        name: "R2",
+        Size: "16-bits",
+      },
+      {
+        name: "R3",
+        Size: "16-bits",
+      },
+      {
+        name: "R4",
+        Size: "16-bits",
+      },
+    ],
+    instructions: [
+      {
+        mnemonic: "LOAD",
+        opcode: "00",
+        instructionSet: "LOAD R1, M[0x02]",
+      },
+      {
+        mnemonic: "SUB",
+        opcode: "00",
+        instructionSet: "R2 = R2 - R3",
+      },
+      {
+        mnemonic: "ADD",
+        opcode: "00",
+        instructionSet: "R1 = R1 + R2",
+      },
+      {
+        mnemonic: "STORE",
+        opcode: "00",
+        instructionSet: "M[0x04] = R3",
+      },
+    ],
+    action: [
+      {
+        nmenonic: "LOAD",
+        action: "	R1 = M[0X01]",
+      },
+      {
+        nmenonic: "STORE",
+        action: "M[0X05] = R3",
+      },
+    ],
+    addressingModes: [
+      {
+        name: "Direct",
+        instruction: "LOAD $10"
+      },
+    ],
     totalRegisters: 6,
     totalInstructions: 4,
     createdAt: "2024-02-01",
@@ -70,12 +342,65 @@ export const architectures = [
     memorySize: "256 Bytes",
     busSize: "16-bit",
     stackSize: "16-bit",
-    registers: ["R0", "R1", "R2", "R3", "R4", "R5"],
-    instructions: ["ADD", "SUB", "LOAD", "STORE"],
+    registers: [
+      {
+        name: "R1",
+        Size: "16-bits",
+      },
+      {
+        name: "R2",
+        Size: "16-bits",
+      },
+      {
+        name: "R3",
+        Size: "16-bits",
+      },
+      {
+        name: "R4",
+        Size: "16-bits",
+      },
+    ],
+    instructions: [
+      {
+        mnemonic: "LOAD",
+        opcode: "00",
+        instructionSet: "LOAD R1, M[0x02]",
+      },
+      {
+        mnemonic: "SUB",
+        opcode: "00",
+        instructionSet: "R2 = R2 - R3",
+      },
+      {
+        mnemonic: "ADD",
+        opcode: "00",
+        instructionSet: "R1 = R1 + R2",
+      },
+      {
+        mnemonic: "STORE",
+        opcode: "00",
+        instructionSet: "M[0x04] = R3",
+      },
+    ],
+    action: [
+      {
+        nmenonic: "LOAD",
+        action: "	R1 = M[0X01]",
+      },
+      {
+        nmenonic: "STORE",
+        action: "M[0X05] = R3",
+      },
+    ],
+    addressingModes: [
+      {
+        name: "Direct",
+        instruction: "	LOAD $10"
+      }
+    ],
     totalRegisters: 6,
     totalInstructions: 4,
     createdAt: "2024-02-01",
     updatedAt: "2024-03-01",
   },
-
 ];

@@ -1,11 +1,25 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-    server: {
-    host: true,   // 👈 REQUIRED
-    port: 5173    // (optional but recommended)
+  server: {
+    port: 5173,
+    proxy: {
+      '/api': {
+        target: 'http://localhost/ComputerArchitectureToolkitAPI',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '/api'),
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.log('proxy error', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            console.log('Sending Request:', req.method, req.url);
+          });
+        },
+      }
+    }
   }
 })

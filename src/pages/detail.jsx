@@ -13,9 +13,8 @@ import {
 } from "@heroicons/react/24/outline";
 
 function Detail() {
+  
   const { id } = useParams();
-
-  // find selected architecture
   const architecture = architectures.find((arch) => arch.id === Number(id));
 
   if (!architecture) {
@@ -92,10 +91,10 @@ function Detail() {
 
                 <tr className=" p-4 text-black">
                   <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    Zero
+                    {architecture.flagRegister}
                   </td>
                   <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    1 bit
+                    {architecture.flagRegisterSize}
                   </td>
                 </tr>
               </tbody>
@@ -115,30 +114,16 @@ function Detail() {
                   </td>
                 </tr>
 
-                <tr className=" p-4 text-black">
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">R1</td>
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    16-bit
-                  </td>
-                </tr>
-                <tr className=" p-4 text-black">
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">R2</td>
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    16-bit
-                  </td>
-                </tr>
-                <tr className=" p-4 text-black">
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">R3</td>
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    16-bit
-                  </td>
-                </tr>
-                <tr className=" p-4 text-black">
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">R4</td>
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    16-bit
-                  </td>
-                </tr>
+                {architecture.registers.map((reg, index) => (
+                  <tr key={index} className="p-4 text-black">
+                    <td className="w-1/2 px-4 py-2 border border-blue-100">
+                      {reg.name}
+                    </td>
+                    <td className="w-1/2 px-4 py-2 border border-blue-100">
+                      {reg.Size}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -168,50 +153,19 @@ function Detail() {
                   </td>
                 </tr>
 
-                <tr className=" p-4 text-black">
-                  <td className="w-1/3 px-4 py-2 border border-blue-100">
-                    LOAD
-                  </td>
-                  <td className="w-1/3 px-4 py-2 border border-blue-100">
-                    00
-                  </td>
-                  <td className="w-1/3 px-4 py-2 border border-blue-100">
-                    LOAD = R1, M[0x02]
-                  </td>
-                </tr>
-                <tr className=" p-4 text-black">
-                  <td className="w-1/3 px-4 py-2 border border-blue-100">
-                    STORE
-                  </td>
-                  <td className="w-1/3 px-4 py-2 border border-blue-100">
-                    01
-                  </td>
-                  <td className="w-1/3 px-4 py-2 border border-blue-100">
-                     M[0x04] = R3
-                  </td>
-                </tr>
-                <tr className=" p-4 text-black">
-                  <td className="w-1/3 px-4 py-2 border border-blue-100">
-                    ADD
-                  </td>
-                  <td className="w-1/3 px-4 py-2 border border-blue-100">
-                    10
-                  </td>
-                  <td className="w-1/3 px-4 py-2 border border-blue-100">
-                    R1 = R1 + R2
-                  </td>
-                </tr>
-                <tr className=" p-4 text-black">
-                  <td className="w-1/3 px-4 py-2 border border-blue-100">
-                    SUB
-                  </td>
-                  <td className="w-1/3 px-4 py-2 border border-blue-100">
-                    11
-                  </td>
-                  <td className="w-1/3 px-4 py-2 border border-blue-100">
-                    R2 = R2 - R3
-                  </td>
-                </tr>
+                {architecture?.instructions?.map((ins, index) => (
+                  <tr key={index} className="p-4 text-black ">
+                    <td className="w-1/3 px-4 py-2 border border-blue-100">
+                      {ins.mnemonic}
+                    </td>
+                    <td className="w-1/3 px-4 py-2 border border-blue-100">
+                      {ins.opcode}
+                    </td>
+                    <td className="w-1/3 px-4 py-2 border border-blue-100">
+                      {ins.instructionSet}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -238,38 +192,16 @@ function Detail() {
                   </td>
                 </tr>
 
-                <tr className=" p-4 text-black">
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    LOAD
-                  </td>
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    R[dr] - M[addr]
-                  </td>
-                </tr>
-                <tr className=" p-4 text-black">
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    STORE
-                  </td>
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    M[addr] - R[sr]
-                  </td>
-                </tr>
-                <tr className=" p-4 text-black">
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    ADD
-                  </td>
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    R[dr] - R[sr1] + R[sr2]
-                  </td>
-                </tr>
-                <tr className=" p-4 text-black">
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    SUB
-                  </td>
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    R[dr] - R[sr1] - R[sr2]
-                  </td>
-                </tr>
+                {architecture.action.map((act, index) => (
+                  <tr key={index} className=" p-4 text-black">
+                    <td className="w-1/2 px-4 py-2 border border-blue-100">
+                      {act.nmenonic}
+                    </td>
+                    <td className="w-1/2 px-4 py-2 border border-blue-100">
+                      {act.action}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -296,15 +228,18 @@ function Detail() {
                   </td>
                 </tr>
 
-                <tr className=" p-4 text-black">
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    Direct
-                  </td>
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    LOAD $10
-                  </td>
-                </tr>
-                <tr className=" p-4 text-black">
+                {architecture.addressingModes.map((mode, index) => (
+                  <tr key={index} className=" p-4 text-black">
+                    <td className="w-1/2 px-4 py-2 border border-blue-100">
+                      {mode.name}
+                    </td>
+                    <td className="w-1/2 px-4 py-2 border border-blue-100">
+                      {mode.instruction}
+                    </td>
+                  </tr>
+                ))}
+
+                {/* <tr className=" p-4 text-black">
                   <td className="w-1/2 px-4 py-2 border border-blue-100">
                     Indirect
                   </td>
@@ -319,7 +254,7 @@ function Detail() {
                   <td className="w-1/2 px-4 py-2 border border-blue-100">
                     LOAD *10
                   </td>
-                </tr>
+                </tr> */}
               </tbody>
             </table>
           </div>
@@ -341,19 +276,6 @@ const Info = ({ icon, label, value }) => (
     {/* Value */}
     <span className="text-black font-small">{value}</span>
   </div>
-);
-
-const Section = ({ title, children }) => (
-  <div className="mt-6">
-    <h3 className=" text-blue-900 mb-2">{title}</h3>
-    <div className="flex flex-wrap gap-2">{children}</div>
-  </div>
-);
-
-const Chip = ({ text }) => (
-  <span className="px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-900">
-    {text}
-  </span>
 );
 
 export default Detail;

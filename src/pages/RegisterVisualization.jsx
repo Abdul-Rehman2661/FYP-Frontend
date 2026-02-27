@@ -5,13 +5,13 @@ import BottomNavigation from "../components/BottomNavigation.jsx";
 function RegisterVisualization() {
   const registers = [
     { name: "R1", value: 0 },
-    { name: "R2", value: 9 },
-    { name: "R3", value: 5 },
-    { name: "R4", value: 9 },
+    { name: "R2", value: 0 },
+    { name: "R3", value: 0},
+    { name: "R4", value: 0 },
     { name: "R5", value: 0 },
-    { name: "PC", value: 6 },
+    { name: "PC", value: 0 },
     { name: "SP", value: 0 },
-    { name: "IR", value: 6 },
+    { name: "IR", value: 0 },
   ];
 
   const flags = [

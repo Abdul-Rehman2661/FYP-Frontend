@@ -9,13 +9,13 @@ import { PlayIcon } from "@heroicons/react/24/outline";
 function Debugging() {
   const registers = [
     { name: "R1", value: 0 },
-    { name: "R2", value: 9 },
-    { name: "R3", value: 5 },
-    { name: "R4", value: 9 },
+    { name: "R2", value: 0 },
+    { name: "R3", value: 0 },
+    { name: "R4", value: 0 },
     { name: "R5", value: 0 },
-    { name: "PC", value: 6 },
+    { name: "PC", value: 0 },
     { name: "SP", value: 0 },
-    { name: "IR", value: 6 },
+    { name: "IR", value: 0 },
   ];
 
   const flags = [
@@ -57,12 +57,7 @@ function Debugging() {
               <p className="text-sm text-gray-700 mb-2">Program Display</p>
               <textarea
                 className="p-4 rounded-xl bg-gray-100  w-full h-48 focus:ring-gray-300"
-                placeholder={`LOAD R1, [0x13] 
-LOAD R2, [0x0D]
-ADD R1, R2
-SUB R3, R1
-STORE [0x00], R1
-STORE [0x01], R3`}
+                placeholder={`Program Display.`}
               />
             </div>
 
@@ -111,8 +106,8 @@ STORE [0x01], R3`}
           <div className="h-full">
             <p className="text-gray-800 pt-8 mb-2">Output</p>
             <div className="border border-gray-300 rounded-lg h-24 w-full bg-gray-100 overflow-y-auto">
-              <p className="text-gray-800 p-4 text-gray-400 font-mono">
-                System Ready...
+              <p className="text-gray-400 p-4 font-mono">
+                No Output to display...
               </p>
             </div>
           </div>

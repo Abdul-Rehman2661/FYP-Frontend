@@ -2,13 +2,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "../components/Header.jsx";
 import BottomNavigation from "../components/BottomNavigation.jsx";
 import { architectures } from "../Data/architectures.js";
-import {
-  Squares2X2Icon,
-  CpuChipIcon,
-  CodeBracketIcon,
-  EyeIcon,
-  CircleStackIcon,
-} from "@heroicons/react/24/outline";
+import { CpuChipIcon } from "@heroicons/react/24/outline";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -18,9 +12,7 @@ function Dashboard() {
       <Header />
 
       <div className="min-h-screen bg-gray-100 flex justify-center pt-14 pb-20">
-
         <div className="w-full max-w-sm lg:max-w-7xl px-4 lg:px-10">
-          {/* Title */}
           <h2 className="text-xl text-blue-900 font-bold text-center mb-1 lg:text-2xl lg:mt-14">
             My Architectures
           </h2>
@@ -29,6 +21,7 @@ function Dashboard() {
             Manage and explore your computer architecture designs
           </p>
 
+        {/* map */}
           {architectures.length === 0 ? (
             <p className="text-center text-red-500 mt-10">No Architecture</p>
           ) : (
@@ -41,7 +34,6 @@ function Dashboard() {
                     lg:p-6 lg:rounded-2xl lg:shadow-sm
                   "
                 >
-                  {/* Header */}
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-8 h-8 rounded bg-blue-100 flex items-center justify-center text-blue-900">
                       <CpuChipIcon className="w-6 h-6" />
@@ -52,7 +44,6 @@ function Dashboard() {
                     </h3>
                   </div>
 
-                  {/* Info */}
                   <div className="text-sm text-gray-700 space-y-1">
                     <p>
                       <span className="font-medium">Memory:</span>{" "}
@@ -63,7 +54,6 @@ function Dashboard() {
                     </p>
                   </div>
 
-                  {/* Buttons */}
                   <div className="flex gap-2 mt-4">
                     <button
                       className="

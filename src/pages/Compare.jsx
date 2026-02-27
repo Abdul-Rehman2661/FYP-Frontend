@@ -65,21 +65,17 @@ function Compare() {
           <div className="flex flex-col lg:flex-row gap-2  border rounded-lg bg-gray-100 p-3 text-sm font-mono text-gray-500">
             <textarea
               className="p-5 lg:m-5 rounded-xl bg-gray-100 lg:w-* w-full h-64 bg-white text-black focus:ring-gray-300"
-              placeholder={`LOAD R1, [0x13]
-LOAD R2, [0x0D]
-ADD R1, R2`}
+              placeholder={`Write a Program`}
             />
 
             <textarea
               className="p-5 lg:m-5 rounded-xl bg-gray-100 lg:w-* w-full h-64 bg-white text-black focus:ring-gray-300"
-              placeholder={`LOAD R1, [0x13]
-LOAD R2, [0x0D]
-ADD R1, R2`}
+              placeholder={`Write a Program`}
             />
           </div>
 
           <div className=" p-4 flex flex-col lg:flex-row gap-2 lg:gap-5">
-            <div className="bg-blue-100 rounded-lg p-3 h-30 mt-5 lg:w-* w-full">
+            <div className="bg-blue-100 rounded-lg p-3 h-30  lg:w-* w-full">
               <p className="text-sm font-semibold text-gray-700 mb-1">
                 Error Display
               </p>
@@ -88,7 +84,7 @@ ADD R1, R2`}
               </div>
             </div>
 
-            <div className="bg-blue-100 rounded-lg p-3 h-30 mt-5 lg:w-* w-full">
+            <div className="bg-blue-100 rounded-lg p-3 h-30  lg:w-* w-full">
               <p className="text-sm font-semibold text-gray-700 mb-1">
                 Error Display
               </p>
@@ -99,16 +95,16 @@ ADD R1, R2`}
           </div>
 
           <div className=" p-4 flex flex-col lg:flex-row gap-2 lg:gap-5 ">
-            <div className="bg-blue-50 mb-8  rounded-lg p-3 mt-5 lg:w-* w-full">
+            <div className="bg-blue-50 mb-8  rounded-lg p-3  lg:w-* w-full">
               <div className="bg-white border flex justify-between rounded-md p-2 text-sm text-blue-900 font-semibold">
                 <p>Clock Cycle:</p>
-                <p>12</p>
+                <p></p>
               </div>
             </div>
-            <div className="bg-blue-50 mb-8 rounded-lg p-3 mt-5 lg:w-* w-full">
+            <div className="bg-blue-50 mb-8 rounded-lg p-3 lg:w-* w-full">
               <div className="bg-white border flex justify-between rounded-md p-2 text-sm text-blue-900 font-semibold">
                 <p>Clock Cycle:</p>
-                <p>10</p>
+                <p></p>
               </div>
             </div>
           </div>

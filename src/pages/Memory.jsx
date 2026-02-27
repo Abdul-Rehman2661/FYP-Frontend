@@ -6,7 +6,10 @@ import AddRegister from "../components/AddRegister.jsx";
 import { useNavigate, useLocation } from "react-router-dom";
 
 function Memory() {
-  const memoryRows = Array.from({ length: 16 }, (_, i) => `add${i + 1}`);
+  const memoryRows = Array.from(
+    { length: 16 },
+    (_, i) => `0x${String(i + 1).padStart(2, "0")}`,
+  );
   const stackRows = Array.from({ length: 16 }, (_, i) => i - 1);
 
   return (
@@ -55,40 +58,40 @@ function Memory() {
             </div>
           </div>
 
-          {/* Stack Memory Section */}
-<div>
-  <p className="text-sm text-gray-700 mb-2">Stack Memory</p>
+          <div>
+            <p className="text-sm text-gray-700 mb-2">Stack Memory</p>
 
-  <div className="border rounded-lg p-4 bg-gray-100 flex justify-center">
-    <div className="flex">
-      
-      {/* Stack numbers */}
-      <div className="flex flex-col-reverse justify-between mr-2">
-        {stackRows.map((num) => (
-          <div
-            key={num}
-            className="text-xs text-gray-600 h-8 flex items-center justify-end"
-          >
-            {num}
+            <div className="border rounded-lg p-4 bg-gray-100 flex justify-center">
+              <div className="flex">
+                {/* Stack numbers */}
+                <div className="flex flex-col-reverse justify-between mr-2">
+                  {stackRows.map((num) => (
+                    <div
+                      key={num}
+                      className="text-xs text-gray-600 h-8 flex items-center justify-end"
+                    >
+                      {num}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Stack boxes */}
+                <div className="flex flex-col-reverse gap-1 relative">
+                  {stackRows.map((num, index) => (
+                    <div key={num} className="flex items-center">
+                      <div className="w-20 h-8 border rounded bg-white"></div>
+                      {/* Add SP indicator to the last box (index 0 since we're using flex-col-reverse) */}
+                      {index === 0 && (
+                        <span className="ml-2 text-xs font-medium text-blue-900 whitespace-nowrap">
+                          &lt;-SP
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
-        ))}
-      </div>
-
-      {/* Stack boxes */}
-      <div className="flex flex-col-reverse gap-1">
-        {stackRows.map((num) => (
-          <div
-            key={num}
-            className="w-20 h-8 border rounded bg-white"
-          ></div>
-        ))}
-      </div>
-
-    </div>
-  </div>
-</div>
-
-
         </div>
       </div>
 

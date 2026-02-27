@@ -42,12 +42,14 @@ function BottomNavigation() {
         <NavItem
           icon={<EyeIcon className="h-6 w-6" />}
           label="Register Viz"
+          active={location.pathname === "/registervis"}
           onClick={()=> navigate("/registervis")}
         />
 
         <NavItem
           icon={<CircleStackIcon className="h-6 w-6" />}
           label="Memory"
+          active={location.pathname === "/memory"}
           onClick={()=> navigate("/memory")}
         />
 

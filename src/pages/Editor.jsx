@@ -81,12 +81,7 @@ function Editor() {
           <div className="flex flex-col lg:flex-row gap-2 lg:gap-5 border rounded-lg bg-white p-3 text-sm font-mono text-gray-500">
             <textarea
               className="p-5 lg:m-5 rounded-xl bg-gray-100 lg:w-* w-full h-64 focus:ring-gray-300"
-              placeholder={`LOAD R1, [0x13] 
-LOAD R2, [0x0D]
-ADD R1, R2
-SUB R3, R1
-STORE [0x00], R1
-STORE [0x01], R3`}
+              placeholder={`Write Assembly code here to Compile and Execute`}
             />
 
             <div className="bg-blue-50 rounded-lg p-3 h-60 mt-5 lg:w-* w-full">

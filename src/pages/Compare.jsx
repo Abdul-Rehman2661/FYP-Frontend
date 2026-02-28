@@ -17,7 +17,8 @@ function Compare() {
   return (
     <>
       <Header />
-      <h2 className="text-blue-900 font-bold text-center mb-1 text-2xl lg:mt-20 mt-14">
+      <div className="pt-20 lg:pt-24">
+      <h2 className="text-blue-900 font-bold text-center mb-1 text-2xl">
         Compare Editor
       </h2>
 
@@ -109,6 +110,7 @@ function Compare() {
             </div>
           </div>
         </div>
+      </div>
       </div>
       <BottomNavigation />
     </>

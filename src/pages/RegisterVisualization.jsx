@@ -6,7 +6,7 @@ function RegisterVisualization() {
   const registers = [
     { name: "R1", value: 0 },
     { name: "R2", value: 0 },
-    { name: "R3", value: 0},
+    { name: "R3", value: 0 },
     { name: "R4", value: 0 },
     { name: "R5", value: 0 },
     { name: "PC", value: 0 },
@@ -24,15 +24,13 @@ function RegisterVisualization() {
   return (
     <>
       <Header />
-      <div className="p-4 pt-24 bg-gray-100 pb-16  min-h-screen bg-gray-50 p-6">
+   <div className="pt-20 lg:pt-24">
+      <h2 className="text-center text-xl font-bold text-blue-900 ">
+        Register Visualization
+      </h2>
+      <div className="p-4 bg-gray-100 pb-16  min-h-screen bg-gray-50 p-6">
         {/* Outer Card */}
         <div className="bg-white rounded-xl shadow border p-6">
-          {/* Title */}
-          <h2 className="text-center text-xl font-bold text-blue-900 mb-6">
-            Register Visualization
-          </h2>
-
-          {/* Two Sections */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Register Display */}
             <div>
@@ -72,10 +70,13 @@ function RegisterVisualization() {
           <div className="h-full">
             <p className="text-gray-800 pt-8 mb-2">Output</p>
             <div className="border border-gray-300 rounded-lg h-48 w-full bg-gray-100 overflow-y-auto">
-              <p className="p-4 text-gray-400 font-mono">No Output to display...</p>
+              <p className="p-4 text-gray-400 font-mono">
+                No Output to display...
+              </p>
             </div>
           </div>
         </div>
+      </div>
       </div>
       <BottomNavigation />
     </>

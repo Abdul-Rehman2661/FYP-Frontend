@@ -27,11 +27,12 @@ function Debugging() {
   return (
     <>
       <Header />
-      <div className="p-4 pt-24 bg-gray-100 pb-16 min-h-screen bg-gray-50 p-6">
-        <div className="bg-white rounded-xl shadow border p-6">
-          <h2 className="text-center text-xl font-bold text-blue-900 mb-6">
+      <div className="pt-20 lg:pt-24">
+          <h2 className="text-center text-xl font-bold text-blue-900">
             Debugging
           </h2>
+      <div className="p-4 bg-gray-100 pb-16 min-h-screen bg-gray-50 p-6">
+        <div className="bg-white rounded-xl shadow border p-6">
 
           <div className="flex gap-4">
             <button className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-white text-blue-900 hover:bg-blue-900 hover:text-white rounded-lg border border-blue-900 text-xs rounded font-bold">
@@ -112,6 +113,7 @@ function Debugging() {
             </div>
           </div>
         </div>
+      </div>
       </div>
       <BottomNavigation />
     </>

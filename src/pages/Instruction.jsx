@@ -3,13 +3,7 @@ import Header from "../components/Header.jsx";
 import BottomNavigation from "../components/BottomNavigation.jsx";
 import { useNavigate, useLocation } from "react-router-dom";
 import { TrashIcon } from "@heroicons/react/24/outline";
-import {
-  addArchitecture,
-  addRegisters,
-  addInstructions,
-  addAddressingModes,
-  getAllArchitectures,
-} from "../services/api";
+
 
 function Instruction() {
   const navigate = useNavigate();
@@ -27,6 +21,38 @@ function Instruction() {
   ]);
   const [isInterrupt, setIsInterrupt] = useState(false);
 
+  const handleAddOperand = () => {
+    setOperands([
+      ...operands,{
+        id: Date.now(),
+        type: "Register",
+        selected: false
+      }
+    ])
+  }
+
+  const handleRadio = (id) => {
+    setOperands(
+      operands.map((op) => 
+        op.id === id ? {...op, selected: true} : {...op, selected: false}
+      )
+    )
+  }
+
+  const handleType = (id, value) => {
+    setOperands(
+      operands.map((op) => 
+        op.od === id ? {...op, type : value} : {type: "register"}
+      )
+    )
+  }
+
+  const handleDelete = (id) => {
+    setOperands(
+      operands.filter((op) => op.id !==id)
+    );
+  }
+
   return (
     <>
       <Header />
@@ -34,7 +60,7 @@ function Instruction() {
         <h2 className="text-blue-900 text-xl text-center font-bold">
           Instruction Design
         </h2>
-        <div className="mt-4 bg-white shadow p-4 rounded-xl">
+        <div className="mt-4 mb-20 bg-white shadow p-4 rounded-xl">
           <div className="mb-6">
             <span className="text-black">Interrupt Instruction</span>
             <input
@@ -52,7 +78,7 @@ function Instruction() {
               <span className="text-black">OpCode</span>
               <br />
               <input
-                className={`mt-2 h-8 mb-2 pl-2 bg-gray-100 w-full rounded-md border text-black`}
+                  className="mt-2 h-8 mb-5 pl-2 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900 "
                 type="text"
                 onChange={(e) => setOpcode(e.target.value)}
                 placeholder="Enter Instruction Code e.g (01)"
@@ -63,7 +89,7 @@ function Instruction() {
               <span className="text-black">Mnemonics</span>
               <br />
               <input
-                className={`mt-2 h-8 mb-2 pl-2 bg-gray-100 w-full rounded-md border text-black`}
+                  className="mt-2 h-8 pl-2 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900"
                 type="text"
                 value={mnemonic}
                 onChange={(e) => setMnemonic(e.target.value)}
@@ -78,7 +104,8 @@ function Instruction() {
               <div className="mb-4">
                 <span className="text-black">Interrupt Symbol</span>
                 <select
-                  className={`mt-2 h-8 mb-2 bg-gray-100 w-full rounded-md border text-black`}
+                      className={`mt-2 mb-4 h-8 pl-2 bg-gray-100 w-full text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900
+                      ${interruptSymbol === "" ? "text-gray-500" : "text-black"}`}
                   value={interruptSymbol}
                   onChange={(e) => setInterruptSymbol(e.target.value)}
                 >
@@ -91,7 +118,8 @@ function Instruction() {
               <div className="mb-4">
                 <span className="text-black">Input Register</span>
                 <select
-                  className={`mt-2 h-8 mb-2 bg-gray-100 w-full rounded-md border text-black`}
+                      className={`mt-2 mb-4 h-8 pl-2 bg-gray-100 w-full text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900
+                      ${inputRegister === "" ? "text-gray-500" : "text-black"}`}
                   onChange={(e) => setInputRegister(e.target.value)}
                 >
                   <option value="">Select input register</option>
@@ -101,7 +129,8 @@ function Instruction() {
               <div className="mb-4">
                 <span className="text-black">Output Register</span>
                 <select
-                  className={`mt-2 h-8 mb-2 bg-gray-100 w-full rounded-md border  text-black`}
+                      className={`mt-2 mb-4 h-8 pl-2 bg-gray-100 w-full text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900
+                      ${outputRegister === "" ? "text-gray-500" : "text-black"}`}
                   onChange={(e) => setOutputRegister(e.target.value)}
                 >
                   <option value="">Select output register</option>
@@ -131,6 +160,7 @@ function Instruction() {
                   <div className="flex items-center gap-3">
                     <select
                       value={op.type}
+                      onChange={(e => handleType(op.id, e.target.value))}
                       className="border rounded-md px-2 bg-white text-black py-1 text-sm"
                     >
                       <option value="Register">Register</option>
@@ -142,15 +172,16 @@ function Instruction() {
                       type="radio"
                       name="destination"
                       checked={op.selected}
+                      onChange={() => handleRadio(op.id)}
                       className="w-4 h-4 rounded-full border border-black bg-white"
                     />
 
-                    <button className="text-red-700 hover:text-red-900">
+                    <button onClick={() => handleDelete(op.id)} className="text-red-700 hover:text-red-900">
                       <TrashIcon className="w-6 h-6" />
                     </button>
 
                     {index === operands.length - 1 && (
-                      <button className="text-blue-600 text-xl font-bold">
+                      <button onClick={handleAddOperand} className="text-blue-600 text-xl font-bold">
                         +
                       </button>
                     )}
@@ -167,7 +198,7 @@ function Instruction() {
               value={action}
               onChange={(e) => setAction(e.target.value)}
               placeholder="// Write Java Code Here"
-              className={`w-full border rounded-md p-2 h-24 bg-white text-black `}
+                className="w-full border rounded-md p-2 h-24 border bg-gray-100 text-black rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900"
             ></textarea>
           </div>
 
@@ -224,7 +255,7 @@ function Instruction() {
 
           {/* Create Architecture Button */}
           <button className="w-full bg-blue-900 text-white py-3 rounded-md mt-6 font-semibold hover:bg-blue-800">
-            "Create Architecture"
+            Create Architecture
           </button>
         </div>
       </div>

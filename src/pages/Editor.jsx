@@ -13,14 +13,15 @@ import { useNavigate } from "react-router-dom";
 
 function Editor() {
   const navigate = useNavigate();
-  const [displayModel, setDisplayModel] = useState(false);
-  const [showModal, setShowModal] = useState(false);
+  const [saveFile, setSaveFile] = useState(false);
+  const [openFile, setOpenFile] = useState(false);
 
   return (
     <>
       <Header />
 
-      <h2 className="text-blue-900 font-bold text-center mb-1 text-2xl lg:mt-20 mt-14">
+      <div className="pt-20 lg:pt-24">
+      <h2 className="text-blue-900 font-bold text-center mb-1 text-2xl">
         Program Editor
       </h2>
 
@@ -45,27 +46,27 @@ function Editor() {
 
             <button
               type="button"
-              onClick={() => setDisplayModel(true)}
+              onClick={() => setSaveFile(true)}
               className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 border border-blue-900 text-blue-900 text-xs rounded hover:bg-blue-900 hover:text-white transition"
             >
               <ArrowDownTrayIcon className="h-4 w-4" />
               Save
             </button>
 
-            {displayModel && (
-              <SaveFile onClose={() => setDisplayModel(false)} />
+            {saveFile && (
+              <SaveFile onClose={() => setSaveFile(false)} />
             )}
 
             <button
               type="button"
-              onClick={() => setShowModal(true)}
+              onClick={() => setOpenFile(true)}
               className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 border border-blue-900 text-blue-900 text-xs rounded hover:bg-blue-900 hover:text-white transition"
             >
               <FolderOpenIcon className="h-4 w-4" />
               Open
             </button>
 
-            {showModal && <OpenFile onClose={() => setShowModal(false)} />}
+            {openFile && <OpenFile onClose={() => setOpenFile(false)} />}
           </div>
 
           <div className="flex justify-center bg-gray-100">
@@ -94,6 +95,7 @@ function Editor() {
             </div>
           </div>
         </div>
+      </div>
       </div>
 
       <BottomNavigation />

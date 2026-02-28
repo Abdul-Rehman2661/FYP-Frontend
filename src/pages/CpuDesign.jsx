@@ -16,10 +16,14 @@ export default function CpuDesign() {
 
   return (
     <>
-      <Header />
-      <div className="p-4 pt-24 min-h-screen bg-gray-100 pb-16 flex justify-center">
-        <div
-          className="
+      <div className="pt-20 lg:pt-24">
+        <h2 className="text-center text-xl font-bold text-blue-900 ">
+          CPU Design
+        </h2>
+        <Header />
+        <div className="p-4  bg-gray-100 mb-14 flex justify-center">
+          <div
+            className="
             w-full
             bg-white
             rounded-xl
@@ -29,96 +33,95 @@ export default function CpuDesign() {
             lg:p-8
             lg:shadow
           "
-        >
-          <h2 className="text-center text-xl font-bold text-blue-900 mb-6">
-            CPU Design
-          </h2>
-
-          <form
-            className="space-y-4 lg:space-y-6"
-            onSubmit={(e) => e.preventDefault()}
           >
-            <div>
-              <label className="text-sm text-black">Architecture Name</label>
-              <input
-                type="text"
-                onChange={(e) => setArchName(e.target.value)}
-                placeholder="Enter architecture name"
-                className={`mt-1 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm
-                  focus:outline-none focus:ring-1 'border-gray-400'} focus:ring-blue-900`}
-              />
-            </div>
-
-            <div className="space-y-4 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
-              <div>
-                <label className="text-sm text-black">
-                  Memory Size (bytes)
-                </label>
-                <input
-                  type="number"
-                  onChange={(e) => setMemorySize(e.target.value)}
-                  placeholder="Enter memory size"
-                  className={`mt-1 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm
-                    focus:outline-none focus:ring-1  'border-gray-400'} focus:ring-blue-900`}
-                />
-              </div>
-
-              <div>
-                <label className="text-sm text-black">Bus Size (bits)</label>
-                <input
-                  type="number"
-                  onChange={(e) => setBusSize(e.target.value)}
-                  placeholder="Enter bus size"
-                  className={`mt-1 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm
-                    focus:outline-none focus:ring-1 'border-gray-400'} focus:ring-blue-900`}
-                />
-              </div>
-
-              <div>
-                <label className="text-sm text-black">Stack Size (bytes)</label>
-                <input
-                  type="number"
-                  onChange={(e) => setStackSize(e.target.value)}
-                  placeholder="Enter stack size"
-                  className={`mt-1 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm
-                    focus:outline-none focus:ring-1 'border-gray-400'} focus:ring-blue-900`}
-                />
-              </div>
-
-              <div>
-                <label className="text-sm text-black">No of Registers</label>
-                <input
-                  type="number"
-                  onChange={(e) => setNoOfRegisters(e.target.value)}
-                  placeholder="Enter no of Registers"
-                  className={`mt-1 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm
-                    focus:outline-none focus:ring-1  'border-gray-400'} focus:ring-blue-900`}
-                />
-              </div>
-
-              <div>
-                <label className="text-sm text-black">No of Instructions</label>
-                <input
-                  type="number"
-                  onChange={(e) => setNoOfInstructions(e.target.value)}
-                  placeholder="Enter no of Instruction"
-                  className={`mt-1 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm
-                    focus:outline-none focus:ring-1  'border-gray-400'} focus:ring-blue-900`}
-                />
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => navigate("/register")}
-              className="w-full mt-6 bg-blue-900 text-white py-2 rounded-md
-                text-sm font-semibold hover:bg-blue-800 transition"
+            <form
+              className="space-y-4 lg:space-y-6"
+              onSubmit={(e) => e.preventDefault()}
             >
-              Next
-            </button>
+              <div>
+                <label className="text-sm text-black">Architecture Name</label>
+                <input
+                  type="text"
+                  onChange={(e) => setArchName(e.target.value)}
+                  placeholder="Enter architecture name"
+                  className="mt-1 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm
+                    focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900"
+                />
+              </div>
 
+              <div className="space-y-4 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
+                <div>
+                  <label className="text-sm text-black">
+                    Memory Size (bytes)
+                  </label>
+                  <input
+                    type="number"
+                    onChange={(e) => setMemorySize(e.target.value)}
+                    placeholder="Enter memory size"
+                    className="mt-1 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm
+                      focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900"
+                  />
+                </div>
 
-          </form>
+                <div>
+                  <label className="text-sm text-black">Bus Size (bits)</label>
+                  <input
+                    type="number"
+                    onChange={(e) => setBusSize(e.target.value)}
+                    placeholder="Enter bus size"
+                    className="mt-1 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm
+                      focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm text-black">
+                    Stack Size (bytes)
+                  </label>
+                  <input
+                    type="number"
+                    onChange={(e) => setStackSize(e.target.value)}
+                    placeholder="Enter stack size"
+                    className="mt-1 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm
+                      focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm text-black">No of Registers</label>
+                  <input
+                    type="number"
+                    onChange={(e) => setNoOfRegisters(e.target.value)}
+                    placeholder="Enter no of Registers"
+                    className="mt-1 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm
+                      focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm text-black">
+                    No of Instructions
+                  </label>
+                  <input
+                    type="number"
+                    onChange={(e) => setNoOfInstructions(e.target.value)}
+                    placeholder="Enter no of Instruction"
+                    className="mt-1 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm
+                      focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => navigate("/register")}
+                className="w-full mt-6 bg-blue-900 text-white py-2 rounded-md
+                text-sm font-semibold hover:bg-blue-800 transition"
+              >
+                Next
+              </button>
+            </form>
+          </div>
         </div>
       </div>
 

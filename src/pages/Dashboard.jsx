@@ -56,6 +56,7 @@ function Dashboard() {
 
                   <div className="flex gap-2 mt-4">
                     <button
+                    onClick={() => navigate('/editor')}
                       className="
                       flex-1 py-1.5 text-sm rounded
                       bg-blue-900 text-white hover:text-gray-400

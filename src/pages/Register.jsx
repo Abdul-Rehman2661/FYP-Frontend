@@ -21,7 +21,7 @@ function Register() {
   return (
     <>
       <Header />
-      <div className="pt-20 pb-16">
+      <div className="pt-20 lg:pt-24 pb-16">
         <h2 className="text-blue-900 text-xl text-center font-bold">
           Register Design
         </h2>
@@ -36,7 +36,7 @@ function Register() {
             <span className="text-black">Flag Register</span>
             <input
               onChange={(e) => setFlagRegister(e.target.value)}
-              className={`mt-2 h-8 mb-2 pl-2 bg-gray-100 w-full rounded-md border 'border-gray-300'} text-black`}
+              className="mt-2 h-8 mb-4 pl-2 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900"
               type="text"
               placeholder="Enter Flag Register Name"
             />
@@ -45,7 +45,7 @@ function Register() {
             <textarea
               value={flagAction}
               onChange={(e) => setFlagAction(e.target.value)}
-              className={`auto-textarea h-20 mt-2 pl-2 bg-gray-100 w-full rounded-md border text-black`}
+              className="auto-textarea h-20 mt-2 pl-2 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900"
               placeholder="//Write Java Code here for Logic of Flag Register"
             />
 
@@ -62,7 +62,7 @@ function Register() {
             <input
               value={gpRegister}
               onChange={(e) => setGpRegister(e.target.value)}
-              className={`mt-2 mb-2 pl-2 bg-gray-100 w-full h-8 rounded-md border text-black`}
+              className="mt-2 mb-4 pl-2 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900"
               type="text"
               placeholder="Enter GP Register Name"
             />
@@ -83,7 +83,8 @@ function Register() {
             <span className="text-black">Addressing Mode</span>
             <select
               onChange={(e) => setAddressingMode(e.target.value)}
-              className={`mt-2 mb-2 h-8 pl-2 bg-gray-100 w-full rounded-md bordertext-black`}
+              className={`mt-2 mb-4 h-8 pl-2 bg-gray-100 w-full text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900
+                      ${addressingMode === "" ? "text-gray-500" : "text-black"}`}
             >
               <option value="">Select Addressing Mode</option>
               <option value="Direct">Direct Addressing</option>
@@ -94,7 +95,8 @@ function Register() {
             <span className="text-black">Addressing Mode Code</span>
             <select
               onChange={(e) => setAddressingModeCode(e.target.value)}
-              className={`mt-2 mb-2 h-8 pl-2 bg-gray-100 w-full rounded-md border  text-black`}
+              className={`mt-2 mb-4 h-8 pl-2 bg-gray-100 w-full text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900
+                      ${addressingMode === "" ? "text-gray-500" : "text-black"}`}
             >
               <option value="">Select Addressing Mode Code</option>
               <option value="00">00</option>
@@ -106,7 +108,7 @@ function Register() {
             <span className="text-black">Symbol</span>
             <input
               onChange={(e) => setSymbol(e.target.value)}
-              className={`mt-2 mb-2 pl-2 h-8 bg-gray-100 w-full rounded-md border  text-black`}
+              className="auto-textarea mt-2 pl-2 h-8 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900"
               type="text"
               placeholder="Enter Symbol (e.g., #, @, etc.)"
             />

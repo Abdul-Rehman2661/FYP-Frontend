@@ -15,23 +15,23 @@ function Memory() {
   return (
     <>
       <Header />
-      <div className="p-4 pt-20 min-h-screen bg-gray-100 pb-16 flex justify-center">
+      <div className="pt-20 lg:pt-24">
+          <h2 className="text-center text-xl font-bold text-blue-900">
+            Memory Visualization
+          </h2>
+      <div className="p-4 min-h-screen bg-gray-100 pb-16 flex justify-center">
         <div
           className="
             w-full
             bg-white
             rounded-xl
             p-4
-            mt-4
             space-y-4
             lg:max-w-full
             lg:p-8
             lg:shadow
           "
         >
-          <h2 className="text-center text-xl font-bold text-blue-900 mb-6">
-            Memory Visualization
-          </h2>
 
           <div className="mb-6">
             <p className="text-sm text-gray-700 mb-2">Memory Value</p>
@@ -93,6 +93,7 @@ function Memory() {
             </div>
           </div>
         </div>
+      </div>
       </div>
 
       <BottomNavigation />

@@ -28,7 +28,7 @@ function Detail() {
   return (
     <>
       <Header />
-      <div className="pt-20 text-center">
+      <div className="pt-20 lg:pt-24 text-center">
         <h2 className="text-xl text-blue-900 font-bold">Details</h2>
 
         <p className="pt-3 text-blue-900 text-sm">

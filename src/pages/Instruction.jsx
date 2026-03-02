@@ -4,7 +4,6 @@ import BottomNavigation from "../components/BottomNavigation.jsx";
 import { useNavigate, useLocation } from "react-router-dom";
 import { TrashIcon } from "@heroicons/react/24/outline";
 
-
 function Instruction() {
   const navigate = useNavigate();
 
@@ -21,37 +20,66 @@ function Instruction() {
   ]);
   const [isInterrupt, setIsInterrupt] = useState(false);
 
+  const DisplayInstruction = () => {
+    if (!opcode || !mnemonic || !action) return;
+
+    if (isInterrupt) {
+      if (!interruptSymbol || !inputRegister || !outputRegister) return;
+    }
+
+    const newRecord = {
+      opcode,
+      mnemonic,
+      action,
+      interruptSymbol,
+      inputRegister,
+      outputRegister,
+      operands,
+    };
+
+    setAddedInstructions([...addedInstructions, newRecord]);
+
+    (setOpcode(" "),
+      setMnemonic(" "),
+      setAction(" "),
+      setInterruptSymbol(" "),
+      setInputRegister(" "),
+      setOutputRegister(" "),
+      setOperands[{ id: 1, type: "Register", selected: false }]);
+
+    console.log("New Record:", newRecord);
+  };
+
   const handleAddOperand = () => {
     setOperands([
-      ...operands,{
+      ...operands,
+      {
         id: Date.now(),
         type: "Register",
-        selected: false
-      }
-    ])
-  }
+        selected: false,
+      },
+    ]);
+  };
 
   const handleRadio = (id) => {
     setOperands(
-      operands.map((op) => 
-        op.id === id ? {...op, selected: true} : {...op, selected: false}
-      )
-    )
-  }
+      operands.map((op) =>
+        op.id === id ? { ...op, selected: true } : { ...op, selected: false },
+      ),
+    );
+  };
 
   const handleType = (id, value) => {
     setOperands(
-      operands.map((op) => 
-        op.od === id ? {...op, type : value} : {type: "register"}
-      )
-    )
-  }
+      operands.map((op) =>
+        op.id === id ? { ...op, type: value } : { type: "register" },
+      ),
+    );
+  };
 
   const handleDelete = (id) => {
-    setOperands(
-      operands.filter((op) => op.id !==id)
-    );
-  }
+    setOperands(operands.filter((op) => op.id !== id));
+  };
 
   return (
     <>
@@ -78,7 +106,7 @@ function Instruction() {
               <span className="text-black">OpCode</span>
               <br />
               <input
-                  className="mt-2 h-8 mb-5 pl-2 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900 "
+                className="mt-2 h-8 mb-5 pl-2 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900 "
                 type="text"
                 onChange={(e) => setOpcode(e.target.value)}
                 placeholder="Enter Instruction Code e.g (01)"
@@ -89,7 +117,7 @@ function Instruction() {
               <span className="text-black">Mnemonics</span>
               <br />
               <input
-                  className="mt-2 h-8 pl-2 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900"
+                className="mt-2 h-8 pl-2 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900"
                 type="text"
                 value={mnemonic}
                 onChange={(e) => setMnemonic(e.target.value)}
@@ -104,7 +132,7 @@ function Instruction() {
               <div className="mb-4">
                 <span className="text-black">Interrupt Symbol</span>
                 <select
-                      className={`mt-2 mb-4 h-8 pl-2 bg-gray-100 w-full text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900
+                  className={`mt-2 mb-4 h-8 pl-2 bg-gray-100 w-full text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900
                       ${interruptSymbol === "" ? "text-gray-500" : "text-black"}`}
                   value={interruptSymbol}
                   onChange={(e) => setInterruptSymbol(e.target.value)}
@@ -118,7 +146,7 @@ function Instruction() {
               <div className="mb-4">
                 <span className="text-black">Input Register</span>
                 <select
-                      className={`mt-2 mb-4 h-8 pl-2 bg-gray-100 w-full text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900
+                  className={`mt-2 mb-4 h-8 pl-2 bg-gray-100 w-full text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900
                       ${inputRegister === "" ? "text-gray-500" : "text-black"}`}
                   onChange={(e) => setInputRegister(e.target.value)}
                 >
@@ -129,7 +157,7 @@ function Instruction() {
               <div className="mb-4">
                 <span className="text-black">Output Register</span>
                 <select
-                      className={`mt-2 mb-4 h-8 pl-2 bg-gray-100 w-full text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900
+                  className={`mt-2 mb-4 h-8 pl-2 bg-gray-100 w-full text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900
                       ${outputRegister === "" ? "text-gray-500" : "text-black"}`}
                   onChange={(e) => setOutputRegister(e.target.value)}
                 >
@@ -157,11 +185,11 @@ function Instruction() {
                     Operand {index + 1}
                   </span>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
                     <select
                       value={op.type}
-                      onChange={(e => handleType(op.id, e.target.value))}
-                      className="border rounded-md px-2 bg-white text-black py-1 text-sm"
+                      onChange={(e) => handleType(op.id, e.target.value)}
+                      className="border rounded-md px-2 bg-white text-black py-1 text-sm flex-1 sm:flex-none"
                     >
                       <option value="Register">Register</option>
                       <option value="Immediate">Immediate</option>
@@ -176,12 +204,18 @@ function Instruction() {
                       className="w-4 h-4 rounded-full border border-black bg-white"
                     />
 
-                    <button onClick={() => handleDelete(op.id)} className="text-red-700 hover:text-red-900">
+                    <button
+                      onClick={() => handleDelete(op.id)}
+                      className="text-red-700 hover:text-red-900"
+                    >
                       <TrashIcon className="w-6 h-6" />
                     </button>
 
                     {index === operands.length - 1 && (
-                      <button onClick={handleAddOperand} className="text-blue-600 text-xl font-bold">
+                      <button
+                        onClick={handleAddOperand}
+                        className="text-blue-600 text-xl font-bold"
+                      >
                         +
                       </button>
                     )}
@@ -198,60 +232,73 @@ function Instruction() {
               value={action}
               onChange={(e) => setAction(e.target.value)}
               placeholder="// Write Java Code Here"
-                className="w-full border rounded-md p-2 h-24 border bg-gray-100 text-black rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900"
+              className="w-full border rounded-md p-2 h-24 border bg-gray-100 text-black rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900"
             ></textarea>
           </div>
 
-          {/* ADD Button */}
-          <button className="w-full bg-blue-900 text-white py-2 rounded-md mt-4 hover:bg-blue-800">
-            ADD
-          </button>
-
           {/* Added Instructions List */}
           {addedInstructions.length > 0 && (
-            <div className="mt-6 border rounded-md p-4 bg-gray-50">
-              <h3 className="text-black font-semibold mb-3">
-                Added Instructions ({addedInstructions.length})
+            <div className="mt-6 mb-3 border rounded-md p-4 text-black text-sm bg-gray-50">
+              <h3 className="text-blue-900 font-semibold mb-2">
+                Added Instructions
               </h3>
 
               {addedInstructions.map((item, index) => (
                 <div
                   key={index}
-                  className="mb-4 p-3 border rounded bg-white relative"
+                  className="mb-2"
                 >
-                  <button className="absolute top-2 right-2 text-red-500 hover:text-red-700">
-                    ✕
-                  </button>
-                  <p className="text-black">
-                    <b>Opcode:</b> {item.opcode}
+                    <span className="flex ">
+                      <p className="text-blue-900 mr-1">OpCode:</p>
+                      <p>{item.opcode}</p>
+                    </span>
+
+                    <span className="flex ">
+                      <p className="text-blue-900 mr-1">Mnemonic:</p>
+                      <p>{item.mnemonic}</p>
+                    </span>
+
+                    <span className="flex ">
+                      <p className="text-blue-900 mr-1">Action:</p>
+                      <p>{item.action}</p>
+                    </span>
+
+                    <span className="flex ">
+                      <p className="text-blue-900 mr-1">Interrupt Symbol:</p>
+                      <p>{item.interruptSymbol}</p>
+                    </span>
+
+                    <span className="flex ">
+                      <p className="text-blue-900 mr-1">Input Register:</p>
+                      <p>{item.inputRegister}</p>
+                    </span>
+
+                    <span className="flex ">
+                      <p className="text-blue-900 mr-1">Output Register:</p>
+                      <p>{item.outputRegister}</p>
+                    </span>
+
+                  <p className="flex text-black mb-4">
+                    <p className="text-blue-900 mr-1">Operands:</p>{" "}
+                    {item.operands.map((op, i) => (
+                      <span key={i}>
+                        {op.type}
+                        {op.selected ? " (Dest)" : ""}{" "}
+                      </span>
+                    ))}
                   </p>
-                  <p className="text-black">
-                    <b>Mnemonic:</b> {item.mnemonic}
-                  </p>
-                  <p className="text-black">
-                    <b>Action:</b> {item.action.substring(0, 50)}...
-                  </p>
-                  {item.isInterrupt ? (
-                    <>
-                      <p className="text-black">
-                        <b>Interrupt Symbol:</b> {item.interruptSymbol}
-                      </p>
-                      <p className="text-black">
-                        <b>Input Register:</b> {item.inputRegister}
-                      </p>
-                      <p className="text-black">
-                        <b>Output Register:</b> {item.outputRegister}
-                      </p>
-                    </>
-                  ) : (
-                    <p className="text-black">
-                      <b>Operands:</b> {item.operands.length}
-                    </p>
-                  )}
                 </div>
               ))}
             </div>
           )}
+
+          {/* ADD Button */}
+          <button
+            onClick={DisplayInstruction}
+            className="w-full bg-blue-900 text-white py-2 rounded-md mt-4 hover:bg-blue-800"
+          >
+            ADD
+          </button>
 
           {/* Create Architecture Button */}
           <button className="w-full bg-blue-900 text-white py-3 rounded-md mt-6 font-semibold hover:bg-blue-800">

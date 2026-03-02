@@ -1,6 +1,6 @@
 import React from "react";
 import {
-  Squares2X2Icon,
+ Squares2X2Icon,
   CpuChipIcon,
   CodeBracketIcon,
   EyeIcon,
@@ -14,35 +14,47 @@ function BottomNavigation() {
   return (
     <footer
       className="fixed bottom-0 left-1/2 -translate-x-1/2
-      w-full lg:max-w-full bg-white border-t"
+      w-full lg:max-w-full bg-white border-t border-blue-900"
     >
       <div className="flex justify-around py-2 text-[11px]">
 
         <NavItem
           icon={<Squares2X2Icon className="h-6 w-6" />}
           label="Dashboard"
-          active={location.pathname === "/"}
+          active={
+            location.pathname === "/" 
+          }
           onClick={() => navigate("/")}
         />
 
         <NavItem
           icon={<CpuChipIcon className="h-6 w-6" />}
           label="CPU Design"
-          active={location.pathname === "/cpudesign"}
+          active={
+            location.pathname === "/cpudesign" ||
+            location.pathname === "/register" ||
+            location.pathname === "/instruction"
+          }
           onClick={() => navigate("/cpudesign")}
         />
 
         <NavItem
           icon={<CodeBracketIcon className="h-6 w-6" />}
           label="Editor"
-          active={location.pathname === "/editor"}
+          active={
+            location.pathname === "/editor" ||
+            location.pathname === "/compare"
+          }
           onClick={() => navigate("/editor")}
         />
 
         <NavItem
           icon={<EyeIcon className="h-6 w-6" />}
           label="Register Viz"
-          active={location.pathname === "/registervis"}
+          active={
+            location.pathname === "/registervis" ||
+            location.pathname === "/debugging"
+          }
           onClick={()=> navigate("/registervis")}
         />
 

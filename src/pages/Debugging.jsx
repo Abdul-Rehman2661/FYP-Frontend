@@ -31,24 +31,25 @@ function Debugging() {
           <h2 className="text-center text-xl font-bold text-blue-900">
             Debugging
           </h2>
-      <div className="p-4 bg-gray-100 pb-16 min-h-screen bg-gray-50 p-6">
+
+      <div className="p-4 bg-gray-100 pb-16 min-h-screen p-6">
         <div className="bg-white rounded-xl shadow border p-6">
 
-          <div className="flex gap-4">
+          <div className="flex gap-4 sm:gap-2 ">
             <button className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-white text-blue-900 hover:bg-blue-900 hover:text-white rounded-lg border border-blue-900 text-xs rounded font-bold">
-              <ArrowLeftIcon className="h-4 w-4" />
+              <ArrowLeftIcon className="h-2 w-2" />
               Back
             </button>
             <button className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-white text-blue-900 hover:bg-blue-900 hover:text-white rounded-lg border border-blue-900 text-xs rounded font-bold">
-              <ArrowRightIcon className="h-4 w-4" />
+              <ArrowRightIcon className="h-2 w-2" />
               Step
             </button>
             <button className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-white text-blue-900 hover:bg-blue-900 hover:text-white rounded-lg border border-blue-900 text-xs rounded font-bold">
-              <PlayIcon className="h-4 w-4" />
+              <PlayIcon className="h-2 w-2" />
               Run
             </button>
             <button className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-white text-blue-900 hover:bg-blue-900 hover:text-white rounded-lg border border-blue-900 text-xs rounded font-bold">
-              <ArrowPathIcon className="h-4 w-4" />
+              <ArrowPathIcon className="h-2 w-2" />
               Reload
             </button>
           </div>

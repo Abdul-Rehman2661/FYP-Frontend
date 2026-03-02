@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import React from "react";
 import Header from "../components/Header.jsx";
 import BottomNavigation from "../components/BottomNavigation.jsx";
-import AddRegister from "../components/AddRegister.jsx";
 import { useNavigate, useLocation } from "react-router-dom";
 
 function Memory() {

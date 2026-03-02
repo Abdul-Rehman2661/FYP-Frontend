@@ -8,15 +8,51 @@ function Register() {
   const [flagAction, setFlagAction] = useState("");
   const [flagRegisterList, setFlagRegisterList] = useState([]);
 
+  const handleAddedFR = () => {
+    if (!flagRegister || !flagAction) return;
+    const newRecord = {
+      name: flagRegister,
+      Action: flagAction,
+    };
+    setFlagRegisterList([...flagRegisterList, newRecord]);
+    ((setFlagRegister = " "), (setFlagAction = " "));
+  };
+
   const navigate = useNavigate();
 
   const [gpRegister, setGpRegister] = useState("");
   const [gpRegisterList, setGpRegisterList] = useState([]);
 
+  const handleGP = () => {
+    if (!gpRegister) return;
+
+    const newRecord = {
+      name: gpRegister,
+    };
+
+    setGpRegisterList([...gpRegisterList, newRecord]);
+    gpRegister = "";
+  };
+
   const [addressingMode, setAddressingMode] = useState("");
   const [addressingModeCode, setAddressingModeCode] = useState("");
   const [symbol, setSymbol] = useState("");
   const [addressingModeList, setAddressingModeList] = useState([]);
+
+  const handleModes = () => {
+    if (!addressingMode || !addressingModeCode || !symbol) return;
+
+    const newRecord = {
+      mode: addressingMode,
+      code: addressingModeCode,
+      sym: symbol,
+    };
+
+    setAddressingModeList([...addressingModeList, newRecord]);
+    ((setAddressingMode = " "),
+      (setAddressingModeCode = " "),
+      (setSymbol = " "));
+  };
 
   return (
     <>
@@ -49,7 +85,32 @@ function Register() {
               placeholder="//Write Java Code here for Logic of Flag Register"
             />
 
-            <button className="w-full h-8 mb-4 text-white bg-blue-900 rounded-lg mt-4 text-center font-semibold hover:bg-blue-800 transition">
+            {/* Display Flag Registers */}
+            {flagRegisterList.length > 0 && (
+              <div className="bg-gray-100 border mt-4 rounded-sm text-sm">
+                <p className="font-semibold text-blue-900 m-2">
+                  Added Flag Registers
+                </p>
+
+                {flagRegisterList.map((item, index) => (
+                  <div key={index} className="text-black m-2">
+                    <span className="flex ">
+                      <p className="text-blue-900 mr-1">Name:</p>
+                      <p>{item.name}</p>
+                    </span>
+                    <span className="flex mb-3">
+                      <p className="text-blue-900 mr-1">Action:</p>
+                      <p>{item.Action}</p>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <button
+              onClick={handleAddedFR}
+              className="w-full h-8 mb-4 text-white bg-blue-900 rounded-lg mt-4 text-center font-semibold hover:bg-blue-800 transition"
+            >
               ADD
             </button>
           </div>
@@ -66,8 +127,27 @@ function Register() {
               type="text"
               placeholder="Enter GP Register Name"
             />
+            {/* Display GP */}
+            {gpRegisterList.length > 0 && (
+              <div className="bg-gray-100 m-2 border rounded-sm">
+                <p className="text-black text-sm m-2 font-semibold text-blue-900">
+                  Added General Purpose
+                </p>
+                {gpRegisterList.map((item, index) => (
+                  <div key={index}>
+                    <span className="flex m-2 mb-3">
+                      <p className="mr-1 text-sm text-blue-900">Name:</p>
+                      <p className="text-black text-sm ">{item.name}</p>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
 
-            <button className="w-full h-8 mb-4 text-white bg-blue-900 rounded-lg text-center font-semibold hover:bg-blue-800 transition">
+            <button
+              onClick={handleGP}
+              className="w-full h-8 mb-4 text-white bg-blue-900 rounded-lg text-center font-semibold hover:bg-blue-800 transition"
+            >
               ADD
             </button>
           </div>
@@ -112,8 +192,35 @@ function Register() {
               type="text"
               placeholder="Enter Symbol (e.g., #, @, etc.)"
             />
+            {/* Display Adressing Modes */}
+            {addressingModeList.length > 0 && (
+              <div className="bg-gray-100 border mt-4 rounded-sm text-sm">
+                <p className="font-semibold text-blue-900 m-2">
+                  Added Addressing Modes
+                </p>
 
-            <button className="w-full h-8 mb-4 text-white bg-blue-900 rounded-lg mt-4 text-center font-semibold hover:bg-blue-800 transition">
+                {addressingModeList.map((item, index) => (
+                  <div key={index} className="text-black m-2">
+                    <span className="flex ">
+                      <p className="text-blue-900 mr-1">Mode:</p>
+                      <p>{item.mode}</p>
+                    </span>
+                    <span className="flex ">
+                      <p className="text-blue-900 mr-1">Code:</p>
+                      <p>{item.code}</p>
+                    </span>
+                    <span className="flex mb-3">
+                      <p className="text-blue-900 mr-1">Symbol:</p>
+                      <p>{item.sym}</p>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <button
+              onClick={handleModes}
+              className="w-full h-8 mb-4 text-white bg-blue-900 rounded-lg mt-4 text-center font-semibold hover:bg-blue-800 transition"
+            >
               ADD
             </button>
           </div>

@@ -1,6 +1,6 @@
 import React from "react";
 import {
- Squares2X2Icon,
+ ComputerDesktopIcon,
   CpuChipIcon,
   CodeBracketIcon,
   EyeIcon,
@@ -19,7 +19,7 @@ function BottomNavigation() {
       <div className="flex justify-around py-2 text-[11px]">
 
         <NavItem
-          icon={<Squares2X2Icon className="h-6 w-6" />}
+          icon={<ComputerDesktopIcon className="h-6 w-6" />}
           label="Dashboard"
           active={
             location.pathname === "/" 

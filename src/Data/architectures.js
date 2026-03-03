@@ -28,43 +28,29 @@ export const architectures = [
         mnemonic: "LOAD",
         opcode: "00",
         instructionSet: "LOAD R1, M[0x02]",
-      },
-      {
-        mnemonic: "SUB",
-        opcode: "00",
-        instructionSet: "R2 = R2 - R3",
-      },
-      {
-        mnemonic: "ADD",
-        opcode: "00",
-        instructionSet: "R1 = R1 + R2",
+        action: "	R1 = M[0X01]",
       },
       {
         mnemonic: "STORE",
         opcode: "00",
         instructionSet: "M[0x04] = R3",
-      },
-    ],
-    action: [
-      {
-        nmenonic: "LOAD",
-        action: "	R1 = M[0X01]",
-      },
-      {
-        nmenonic: "STORE",
         action: "M[0X05] = R3",
       },
     ],
     addressingModes: [
       {
         name: "Direct",
-        instruction: "	LOAD $10"
-      }
+        instruction: "	LOAD $10",
+      },
     ],
     totalRegisters: 4,
     totalInstructions: 4,
-    flagRegister: "Zero",
-    flagRegisterSize: "1 bit",
+    flagRegister: [
+      {
+        name: "Zero",
+        size: "1 bit",
+      },
+    ],
     createdAt: "2024-01-10",
     updatedAt: "2024-02-15",
   },
@@ -97,38 +83,26 @@ export const architectures = [
         mnemonic: "LOAD",
         opcode: "00",
         instructionSet: "LOAD R1, M[0x02]",
-      },
-      {
-        mnemonic: "SUB",
-        opcode: "00",
-        instructionSet: "R2 = R2 - R3",
-      },
-      {
-        mnemonic: "ADD",
-        opcode: "00",
-        instructionSet: "R1 = R1 + R2",
+        action: "	R1 = M[0X01]",
       },
       {
         mnemonic: "STORE",
         opcode: "00",
         instructionSet: "M[0x04] = R3",
-      },
-    ],
-    action: [
-      {
-        nmenonic: "LOAD",
-        action: "	R1 = M[0X01]",
-      },
-      {
-        nmenonic: "STORE",
         action: "M[0X05] = R3",
       },
     ],
     addressingModes: [
       {
         name: "Direct",
-        instruction: "	LOAD $10"
-      }
+        instruction: "	LOAD $10",
+      },
+    ],
+    flagRegister: [
+      {
+        name: "Zero",
+        size: "1 bit",
+      },
     ],
     totalRegisters: 6,
     totalInstructions: 4,
@@ -164,38 +138,26 @@ export const architectures = [
         mnemonic: "LOAD",
         opcode: "00",
         instructionSet: "LOAD R1, M[0x02]",
-      },
-      {
-        mnemonic: "SUB",
-        opcode: "00",
-        instructionSet: "R2 = R2 - R3",
-      },
-      {
-        mnemonic: "ADD",
-        opcode: "00",
-        instructionSet: "R1 = R1 + R2",
+        action: "	R1 = M[0X01]",
       },
       {
         mnemonic: "STORE",
         opcode: "00",
         instructionSet: "M[0x04] = R3",
-      },
-    ],
-    action: [
-      {
-        nmenonic: "LOAD",
-        action: "	R1 = M[0X01]",
-      },
-      {
-        nmenonic: "STORE",
         action: "M[0X05] = R3",
       },
     ],
     addressingModes: [
       {
         name: "Direct",
-        instruction: "	LOAD $10"
-      }
+        instruction: "	LOAD $10",
+      },
+    ],
+    flagRegister: [
+      {
+        name: "Zero",
+        size: "1 bit",
+      },
     ],
     totalRegisters: 6,
     totalInstructions: 4,
@@ -231,38 +193,26 @@ export const architectures = [
         mnemonic: "LOAD",
         opcode: "00",
         instructionSet: "LOAD R1, M[0x02]",
-      },
-      {
-        mnemonic: "SUB",
-        opcode: "00",
-        instructionSet: "R2 = R2 - R3",
-      },
-      {
-        mnemonic: "ADD",
-        opcode: "00",
-        instructionSet: "R1 = R1 + R2",
+        action: "	R1 = M[0X01]",
       },
       {
         mnemonic: "STORE",
         opcode: "00",
         instructionSet: "M[0x04] = R3",
-      },
-    ],
-    action: [
-      {
-        nmenonic: "LOAD",
-        action: "	R1 = M[0X01]",
-      },
-      {
-        nmenonic: "STORE",
         action: "M[0X05] = R3",
       },
     ],
     addressingModes: [
       {
         name: "Direct",
-        instruction: "	LOAD $10"
-      }
+        instruction: "	LOAD $10",
+      },
+    ],
+    flagRegister: [
+      {
+        name: "Zero",
+        size: "1 bit",
+      },
     ],
     totalRegisters: 6,
     totalInstructions: 4,
@@ -298,37 +248,25 @@ export const architectures = [
         mnemonic: "LOAD",
         opcode: "00",
         instructionSet: "LOAD R1, M[0x02]",
-      },
-      {
-        mnemonic: "SUB",
-        opcode: "00",
-        instructionSet: "R2 = R2 - R3",
-      },
-      {
-        mnemonic: "ADD",
-        opcode: "00",
-        instructionSet: "R1 = R1 + R2",
+        action: "	R1 = M[0X01]",
       },
       {
         mnemonic: "STORE",
         opcode: "00",
         instructionSet: "M[0x04] = R3",
-      },
-    ],
-    action: [
-      {
-        nmenonic: "LOAD",
-        action: "	R1 = M[0X01]",
-      },
-      {
-        nmenonic: "STORE",
         action: "M[0X05] = R3",
       },
     ],
     addressingModes: [
       {
         name: "Direct",
-        instruction: "LOAD $10"
+        instruction: "LOAD $10",
+      },
+    ],
+    flagRegister: [
+      {
+        name: "Zero",
+        size: "1 bit",
       },
     ],
     totalRegisters: 6,
@@ -365,38 +303,26 @@ export const architectures = [
         mnemonic: "LOAD",
         opcode: "00",
         instructionSet: "LOAD R1, M[0x02]",
-      },
-      {
-        mnemonic: "SUB",
-        opcode: "00",
-        instructionSet: "R2 = R2 - R3",
-      },
-      {
-        mnemonic: "ADD",
-        opcode: "00",
-        instructionSet: "R1 = R1 + R2",
+        action: "	R1 = M[0X01]",
       },
       {
         mnemonic: "STORE",
         opcode: "00",
         instructionSet: "M[0x04] = R3",
-      },
-    ],
-    action: [
-      {
-        nmenonic: "LOAD",
-        action: "	R1 = M[0X01]",
-      },
-      {
-        nmenonic: "STORE",
         action: "M[0X05] = R3",
       },
     ],
     addressingModes: [
       {
         name: "Direct",
-        instruction: "	LOAD $10"
-      }
+        instruction: "	LOAD $10",
+      },
+    ],
+    flagRegister: [
+      {
+        name: "Zero",
+        size: "1 bit",
+      },
     ],
     totalRegisters: 6,
     totalInstructions: 4,

@@ -13,7 +13,6 @@ import {
 } from "@heroicons/react/24/outline";
 
 function Detail() {
-  
   const { id } = useParams();
   const architecture = architectures.find((arch) => arch.id === Number(id));
 
@@ -76,7 +75,7 @@ function Detail() {
         </div>
 
         <div className="mt-5">
-          <p className="text-blue-900">Flag Registers</p>
+          <p className="text-blue-900 mb-2">Flag Registers</p>
           <div className="overflow-hidden rounded-lg border border-blue-100 w-full">
             <table className="w-full border-collapse text-sm">
               <tbody>
@@ -89,19 +88,21 @@ function Detail() {
                   </td>
                 </tr>
 
-                <tr className=" p-4 text-black">
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    {architecture.flagRegister}
-                  </td>
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    {architecture.flagRegisterSize}
-                  </td>
-                </tr>
+                {architecture.flagRegister.map((fr, i) => (
+                    <tr key={i} className=" p-4 text-black">
+                      <td className="w-1/2 px-4 py-2 border border-blue-100">
+                        {fr.name}
+                      </td>
+                      <td className="w-1/2 px-4 py-2 border border-blue-100">
+                        {fr.size}
+                      </td>
+                    </tr>
+                ))}
               </tbody>
             </table>
           </div>
 
-          <p className="mt-5 text-blue-900">General Purpose Registers</p>
+          <p className="mt-5 text-blue-900 mb-2">General Purpose Registers</p>
           <div className="overflow-hidden rounded-lg border border-blue-100 w-full">
             <table className="w-full border-collapse text-sm">
               <tbody>
@@ -192,13 +193,13 @@ function Detail() {
                   </td>
                 </tr>
 
-                {architecture.action.map((act, index) => (
+                {architecture.instructions.map((ins, index) => (
                   <tr key={index} className=" p-4 text-black">
                     <td className="w-1/2 px-4 py-2 border border-blue-100">
-                      {act.nmenonic}
+                      {ins.mnemonic}
                     </td>
                     <td className="w-1/2 px-4 py-2 border border-blue-100">
-                      {act.action}
+                      {ins.action}
                     </td>
                   </tr>
                 ))}

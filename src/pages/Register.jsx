@@ -15,7 +15,8 @@ function Register() {
       Action: flagAction,
     };
     setFlagRegisterList([...flagRegisterList, newRecord]);
-    ((setFlagRegister = " "), (setFlagAction = " "));
+    setFlagRegister("");
+    setFlagAction("");
   };
 
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ function Register() {
     };
 
     setGpRegisterList([...gpRegisterList, newRecord]);
-    gpRegister = "";
+    setGpRegister("");
   };
 
   const [addressingMode, setAddressingMode] = useState("");
@@ -49,9 +50,9 @@ function Register() {
     };
 
     setAddressingModeList([...addressingModeList, newRecord]);
-    ((setAddressingMode = " "),
-      (setAddressingModeCode = " "),
-      (setSymbol = " "));
+    setAddressingMode("");
+    setAddressingModeCode("");
+    setSymbol("");
   };
 
   return (

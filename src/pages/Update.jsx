@@ -84,9 +84,10 @@ export default function Update() {
     };
 
     setAddressingModeList([...addressingModeList, newRecord]);
-    ((setAddressingMode = " "),
-      (setAddressingModeCode = " "),
-      (setSymbol = " "));
+
+    setAddressingMode("");
+    setAddressingModeCode("");
+    setSymbol("");
   };
 
   const [opcode, setOpcode] = useState("");

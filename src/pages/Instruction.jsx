@@ -301,7 +301,7 @@ function Instruction() {
           </button>
 
           {/* Create Architecture Button */}
-          <button className="w-full bg-blue-900 text-white py-3 rounded-md mt-6 font-semibold hover:bg-blue-800">
+          <button onClick={() => {navigate("/editor")}} className="w-full bg-blue-900 text-white py-3 rounded-md mt-6 font-semibold hover:bg-blue-800">
             Create Architecture
           </button>
         </div>

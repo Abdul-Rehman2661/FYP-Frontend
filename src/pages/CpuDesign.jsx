@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import Header from "../components/Header.jsx";
 import BottomNavigation from "../components/BottomNavigation.jsx";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useContext } from "react";
+import { ArchitectureContext } from "../context/ArchitectureContext";
 
 export default function CpuDesign() {
   const navigate = useNavigate();
@@ -13,6 +15,7 @@ export default function CpuDesign() {
   const [stackSize, setStackSize] = useState("");
   const [noOfRegisters, setNoOfRegisters] = useState("");
   const [noOfInstructions, setNoOfInstructions] = useState("");
+  const { setArchitectureData } = useContext(ArchitectureContext);
 
   return (
     <>
@@ -114,9 +117,19 @@ export default function CpuDesign() {
 
               <button
                 type="button"
-                onClick={() => navigate("/register")}
+                onClick={() => {
+                  setArchitectureData({
+                    name: archName,
+                    memorySize: parseInt(memorySize),
+                    busSize: parseInt(busSize),
+                    stackSize: parseInt(stackSize),
+                    noOfRegisters: parseInt(noOfRegisters),
+                    noOfInstructions: parseInt(noOfInstructions),
+                  });
+                  navigate("/register");
+                }}
                 className="w-full mt-6 bg-blue-900 text-white py-2 rounded-md
-                text-sm font-semibold hover:bg-blue-800 transition"
+    text-sm font-semibold hover:bg-blue-800 transition"
               >
                 Next
               </button>

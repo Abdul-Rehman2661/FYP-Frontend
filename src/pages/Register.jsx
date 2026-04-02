@@ -2,11 +2,23 @@ import React, { useState } from "react";
 import Header from "../components/Header.jsx";
 import BottomNavigation from "../components/BottomNavigation.jsx";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useContext } from "react";
+import { ArchitectureContext } from "../context/ArchitectureContext.jsx";
 
 function Register() {
   const [flagRegister, setFlagRegister] = useState("");
   const [flagAction, setFlagAction] = useState("");
   const [flagRegisterList, setFlagRegisterList] = useState([]);
+  const [addressingMode, setAddressingMode] = useState("");
+  const [addressingModeCode, setAddressingModeCode] = useState("");
+  const [symbol, setSymbol] = useState("");
+  const [addressingModeList, setAddressingModeList] = useState([]);
+  const [gpRegister, setGpRegister] = useState("");
+  const [gpRegisterList, setGpRegisterList] = useState([]);
+  const { setRegisterData, setAddressingModesData } =
+    useContext(ArchitectureContext);
+
+  const navigate = useNavigate();
 
   const handleAddedFR = () => {
     if (!flagRegister || !flagAction) return;
@@ -19,11 +31,6 @@ function Register() {
     setFlagAction("");
   };
 
-  const navigate = useNavigate();
-
-  const [gpRegister, setGpRegister] = useState("");
-  const [gpRegisterList, setGpRegisterList] = useState([]);
-
   const handleGP = () => {
     if (!gpRegister) return;
 
@@ -34,11 +41,6 @@ function Register() {
     setGpRegisterList([...gpRegisterList, newRecord]);
     setGpRegister("");
   };
-
-  const [addressingMode, setAddressingMode] = useState("");
-  const [addressingModeCode, setAddressingModeCode] = useState("");
-  const [symbol, setSymbol] = useState("");
-  const [addressingModeList, setAddressingModeList] = useState([]);
 
   const handleModes = () => {
     if (!addressingMode || !addressingModeCode || !symbol) return;
@@ -230,7 +232,21 @@ function Register() {
         <div className="p-4">
           <button
             className="w-full h-10 text-white bg-blue-900 rounded-lg text-center font-semibold hover:bg-blue-800 transition"
-            onClick={() => navigate("/instruction")}
+            onClick={() => {
+              const registerPayload = {
+                flagRegisters: flagRegisterList,
+                generalPurposeRegisters: gpRegisterList,
+              };
+
+              setRegisterData(registerPayload);
+
+              setAddressingModesData(addressingModeList);
+
+              console.log("Register Data:", registerPayload);
+              console.log("Addressing Modes:", addressingModeList);
+
+              navigate("/instruction");
+            }}
           >
             Next
           </button>

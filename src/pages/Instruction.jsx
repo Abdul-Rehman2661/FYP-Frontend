@@ -3,8 +3,10 @@ import Header from "../components/Header.jsx";
 import BottomNavigation from "../components/BottomNavigation.jsx";
 import { useNavigate, useLocation } from "react-router-dom";
 import { TrashIcon } from "@heroicons/react/24/outline";
+import { useContext } from "react";
+import { ArchitectureContext } from "../context/ArchitectureContext.jsx";
 
-function Instruction() {
+export default function Instruction() {
   const navigate = useNavigate();
 
   // Form states
@@ -15,10 +17,10 @@ function Instruction() {
   const [inputRegister, setInputRegister] = useState("");
   const [outputRegister, setOutputRegister] = useState("");
   const [addedInstructions, setAddedInstructions] = useState([]);
+  const [isInterrupt, setIsInterrupt] = useState(false);
   const [operands, setOperands] = useState([
     { id: 1, type: "Register", selected: false },
   ]);
-  const [isInterrupt, setIsInterrupt] = useState(false);
 
   const DisplayInstruction = () => {
     if (!opcode || !mnemonic || !action) return;
@@ -37,15 +39,19 @@ function Instruction() {
       operands,
     };
 
-    setAddedInstructions([...addedInstructions, newRecord]);
+    const updatedInstructions = [...addedInstructions, newRecord];
 
-    (setOpcode(" "),
-      setMnemonic(" "),
-      setAction(" "),
-      setInterruptSymbol(" "),
-      setInputRegister(" "),
-      setOutputRegister(" "),
-      setOperands[{ id: 1, type: "Register", selected: false }]);
+    setAddedInstructions(updatedInstructions);
+
+    setInstructionData(updatedInstructions);
+
+    setOpcode("");
+    setMnemonic("");
+    setAction("");
+    setInterruptSymbol("");
+    setInputRegister("");
+    setOutputRegister("");
+    setOperands([{ id: 1, type: "Register", selected: false }]);
 
     console.log("New Record:", newRecord);
   };
@@ -80,6 +86,87 @@ function Instruction() {
   const handleDelete = (id) => {
     setOperands(operands.filter((op) => op.id !== id));
   };
+
+  const {
+    architectureData,
+    registerData,
+    addressingModesData,
+    setInstructionData,
+  } = useContext(ArchitectureContext);
+
+const handleCreate = async () => {
+  try {
+const flatRegisters = [
+  ...(registerData.flagRegisters || []),
+  ...(registerData.generalPurposeRegisters || []).map(reg => ({
+    name: reg.name,
+    action: "" 
+  }))
+];
+
+    const mappedAddressingModes = (addressingModesData || []).map(m => ({
+      addressingModeName: m.mode,
+      addressingModeCode: m.code,
+      addressingModeSymbol: m.sym
+    }));
+
+    const mappedInstructions = (addedInstructions || []).map(ins => ({
+      mnemonics: ins.mnemonic,
+      opcode: ins.opcode,
+      operands: (ins.operands || []).map(op => ({
+        Destination: op.selected,
+        Type: op.type
+      })),
+      action: ins.action,
+      instructionFormat: ins.operands?.length || 0,
+      interruptSymbol: ins.interruptSymbol || null,
+      outputRegister: ins.outputRegister || null,
+      inputRegister: ins.inputRegister || null
+    }));
+
+    const payload = {
+      architecture: {
+        name: architectureData.name,
+        memorySize: Number(architectureData.memorySize),
+        stackSize: Number(architectureData.stackSize),
+        busSize: Number(architectureData.busSize),
+        numberOfRegisters: Number(architectureData.noOfRegisters),
+        numberOfInstructions: Number(architectureData.noOfInstructions),
+      },
+      registers: flatRegisters,
+      instructions: mappedInstructions,
+      addressingModes: mappedAddressingModes
+    };
+
+    console.log("FINAL CLEAN PAYLOAD:", payload);
+
+    const res = await fetch(
+      "http://localhost/ComputerArchitectureToolkitAPI/api/architecture/create-full",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Server Error:", data);
+      alert(data.message || "Failed to create architecture");
+      return;
+    }
+
+    console.log("SUCCESS:", data);
+    alert("Architecture Created Successfully ");
+
+  } catch (err) {
+    console.error("Frontend Error:", err);
+    alert("Something went wrong ");
+  }
+};
 
   return (
     <>
@@ -244,39 +331,36 @@ function Instruction() {
               </h3>
 
               {addedInstructions.map((item, index) => (
-                <div
-                  key={index}
-                  className="mb-2"
-                >
-                    <span className="flex ">
-                      <p className="text-blue-900 mr-1">OpCode:</p>
-                      <p>{item.opcode}</p>
-                    </span>
+                <div key={index} className="mb-2">
+                  <span className="flex ">
+                    <p className="text-blue-900 mr-1">OpCode:</p>
+                    <p>{item.opcode}</p>
+                  </span>
 
-                    <span className="flex ">
-                      <p className="text-blue-900 mr-1">Mnemonic:</p>
-                      <p>{item.mnemonic}</p>
-                    </span>
+                  <span className="flex ">
+                    <p className="text-blue-900 mr-1">Mnemonic:</p>
+                    <p>{item.mnemonic}</p>
+                  </span>
 
-                    <span className="flex ">
-                      <p className="text-blue-900 mr-1">Action:</p>
-                      <p>{item.action}</p>
-                    </span>
+                  <span className="flex ">
+                    <p className="text-blue-900 mr-1">Action:</p>
+                    <p>{item.action}</p>
+                  </span>
 
-                    <span className="flex ">
-                      <p className="text-blue-900 mr-1">Interrupt Symbol:</p>
-                      <p>{item.interruptSymbol}</p>
-                    </span>
+                  <span className="flex ">
+                    <p className="text-blue-900 mr-1">Interrupt Symbol:</p>
+                    <p>{item.interruptSymbol}</p>
+                  </span>
 
-                    <span className="flex ">
-                      <p className="text-blue-900 mr-1">Input Register:</p>
-                      <p>{item.inputRegister}</p>
-                    </span>
+                  <span className="flex ">
+                    <p className="text-blue-900 mr-1">Input Register:</p>
+                    <p>{item.inputRegister}</p>
+                  </span>
 
-                    <span className="flex ">
-                      <p className="text-blue-900 mr-1">Output Register:</p>
-                      <p>{item.outputRegister}</p>
-                    </span>
+                  <span className="flex ">
+                    <p className="text-blue-900 mr-1">Output Register:</p>
+                    <p>{item.outputRegister}</p>
+                  </span>
 
                   <p className="flex text-black mb-4">
                     <p className="text-blue-900 mr-1">Operands:</p>{" "}
@@ -301,7 +385,10 @@ function Instruction() {
           </button>
 
           {/* Create Architecture Button */}
-          <button onClick={() => {navigate("/editor")}} className="w-full bg-blue-900 text-white py-3 rounded-md mt-6 font-semibold hover:bg-blue-800">
+          <button
+            onClick={handleCreate}
+            className="w-full bg-blue-900 text-white py-3 rounded-md mt-6 font-semibold hover:bg-blue-800"
+          >
             Create Architecture
           </button>
         </div>
@@ -310,5 +397,3 @@ function Instruction() {
     </>
   );
 }
-
-export default Instruction;

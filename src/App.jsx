@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import Dashboard from "./pages/Dashboard.jsx";
 import Detail from "./pages/Detail.jsx";
 import CpuDesign from "./pages/CpuDesign.jsx";
@@ -15,10 +16,11 @@ import Update from "./pages/Update.jsx";
 function App() {
   return (
     <div className="min-h-screen bg-white flex justify-center">
-      <div
+      <div  
         className="w-full min-h-screen bg-gray-100
         shadow-2xl border"
       >
+        <Toaster position="top-right" reverseOrder={false} />
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/detail/:id" element={<Detail />} />

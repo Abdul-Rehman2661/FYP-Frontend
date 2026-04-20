@@ -1,11 +1,35 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import Header from "../components/Header.jsx";
 import BottomNavigation from "../components/BottomNavigation.jsx";
-import { architectures } from "../Data/architectures.js";
 import { CpuChipIcon } from "@heroicons/react/24/outline";
 
 function Dashboard() {
+  const [architectures, setArchitectures] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchArchitectures();
+  }, []);
+
+const fetchArchitectures = async () => {
+  try {
+    const res = await fetch(
+      "http://localhost/ComputerArchitectureToolkitAPI/api/architecture/all"
+    );
+
+    const data = await res.json();
+
+    setArchitectures(data); 
+  } catch (err) {
+    console.error(err);
+    setError("Failed to fetch architectures");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <>
@@ -21,18 +45,15 @@ function Dashboard() {
             Manage and explore your computer architecture designs
           </p>
 
-        {/* map */}
+          {/* map */}
           {architectures.length === 0 ? (
             <p className="text-center text-red-500 mt-10">No Architecture</p>
           ) : (
             <div className="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-6">
               {architectures.map((arch) => (
                 <div
-                  key={arch.id}
-                  className="
-                    bg-white border rounded-xl shadow p-4
-                    lg:p-6 lg:rounded-2xl lg:shadow-sm
-                  "
+                  key={arch.ArchitectureID}
+                  className="bg-white border rounded-xl shadow p-4 lg:p-6 lg:rounded-2xl lg:shadow-sm"
                 >
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-8 h-8 rounded bg-blue-100 flex items-center justify-center text-blue-900">
@@ -40,47 +61,38 @@ function Dashboard() {
                     </div>
 
                     <h3 className="text-lg font-semibold text-blue-900">
-                      {arch.name}
+                      {arch.Name}
                     </h3>
                   </div>
 
                   <div className="text-sm text-gray-700 space-y-1">
                     <p>
                       <span className="font-medium">Memory:</span>{" "}
-                      {arch.memorySize}
+                      {arch.MemorySize}
                     </p>
                     <p>
-                      <span className="font-medium">Bus:</span> {arch.busSize}
+                      <span className="font-medium">Bus:</span> {arch.BusSize}
                     </p>
                   </div>
 
                   <div className="flex gap-2 mt-4">
                     <button
-                    onClick={() => navigate('/editor')}
-                      className="
-                      flex-1 py-1.5 text-sm rounded
-                      bg-blue-900 text-white hover:text-gray-400
-                    "
+                      onClick={() => navigate("/editor")}
+                      className="flex-1 py-1.5 text-sm rounded bg-blue-900 text-white hover:text-gray-400"
                     >
                       Use
                     </button>
 
                     <button
-                      onClick={() => navigate(`/update/${arch.id}`)}
-                      className="
-                      flex-1 py-1.5 text-sm rounded
-                      bg-blue-900 text-white hover:text-gray-400
-                      "
+                      onClick={() => navigate(`/update/${arch.ArchitectureID}`)}
+                      className="flex-1 py-1.5 text-sm rounded bg-blue-900 text-white hover:text-gray-400"
                     >
                       Update
                     </button>
 
                     <button
-                      onClick={() => navigate(`/detail/${arch.id}`)}
-                      className="
-                      flex-1 py-1.5 text-sm rounded
-                      bg-blue-900 text-white hover:text-gray-400
-                      "
+                      onClick={() => navigate(`/detail/${arch.ArchitectureID}`)}
+                      className="flex-1 py-1.5 text-sm rounded bg-blue-900 text-white hover:text-gray-400"
                     >
                       Details
                     </button>

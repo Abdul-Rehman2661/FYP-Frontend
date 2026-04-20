@@ -5,6 +5,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { useContext } from "react";
 import { ArchitectureContext } from "../context/ArchitectureContext.jsx";
+import toast from "react-hot-toast";
+import confetti from "canvas-confetti";
 
 export default function Instruction() {
   const navigate = useNavigate();
@@ -94,15 +96,15 @@ export default function Instruction() {
     setInstructionData,
   } = useContext(ArchitectureContext);
 
-const handleCreate = async () => {
+  const handleCreate = async () => {
   try {
-const flatRegisters = [
-  ...(registerData.flagRegisters || []),
-  ...(registerData.generalPurposeRegisters || []).map(reg => ({
-    name: reg.name,
-    action: "" 
-  }))
-];
+    const flatRegisters = [
+      ...(registerData.flagRegisters || []),
+      ...(registerData.generalPurposeRegisters || []).map(reg => ({
+        name: reg.name,
+        action: ""
+      }))
+    ];
 
     const mappedAddressingModes = (addressingModesData || []).map(m => ({
       addressingModeName: m.mode,
@@ -138,8 +140,6 @@ const flatRegisters = [
       addressingModes: mappedAddressingModes
     };
 
-    console.log("FINAL CLEAN PAYLOAD:", payload);
-
     const res = await fetch(
       "http://localhost/ComputerArchitectureToolkitAPI/api/architecture/create-full",
       {
@@ -154,17 +154,27 @@ const flatRegisters = [
     const data = await res.json();
 
     if (!res.ok) {
-      console.error("Server Error:", data);
-      alert(data.message || "Failed to create architecture");
+      toast.error(data.message || "Failed to create architecture");
       return;
     }
+    toast.success("Architecture Created Successfully!", {
+      duration: 4000,
+      style: {
+        borderRadius: "10px",
+        background: "#1e293b",
+        color: "#fff",
+      },
+    });
 
-    console.log("SUCCESS:", data);
-    alert("Architecture Created Successfully ");
+    confetti({
+      particleCount: 120,
+      spread: 70,
+      origin: { y: 1 } 
+    });
 
   } catch (err) {
     console.error("Frontend Error:", err);
-    alert("Something went wrong ");
+    toast.error("Something went wrong ");
   }
 };
 

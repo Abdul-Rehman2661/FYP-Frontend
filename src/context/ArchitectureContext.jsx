@@ -7,6 +7,7 @@ export const ArchitectureProvider = ({ children }) => {
   const [registerData, setRegisterData] = useState([]);
   const [addressingModesData, setAddressingModesData] = useState([]); 
   const [instructionData, setInstructionData] = useState([]);
+  const [executionResult, setExecutionResult] = useState(null);
 
   return (
     <ArchitectureContext.Provider
@@ -19,6 +20,8 @@ export const ArchitectureProvider = ({ children }) => {
         setAddressingModesData,   
         instructionData,
         setInstructionData,
+        executionResult,
+        setExecutionResult,
       }}
     >
       {children}

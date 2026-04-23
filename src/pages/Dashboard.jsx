@@ -77,7 +77,7 @@ const fetchArchitectures = async () => {
 
                   <div className="flex gap-2 mt-4">
                     <button
-                      onClick={() => navigate("/editor")}
+                      onClick={() => navigate(`/editor/${arch.ArchitectureID}`)}
                       className="flex-1 py-1.5 text-sm rounded bg-blue-900 text-white hover:text-gray-400"
                     >
                       Use

@@ -25,7 +25,7 @@ function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/detail/:id" element={<Detail />} />
           <Route path="/cpudesign" element={<CpuDesign />} />
-          <Route path="/editor" element={<Editor />} />
+          <Route path="/editor/:id" element={<Editor />} />
           <Route path="/register" element={<Register />} />
           <Route path="/instruction" element={<Instruction />} />
           <Route path="/compare" element={<Compare />} />

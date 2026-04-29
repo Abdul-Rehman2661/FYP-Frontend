@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useEffect } from "react";
 import Header from "../components/Header.jsx";
 import BottomNavigation from "../components/BottomNavigation.jsx";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -23,6 +24,18 @@ export default function Instruction() {
   const [operands, setOperands] = useState([
     { id: 1, type: "Register", selected: false },
   ]);
+
+  useEffect(() => {
+    if (inputRegister && inputRegister === outputRegister) {
+      setOutputRegister("");
+    }
+  }, [inputRegister]);
+
+  useEffect(() => {
+    if (outputRegister && outputRegister === inputRegister) {
+      setInputRegister("");
+    }
+  }, [outputRegister]);
 
   const DisplayInstruction = () => {
     if (!opcode || !mnemonic || !action) return;
@@ -97,86 +110,104 @@ export default function Instruction() {
   } = useContext(ArchitectureContext);
 
   const handleCreate = async () => {
-  try {
-    const flatRegisters = [
-      ...(registerData.flagRegisters || []),
-      ...(registerData.generalPurposeRegisters || []).map(reg => ({
-        name: reg.name,
-        action: ""
-      }))
-    ];
+    try {
+      const flatRegisters = [
+        ...(registerData.flagRegisters || []),
+        ...(registerData.generalPurposeRegisters || []).map((reg) => ({
+          name: reg.name,
+          action: "",
+        })),
+      ];
 
-    const mappedAddressingModes = (addressingModesData || []).map(m => ({
-      addressingModeName: m.mode,
-      addressingModeCode: m.code,
-      addressingModeSymbol: m.sym
-    }));
+      const mappedAddressingModes = (addressingModesData || []).map((m) => ({
+        addressingModeName: m.mode,
+        addressingModeCode: m.code,
+        addressingModeSymbol: m.sym,
+      }));
 
-    const mappedInstructions = (addedInstructions || []).map(ins => ({
-      mnemonics: ins.mnemonic,
-      opcode: ins.opcode,
-      operands: (ins.operands || []).map(op => ({
-        Destination: op.selected,
-        Type: op.type
-      })),
-      action: ins.action,
-      instructionFormat: ins.operands?.length || 0,
-      interruptSymbol: ins.interruptSymbol || null,
-      outputRegister: ins.outputRegister || null,
-      inputRegister: ins.inputRegister || null
-    }));
+      const mappedInstructions = (addedInstructions || []).map((ins) => ({
+        mnemonics: ins.mnemonic,
+        opcode: ins.opcode,
+        operands: (ins.operands || []).map((op) => ({
+          Destination: op.selected,
+          Type: op.type,
+        })),
+        action: ins.action,
+        instructionFormat: ins.operands?.length || 0,
+        interruptSymbol: ins.interruptSymbol || null,
+        outputRegister: ins.outputRegister || null,
+        inputRegister: ins.inputRegister || null,
+      }));
 
-    const payload = {
-      architecture: {
-        name: architectureData.name,
-        memorySize: Number(architectureData.memorySize),
-        stackSize: Number(architectureData.stackSize),
-        busSize: Number(architectureData.busSize),
-        numberOfRegisters: Number(architectureData.noOfRegisters),
-        numberOfInstructions: Number(architectureData.noOfInstructions),
-      },
-      registers: flatRegisters,
-      instructions: mappedInstructions,
-      addressingModes: mappedAddressingModes
-    };
-
-    const res = await fetch(
-      "http://localhost/ComputerArchitectureToolkitAPI/api/architecture/create-full",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
+      const payload = {
+        architecture: {
+          name: architectureData.name,
+          memorySize: Number(architectureData.memorySize),
+          stackSize: Number(architectureData.stackSize),
+          busSize: Number(architectureData.busSize),
+          numberOfRegisters: Number(architectureData.noOfRegisters),
+          numberOfInstructions: Number(architectureData.noOfInstructions),
         },
-        body: JSON.stringify(payload)
+        registers: flatRegisters,
+        instructions: mappedInstructions,
+        addressingModes: mappedAddressingModes,
+      };
+
+      const res = await fetch(
+        "http://localhost/ComputerArchitectureToolkitAPI/api/architecture/create-full",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.message || "Failed to create architecture");
+        return;
       }
-    );
+      toast.success("Architecture Created Successfully!", {
+        duration: 4000,
+        style: {
+          borderRadius: "10px",
+          background: "#1e293b",
+          color: "#fff",
+        },
+      });
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      toast.error(data.message || "Failed to create architecture");
-      return;
+      confetti({
+        particleCount: 120,
+        spread: 70,
+        origin: { y: 1 },
+      });
+    } catch (err) {
+      console.error("Frontend Error:", err);
+      toast.error("Something went wrong ");
     }
-    toast.success("Architecture Created Successfully!", {
-      duration: 4000,
-      style: {
-        borderRadius: "10px",
-        background: "#1e293b",
-        color: "#fff",
-      },
-    });
+  };
 
-    confetti({
-      particleCount: 120,
-      spread: 70,
-      origin: { y: 1 } 
-    });
+  const safeRegisters =
+    registerData && typeof registerData === "object"
+      ? [
+          ...(registerData.generalPurposeRegisters || []),
+          ...(registerData.flagRegisters || []),
+        ]
+      : [];
 
-  } catch (err) {
-    console.error("Frontend Error:", err);
-    toast.error("Something went wrong ");
-  }
-};
+  const inputRegisterOptions = safeRegisters.filter(
+    (reg) => reg.name !== outputRegister,
+  );
+
+  const outputRegisterOptions = safeRegisters.filter(
+    (reg) => reg.name !== inputRegister,
+  );
+
+  console.log("registerData:", registerData);
+  console.log("type:", typeof registerData);
 
   return (
     <>
@@ -243,22 +274,36 @@ export default function Instruction() {
               <div className="mb-4">
                 <span className="text-black">Input Register</span>
                 <select
-                  className={`mt-2 mb-4 h-8 pl-2 bg-gray-100 w-full text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900
-                      ${inputRegister === "" ? "text-gray-500" : "text-black"}`}
+                  value={inputRegister}
                   onChange={(e) => setInputRegister(e.target.value)}
+                  className={`mt-2 mb-4 h-8 pl-2 bg-gray-100 w-full text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-900
+    ${inputRegister === "" ? "text-gray-500" : "text-black"}`}
                 >
                   <option value="">Select input register</option>
+
+                  {inputRegisterOptions.map((reg, i) => (
+                    <option key={i} value={reg.name}>
+                      {reg.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
               <div className="mb-4">
                 <span className="text-black">Output Register</span>
                 <select
-                  className={`mt-2 mb-4 h-8 pl-2 bg-gray-100 w-full text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900
-                      ${outputRegister === "" ? "text-gray-500" : "text-black"}`}
+                  value={outputRegister}
                   onChange={(e) => setOutputRegister(e.target.value)}
+                  className={`mt-2 mb-4 h-8 pl-2 bg-gray-100 w-full text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-900
+    ${outputRegister === "" ? "text-gray-500" : "text-black"}`}
                 >
                   <option value="">Select output register</option>
+
+                  {outputRegisterOptions.map((reg, i) => (
+                    <option key={i} value={reg.name}>
+                      {reg.name}
+                    </option>
+                  ))}
                 </select>
               </div>
             </>

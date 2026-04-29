@@ -10,11 +10,16 @@ function Memory() {
   const memorySummary = executionResult?.MemorySummary || {};
   const stackSummary = executionResult?.StackSummary || {};
   const spIndex = executionResult?.StackPointer || 0;
+  const { architectureData } = useContext(ArchitectureContext);
+const memorySize = architectureData?.memorySize || 0;
 
-  const memoryRows = Array.from(
-    { length: 16 },
-    (_, i) => `0x${String(i + 1).padStart(2, "0")}`,
-  );
+const ROWS = Number(memorySize) || 0;
+const COLS = 8;
+
+const memoryRows = Array.from(
+  { length: ROWS },
+  (_, i) => `0x${String(i).padStart(2, "0")}`
+);
 const stackRows = Array.from({ length: 16 }, (_, i) => i);
   return (
     <>

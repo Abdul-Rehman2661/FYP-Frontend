@@ -28,11 +28,11 @@ function App() {
           <Route path="/editor/:id" element={<Editor />} />
           <Route path="/register" element={<Register />} />
           <Route path="/instruction" element={<Instruction />} />
-          <Route path="/compare" element={<Compare />} />
+          <Route path="/compare/:id" element={<Compare />} />
           <Route path="/registervis" element={<RegisterVisualization />} />
           <Route path="/memory" element={<Memory />} />
           <Route path="/Back" element={<BackButton />} />
-          <Route path="/debugging" element={<Debugging />} />
+          <Route path="/debugging/:id" element={<Debugging />} />
           <Route path="/update/:id" element={<Update />} />
         </Routes>
       </div>

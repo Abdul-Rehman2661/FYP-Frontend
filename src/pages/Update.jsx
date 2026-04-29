@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import Header from "../components/Header.jsx";
 import BottomNavigation from "../components/BottomNavigation.jsx";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { TrashIcon } from "@heroicons/react/24/outline";
 
 export default function Update() {
   const navigate = useNavigate();
+  const { id } = useParams(); // ✅ FIXED
 
   const [archName, setArchName] = useState("");
   const [memorySize, setMemorySize] = useState("");
@@ -13,82 +14,18 @@ export default function Update() {
   const [stackSize, setStackSize] = useState("");
   const [noOfRegisters, setNoOfRegisters] = useState("");
   const [noOfInstructions, setNoOfInstructions] = useState("");
-  const [CPUlist, setCPUlist] = useState([]);
-  const handleCPUAdded = () => {
-    if (
-      !archName ||
-      !memorySize ||
-      !busSize ||
-      !stackSize ||
-      !noOfRegisters ||
-      !noOfInstructions
-    )
-      return;
-
-    const newRecord = {
-      archName,
-      memorySize,
-      busSize,
-      stackSize,
-      noOfRegisters,
-      noOfInstructions,
-    };
-
-    setCPUlist([...CPUlist, newRecord]);
-
-    (setArchName(" "),
-      setMemorySize(" "),
-      setBusSize(" "),
-      setStackSize(" "),
-      setNoOfRegisters(" "),
-      setNoOfInstructions(" "));
-  };
 
   const [flagRegister, setFlagRegister] = useState("");
   const [flagAction, setFlagAction] = useState("");
   const [flagRegisterList, setFlagRegisterList] = useState([]);
-  const handleAddedFR = () => {
-    if (!flagRegister || !flagAction) return;
-    const newRecord = {
-      name: flagRegister,
-      Action: flagAction,
-    };
-    setFlagRegisterList([...flagRegisterList, newRecord]);
-    (setFlagRegister(" "), setFlagAction(" "));
-  };
 
   const [gpRegister, setGpRegister] = useState("");
   const [gpRegisterList, setGpRegisterList] = useState([]);
-  const handleGP = () => {
-    if (!gpRegister) return;
-
-    const newRecord = {
-      name: gpRegister,
-    };
-
-    setGpRegisterList([...gpRegisterList, newRecord]);
-    setGpRegister(" ");
-  };
 
   const [addressingMode, setAddressingMode] = useState("");
   const [addressingModeCode, setAddressingModeCode] = useState("");
   const [symbol, setSymbol] = useState("");
   const [addressingModeList, setAddressingModeList] = useState([]);
-  const handleModes = () => {
-    if (!addressingMode || !addressingModeCode || !symbol) return;
-
-    const newRecord = {
-      mode: addressingMode,
-      code: addressingModeCode,
-      sym: symbol,
-    };
-
-    setAddressingModeList([...addressingModeList, newRecord]);
-
-    setAddressingMode("");
-    setAddressingModeCode("");
-    setSymbol("");
-  };
 
   const [opcode, setOpcode] = useState("");
   const [mnemonic, setMnemonic] = useState("");
@@ -97,49 +34,253 @@ export default function Update() {
   const [inputRegister, setInputRegister] = useState("");
   const [outputRegister, setOutputRegister] = useState("");
   const [addedInstructions, setAddedInstructions] = useState([]);
+  const [CPUlist, setCPUlist] = useState([]);
+
   const [operands, setOperands] = useState([
     { id: 1, type: "Register", selected: false },
   ]);
+
   const [isInterrupt, setIsInterrupt] = useState(false);
 
-  const DisplayInstruction = () => {
-    if (!opcode || !mnemonic || !action) return;
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost/ComputerArchitectureToolkitAPI/api/architecture/get-full/${id}`
+      );
 
-    if (isInterrupt) {
-      if (!interruptSymbol || !inputRegister || !outputRegister) return;
+      const data = await res.json();
+
+      console.log("API RESPONSE:", data);
+
+      // ✅ FIXED: Access nested Architecture
+      const arch = data.Architecture;
+
+      setArchName(arch?.Name || "");
+      setMemorySize(arch?.MemorySize || "");
+      setStackSize(arch?.StackSize || "");
+      setBusSize(arch?.BusSize || "");
+      setNoOfRegisters(arch?.NumberOfRegisters || "");
+      setNoOfInstructions(arch?.NumberOfInstructions || "");
+
+      // ✅ Registers
+      setFlagRegisterList(
+        data.Registers
+          ?.filter((r) => !r.Action) // flag registers
+          .map((r) => ({
+            name: r.Name,
+            Action: r.Action,
+          })) || []
+      );
+
+      setGpRegisterList(
+        data.Registers
+          ?.filter((r) => r.Action) // GP registers
+          .map((r) => ({
+            name: r.Name,
+          })) || []
+      );
+
+      // ✅ Addressing Modes
+      setAddressingModeList(
+        data.AddressingModes?.map((m) => ({
+          mode: m.AddressingModeName,
+          code: m.AddressingModeCode,
+          sym: m.AddressingModeSymbol,
+        })) || []
+      );
+
+      // ✅ Instructions
+      setAddedInstructions(
+        data.Instructions?.map((ins) => ({
+          opcode: ins.Opcode,
+          mnemonics: ins.Mnemonics,
+          action: ins.Action,
+          interruptSymbol: ins.InterruptSymbol,
+          inputRegister: ins.InputRegister,
+          outputRegister: ins.OutputRegister,
+          operands: [], // optional (if not stored)
+        })) || []
+      );
+
+    } catch (err) {
+      console.error(err);
     }
-
-    const newRecord = {
-      opcode,
-      mnemonic,
-      action,
-      interruptSymbol,
-      inputRegister,
-      outputRegister,
-      operands,
-    };
-
-    setAddedInstructions([...addedInstructions, newRecord]);
-
-    (setOpcode(" "),
-      setMnemonic(" "),
-      setAction(" "),
-      setInterruptSymbol(" "),
-      setInputRegister(" "),
-      setOutputRegister(" "),
-      setOperands[{ id: 1, type: "Register", selected: false }]);
-
-    console.log("New Record:", newRecord);
   };
+
+  if (id) fetchData();
+}, [id]);
+
+const buildPayload = () => {
+  return {
+    Architecture: {
+      Name: archName,
+      MemorySize: parseInt(memorySize) || 0,
+      StackSize: parseInt(stackSize) || 0,
+      BusSize: parseInt(busSize) || 0,
+      NumberOfRegisters: parseInt(noOfRegisters) || 0,
+      NumberOfInstructions: parseInt(noOfInstructions) || 0,
+    },
+
+    Registers: [
+      ...flagRegisterList.map((f) => ({
+        Name: f.name,
+        Action: f.Action,
+        Type: "FLAG",
+      })),
+      ...gpRegisterList.map((g) => ({
+        Name: g.name,
+        Type: "GENERAL",
+      })),
+    ],
+
+    Instructions: addedInstructions.map((ins) => ({
+      Opcode: ins.opcode,
+      Mnemonics: ins.mnemonics,
+      Action: ins.action,
+      InterruptSymbol: ins.interruptSymbol || null,
+      InputRegister: ins.inputRegister || null,
+      OutputRegister: ins.outputRegister || null,
+      Operands: JSON.stringify(ins.operands),
+      InstructionFormat: ins.operands.length,
+      NumberOfOperands: ins.operands.length,
+      DestinationOperand:
+        ins.operands.findIndex((op) => op.selected) + 1,
+    })),
+
+    AddressingModes: addressingModeList.map((m) => ({
+      AddressingModeName: m.mode,
+      AddressingModeCode: m.code,
+      AddressingModeSymbol: m.sym,
+    })),
+  };
+};
+
+  const handleCPUAdded = () => {
+    if (!archName) return;
+
+    setCPUlist([
+      ...CPUlist,
+      {
+        archName,
+        memorySize,
+        busSize,
+        stackSize,
+        noOfRegisters,
+        noOfInstructions,
+      },
+    ]);
+  };
+
+  // ✅ UPDATE API
+  const handleUpdate = async () => {
+    try {
+      const payload = buildPayload();
+
+      console.log("Payload:", payload); // 🔥 DEBUG
+
+      const res = await fetch(
+        `http://localhost/ComputerArchitectureToolkitAPI/api/architecture/update-full/${id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("Updated successfully ✅");
+        navigate("/");
+      } else {
+        console.error(data);
+        alert(data.message || "Update failed ❌");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Server error ❌");
+    }
+  };
+
+  // ================= HANDLERS =================
+
+  const handleAddedFR = (e) => {
+    e.preventDefault();
+    if (!flagRegister || !flagAction) return;
+
+    setFlagRegisterList([
+  ...flagRegisterList,
+  {
+    name: flagRegister,
+    Action: flagAction,
+  },
+]);
+
+    setFlagRegister("");
+    setFlagAction("");
+  };
+
+const handleGP = (e) => {
+  e.preventDefault();
+  if (!gpRegister) return;
+
+  setGpRegisterList([
+    ...gpRegisterList,
+    { name: gpRegister },
+  ]);
+
+  setGpRegister("");
+};
+
+const handleModes = (e) => {
+  e.preventDefault();
+  if (!addressingMode || !addressingModeCode || !symbol) return;
+
+  setAddressingModeList([
+    ...addressingModeList,
+    {
+      mode: addressingMode,
+      code: addressingModeCode,
+      sym: symbol,
+    },
+  ]);
+
+  setAddressingMode("");
+  setAddressingModeCode("");
+  setSymbol("");
+};
+
+const DisplayInstruction = (e) => {
+  e.preventDefault();
+
+  if (!opcode || !mnemonic || !action) return;
+
+setAddedInstructions([
+  ...addedInstructions,
+  {
+    opcode,
+    mnemonics: mnemonic, // ✅ FIX
+    action,
+    interruptSymbol,
+    inputRegister,
+    outputRegister,
+    operands,
+  },
+]);
+  setOpcode("");
+  setMnemonic("");
+  setAction("");
+  setInterruptSymbol("");
+  setInputRegister("");
+  setOutputRegister("");
+  setOperands([{ id: 1, type: "Register", selected: false }]);
+};
 
   const handleAddOperand = () => {
     setOperands([
       ...operands,
-      {
-        id: Date.now(),
-        type: "Register",
-        selected: false,
-      },
+      { id: Date.now(), type: "Register", selected: false },
     ]);
   };
 
@@ -153,9 +294,7 @@ export default function Update() {
 
   const handleType = (id, value) => {
     setOperands(
-      operands.map((op) =>
-        op.id === id ? { ...op, type: value } : { type: "register" },
-      ),
+      operands.map((op) => (op.id === id ? { ...op, type: value } : op)),
     );
   };
 
@@ -333,6 +472,7 @@ export default function Update() {
                 <div>
                   <span className="text-black">Flag Register</span>
                   <input
+                    value={flagRegister}
                     onChange={(e) => setFlagRegister(e.target.value)}
                     className="mt-2 h-8 mb-4 pl-2 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900"
                     type="text"
@@ -348,7 +488,7 @@ export default function Update() {
                   />
 
                   {/* Display Flag Registers */}
-                  {flagRegisterList.length > 0 && (
+                  {/* {flagRegisterList.length > 0 && (
                     <div className="bg-gray-100 border mt-4 rounded-sm text-sm">
                       <p className="font-semibold text-blue-900 m-2">
                         Added Flag Registers
@@ -367,7 +507,7 @@ export default function Update() {
                         </div>
                       ))}
                     </div>
-                  )}
+                  )} */}
 
                   <div className="flex flex-col sm:flex-row gap-3 mt-4 mb-8">
                     <button
@@ -395,7 +535,7 @@ export default function Update() {
                       placeholder="Enter GP Register Name"
                     />
                     {/* Display GP */}
-                    {gpRegisterList.length > 0 && (
+                    {/* {gpRegisterList.length > 0 && (
                       <div className="bg-gray-100 m-2 border rounded-sm">
                         <p className="text-black text-sm m-2 font-semibold text-blue-900">
                           Added General Purpose
@@ -411,7 +551,7 @@ export default function Update() {
                           </div>
                         ))}
                       </div>
-                    )}
+                    )} */}
 
                     <div className="flex flex-col sm:flex-row gap-3 mt-4 mb-8">
                       <button
@@ -435,6 +575,7 @@ export default function Update() {
                   <div>
                     <span className="text-black">Addressing Mode</span>
                     <select
+                      value={addressingMode}
                       onChange={(e) => setAddressingMode(e.target.value)}
                       className={`mt-2 mb-4 h-8 pl-2 bg-gray-100 w-full text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900
                       ${addressingMode === "" ? "text-gray-500" : "text-black"}`}
@@ -466,7 +607,7 @@ export default function Update() {
                       placeholder="Enter Symbol (e.g., #, @, etc.)"
                     />
                     {/* Display Adressing Modes */}
-                    {addressingModeList.length > 0 && (
+                    {/* {addressingModeList.length > 0 && (
                       <div className="bg-gray-100 border mt-4 rounded-sm text-sm">
                         <p className="font-semibold text-blue-900 m-2">
                           Added Addressing Modes
@@ -489,7 +630,8 @@ export default function Update() {
                           </div>
                         ))}
                       </div>
-                    )}
+                    )} */}
+
                     <button
                       onClick={handleModes}
                       className="w-full h-8 mb-4 text-white bg-blue-900 rounded-lg mt-4 text-center font-semibold hover:bg-blue-800 transition"
@@ -516,6 +658,7 @@ export default function Update() {
                   <span className="text-black">Interrupt Instruction</span>
                   <input
                     type="checkbox"
+                    checked={isInterrupt}
                     onChange={(e) => {
                       setIsInterrupt(e.target.checked);
                     }}
@@ -530,6 +673,7 @@ export default function Update() {
                     <br />
                     <input
                       className="mt-2 h-8 mb-5 pl-2 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900 "
+                      value={opcode}
                       type="text"
                       onChange={(e) => setOpcode(e.target.value)}
                       placeholder="Enter Instruction Code e.g (01)"
@@ -628,6 +772,7 @@ export default function Update() {
                           />
 
                           <button
+                            type="button"
                             onClick={() => handleDelete(op.id)}
                             className="text-red-700 hover:text-red-900"
                           >
@@ -636,6 +781,7 @@ export default function Update() {
 
                           {index === operands.length - 1 && (
                             <button
+                              type="button"
                               onClick={handleAddOperand}
                               className="text-blue-600 text-xl font-bold"
                             >
@@ -662,7 +808,7 @@ export default function Update() {
                 </div>
 
                 {/* Added Instructions List */}
-                {addedInstructions.length > 0 && (
+                {/* {addedInstructions.length > 0 && (
                   <div className="mt-6 mb-3 border rounded-md p-4 text-black text-sm bg-gray-50">
                     <h3 className="text-blue-900 font-semibold mb-2">
                       Added Instructions
@@ -677,7 +823,7 @@ export default function Update() {
 
                         <span className="flex ">
                           <p className="text-blue-900 mr-1">Mnemonic:</p>
-                          <p>{item.mnemonic}</p>
+                          <p>{item.mnemonics}</p>
                         </span>
 
                         <span className="flex ">
@@ -702,7 +848,7 @@ export default function Update() {
                           <p>{item.outputRegister}</p>
                         </span>
 
-                        <p className="flex text-black mb-4">
+                        <div className="flex text-black mb-4">
                           <p className="text-blue-900 mr-1">Operands:</p>{" "}
                           {item.operands.map((op, i) => (
                             <span key={i}>
@@ -710,11 +856,11 @@ export default function Update() {
                               {op.selected ? " (Dest)" : ""}{" "}
                             </span>
                           ))}
-                        </p>
+                        </div>
                       </div>
                     ))}
                   </div>
-                )}
+                )} */}
 
                 <div className="flex flex-col sm:flex-row gap-3 mt-4 mb-8">
                   <button
@@ -736,6 +882,7 @@ export default function Update() {
         <div className="mb-24 p-4">
           <div className="max-w-8xl mx-auto">
             <button
+              onClick={handleUpdate}
               type="button"
               className="w-full h-10 text-white bg-blue-900 rounded-lg mt-4 text-center font-semibold"
             >

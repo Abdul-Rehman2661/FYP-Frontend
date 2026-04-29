@@ -6,7 +6,7 @@ import { CpuChipIcon } from "@heroicons/react/24/outline";
 
 function Dashboard() {
   const [architectures, setArchitectures] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
@@ -14,22 +14,23 @@ function Dashboard() {
     fetchArchitectures();
   }, []);
 
-const fetchArchitectures = async () => {
-  try {
-    const res = await fetch(
-      "http://localhost/ComputerArchitectureToolkitAPI/api/architecture/all"
-    );
+  const fetchArchitectures = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(
+        "http://localhost/ComputerArchitectureToolkitAPI/api/architecture/all",
+      );
 
-    const data = await res.json();
+      const data = await res.json();
 
-    setArchitectures(data); 
-  } catch (err) {
-    console.error(err);
-    setError("Failed to fetch architectures");
-  } finally {
-    setLoading(false);
-  }
-};
+      setArchitectures(data);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to fetch architectures");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -45,8 +46,11 @@ const fetchArchitectures = async () => {
             Manage and explore your computer architecture designs
           </p>
 
-          {/* map */}
-          {architectures.length === 0 ? (
+          {loading ? (
+            <div className="flex justify-center items-center mt-10">
+              <div className="h-8 w-8 border-2 border-blue-900 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : architectures.length === 0 ? (
             <p className="text-center text-red-500 mt-10">No Architecture</p>
           ) : (
             <div className="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-6">

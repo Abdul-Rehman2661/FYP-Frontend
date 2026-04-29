@@ -1,21 +1,87 @@
 import { useParams } from "react-router-dom";
-import { architectures } from "../Data/architectures.js";
+import { useEffect, useState } from "react";
+import axios from "axios";
+
 import Header from "../components/Header.jsx";
 import BottomNavigation from "../components/BottomNavigation.jsx";
+
 import {
-  Squares2X2Icon,
   CpuChipIcon,
   ServerIcon,
   CodeBracketIcon,
-  EyeIcon,
   CubeIcon,
   CircleStackIcon,
 } from "@heroicons/react/24/outline";
+import { useContext } from "react";
+import { ArchitectureContext } from "../context/ArchitectureContext";
 
 function Detail() {
   const { id } = useParams();
-  const architecture = architectures.find((arch) => arch.id === Number(id));
 
+  const { setArchitectureData } = useContext(ArchitectureContext);
+  const [architecture, setArchitecture] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDetails = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost/ComputerArchitectureToolkitAPI/api/architecture/get-full/${id}`,
+        );
+
+        const data = res.data;
+
+        setArchitectureData({
+          memorySize: data?.Architecture?.MemorySize || 0,
+          stackSize: data?.Architecture?.StackSize || 0,
+          busSize: data?.Architecture?.BusSize || 0,
+          name: data?.Architecture?.Name || "",
+        });
+        // 🔥 Mapping backend → frontend
+        setArchitecture({
+          name: data?.Architecture?.Name || "",
+          memorySize: data?.Architecture?.MemorySize || "",
+          busSize: data?.Architecture?.BusSize || "",
+          stackSize: data?.Architecture?.StackSize || "",
+
+          registers: (data?.Registers || []).map((r) => ({
+            name: r.Name || "",
+            size: r.RegisterSize || "",
+            action: r.Action || "",
+          })),
+
+          instructions: (data?.Instructions || []).map((i) => ({
+            mnemonic: i.Mnemonics || "",
+            opcode: i.Opcode || "",
+            noOfOperands: i.NumberOfOperands || 2,
+            action: i.Action || "",
+          })),
+
+          // Not provided by backend → keep empty
+          flagRegister: [],
+          addressingModes: (data?.AddressingModes || []).map((i) => ({
+            AddressingModeName: i.AddressingModeName || "",
+            AddressingModeCode: i.AddressingModeCode || "",
+            AddressingModeSymbol: i.AddressingModeSymbol || "",
+          })),
+        });
+      } catch (err) {
+        console.error(err);
+        setArchitecture(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDetails();
+  }, [id]);
+
+  // 🔹 Loading
+  if (loading) {
+    return <div className="p-4 pt-16 text-center">Loading...</div>;
+  }
+
+  // 🔹 Not found
   if (!architecture) {
     return (
       <div className="p-4 pt-16 text-center text-gray-500">
@@ -27,256 +93,199 @@ function Detail() {
   return (
     <>
       <Header />
+
       <div className="pt-20 lg:pt-24 text-center">
         <h2 className="text-xl text-blue-900 font-bold">Details</h2>
-
         <p className="pt-3 text-blue-900 text-sm">
           Technical specifications and reference manual.
         </p>
       </div>
 
-      {/* Architecture Card */}
-      <div className="m-4 p-6 bg-white rounded-xl border border-gray-200 shadow-md">
-        <div className="flex items-center gap-2 mb-6 text-blue-900 font-semibold">
-          <CpuChipIcon className="w-6 h-6" />
-          <span>System Specifications</span>
-        </div>
-
+      {/* ================= SYSTEM SPEC ================= */}
+      <Card
+        title="System Specifications"
+        icon={<CpuChipIcon className="w-6 h-6" />}
+      >
         <div className="grid grid-cols-2 gap-y-6 gap-x-20 text-sm">
-          <Info
-            icon={<CpuChipIcon className="w-4 h-4 text-blue-900 " />}
-            label="Architecture Name"
-            value={architecture.name}
-          />
-          <Info
-            icon={<CircleStackIcon className="w-4 h-4 text-blue-900 " />}
-            label="Memory Size"
-            value={architecture.memorySize}
-          />
-
-          <Info
-            icon={<ServerIcon className="w-4 h-4 text-blue-900 " />}
-            label="Bus Size"
-            value={architecture.busSize}
-          />
-          <Info
-            icon={<CubeIcon className="w-4 h-4 text-blue-900 " />}
-            label="Stack Size"
-            value={architecture.stackSize}
-          />
+          <Info label="Architecture Name" value={architecture.name} />
+          <Info label="Memory Size" value={architecture.memorySize} />
+          <Info label="Bus Size" value={architecture.busSize} />
+          <Info label="Stack Size" value={architecture.stackSize} />
         </div>
-      </div>
+      </Card>
 
-      {/* Register Card */}
-      <div className="m-4 p-6 bg-white rounded-xl border border-gray-200 shadow-md">
-        <div className="flex items-center gap-2 mb-6 text-blue-900 font-semibold">
-          <CircleStackIcon className="w-6 h-6" />
-          <span>Registers File</span>
-        </div>
+      {/* ================= REGISTERS ================= */}
+      <Card
+        title="Registers File"
+        icon={<CircleStackIcon className="w-6 h-6" />}
+      >
+        {/* Flag Registers */}
+        {/* <Table
+          title="Flag Registers"
+          headers={["Name", "Size"]}
+          data={architecture.flagRegister}
+          renderRow={(item, i) => (
+            <tr key={i}>
+              <td className="px-4 py-3 border border-blue-100 text-black text-left">
+                {item.name}
+              </td>
+              <td className="px-4 py-3 border border-blue-100 text-black text-left">
+                {item.size}
+              </td>
+            </tr>
+          )}
+        /> */}
 
-        <div className="mt-5">
-          <p className="text-blue-900 mb-2">Flag Registers</p>
-          <div className="overflow-hidden rounded-lg border border-blue-100 w-full">
-            <table className="w-full border-collapse text-sm">
-              <tbody>
-                <tr className="bg-blue-100 text-black font-semibold">
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    Name
-                  </td>
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    Size
-                  </td>
-                </tr>
+        {/* General Registers */}
+        <Table
+          title="General Purpose Registers"
+          headers={["Name", "Size"]}
+          data={architecture.registers}
+          renderRow={(item, i) => (
+            <tr key={i}>
+              <td className="px-4 py-3 border border-blue-100 text-black text-left">
+                {item.name}
+              </td>
+              <td className="px-4 py-3 border border-blue-100 text-black text-left">
+                {item.size}
+              </td>
+            </tr>
+          )}
+        />
+      </Card>
 
-                {architecture.flagRegister.map((fr, i) => (
-                    <tr key={i} className=" p-4 text-black">
-                      <td className="w-1/2 px-4 py-2 border border-blue-100">
-                        {fr.name}
-                      </td>
-                      <td className="w-1/2 px-4 py-2 border border-blue-100">
-                        {fr.size}
-                      </td>
-                    </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+      {/* ================= INSTRUCTIONS ================= */}
+      <Card
+        title="Instruction Set"
+        icon={<CodeBracketIcon className="w-6 h-6" />}
+      >
+        <Table
+          headers={["Mnemonic", "Opcode", "No of operands"]}
+          data={architecture.instructions}
+          renderRow={(item, i) => (
+            <tr key={i}>
+              <td className="px-4 py-3 border border-blue-100 text-black text-left">
+                {item.mnemonic}
+              </td>
+              <td className="px-4 py-3 border border-blue-100 text-black text-left">
+                {item.opcode}
+              </td>
+              <td className="px-4 py-3 border border-blue-100 text-black text-left">
+                {item.noOfOperands}
+              </td>
+            </tr>
+          )}
+        />
+      </Card>
 
-          <p className="mt-5 text-blue-900 mb-2">General Purpose Registers</p>
-          <div className="overflow-hidden rounded-lg border border-blue-100 w-full">
-            <table className="w-full border-collapse text-sm">
-              <tbody>
-                <tr className="bg-blue-100 text-black font-semibold">
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    Name
-                  </td>
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    Size
-                  </td>
-                </tr>
+      {/* ================= ACTION ================= */}
+      <Card title="Action" icon={<CodeBracketIcon className="w-6 h-6" />}>
+        <Table
+          headers={["Mnemonic", "Action"]}
+          data={architecture.instructions}
+          renderRow={(item, i) => (
+            <tr key={i}>
+              <td className="px-4 py-3 border border-blue-100 text-black text-left">
+                {item.mnemonic}
+              </td>
+              <td className="px-4 py-3 border border-blue-100 text-black text-left">
+                {item.action}
+              </td>
+            </tr>
+          )}
+        />
+      </Card>
 
-                {architecture.registers.map((reg, index) => (
-                  <tr key={index} className="p-4 text-black">
-                    <td className="w-1/2 px-4 py-2 border border-blue-100">
-                      {reg.name}
-                    </td>
-                    <td className="w-1/2 px-4 py-2 border border-blue-100">
-                      {reg.Size}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      {/* Instruction Card */}
-      <div className="m-4 p-6 bg-white rounded-xl border border-gray-200 shadow-md">
-        <div className="flex items-center gap-2 mb-6 text-blue-900 font-semibold">
-          <CodeBracketIcon className="w-6 h-6" />
-          <span>Instruction Set</span>
-        </div>
-
-        <div className="mt-5">
-          <div className="overflow-hidden rounded-lg border border-blue-100 w-full">
-            <table className="w-full border-collapse text-sm">
-              <tbody>
-                <tr className="bg-blue-100 text-black font-semibold">
-                  <td className="w-1/3 px-4 py-2 border border-blue-100">
-                    Mnemonic
-                  </td>
-                  <td className="w-1/3 px-4 py-2 border border-blue-100">
-                    Opcode
-                  </td>
-                  <td className="w-1/3 px-4 py-2 border border-blue-100">
-                    Instruction Set
-                  </td>
-                </tr>
-
-                {architecture?.instructions?.map((ins, index) => (
-                  <tr key={index} className="p-4 text-black ">
-                    <td className="w-1/3 px-4 py-2 border border-blue-100">
-                      {ins.mnemonic}
-                    </td>
-                    <td className="w-1/3 px-4 py-2 border border-blue-100">
-                      {ins.opcode}
-                    </td>
-                    <td className="w-1/3 px-4 py-2 border border-blue-100">
-                      {ins.instructionSet}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      {/* Action Card */}
-      <div className="m-4 p-6 bg-white rounded-xl border border-gray-200 shadow-md">
-        <div className="flex items-center gap-2 mb-6 text-blue-900 font-semibold">
-          <CodeBracketIcon className="w-6 h-6" />
-          <span>Action</span>
-        </div>
-
-        <div className="mt-5">
-          <div className="overflow-hidden rounded-lg border border-blue-100 w-full">
-            <table className="w-full border-collapse text-sm">
-              <tbody>
-                <tr className="bg-blue-100 text-black font-semibold">
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    Mnemonic
-                  </td>
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    Action
-                  </td>
-                </tr>
-
-                {architecture.instructions.map((ins, index) => (
-                  <tr key={index} className=" p-4 text-black">
-                    <td className="w-1/2 px-4 py-2 border border-blue-100">
-                      {ins.mnemonic}
-                    </td>
-                    <td className="w-1/2 px-4 py-2 border border-blue-100">
-                      {ins.action}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      {/* Addressing Modes Card */}
-      <div className="m-4 p-6 mb-20 bg-white rounded-xl border border-gray-200 shadow-md">
-        <div className="flex items-center gap-2 mb-6 text-blue-900 font-semibold">
-          <CodeBracketIcon className="w-6 h-6" />
-          <span>Addressing Modes</span>
-        </div>
-
-        <div className="mt-5">
-          <div className="overflow-hidden rounded-lg border border-blue-100 w-full">
-            <table className="w-full border-collapse text-sm">
-              <tbody>
-                <tr className="bg-blue-100 text-black font-semibold">
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    Name
-                  </td>
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    Instruction
-                  </td>
-                </tr>
-
-                {architecture.addressingModes.map((mode, index) => (
-                  <tr key={index} className=" p-4 text-black">
-                    <td className="w-1/2 px-4 py-2 border border-blue-100">
-                      {mode.name}
-                    </td>
-                    <td className="w-1/2 px-4 py-2 border border-blue-100">
-                      {mode.instruction}
-                    </td>
-                  </tr>
-                ))}
-
-                {/* <tr className=" p-4 text-black">
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    Indirect
-                  </td>
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    LOAD &10
-                  </td>
-                </tr>
-                <tr className=" p-4 text-black">
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    Indexed
-                  </td>
-                  <td className="w-1/2 px-4 py-2 border border-blue-100">
-                    LOAD *10
-                  </td>
-                </tr> */}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+      {/* ================= ADDRESSING ================= */}
+      <Card
+        title="Addressing Modes"
+        icon={<CodeBracketIcon className="w-6 h-6" />}
+      >
+        <Table
+          headers={["Name", "Code", "Symbol"]}
+          data={architecture.addressingModes}
+          renderRow={(item, i) => (
+            <tr key={i}>
+              <td className="px-4 py-3 border border-blue-100 text-black text-left">
+                {item.AddressingModeName}
+              </td>
+              <td className="px-4 py-3 border border-blue-100 text-black text-left">
+                {item.AddressingModeCode}
+              </td>
+              <td className="px-4 py-3 border border-blue-100 text-black text-left">
+                {item.AddressingModeSymbol}
+              </td>
+            </tr>
+          )}
+        />
+      </Card>
 
       <BottomNavigation />
     </>
   );
 }
 
-const Info = ({ icon, label, value }) => (
-  <div className="flex flex-col gap-1 py-1">
-    <div className="flex items-center gap-2">
-      {icon}
-      <span className="text-blue-900 text-sm font-small">{label}</span>
-    </div>
+export default Detail;
 
-    {/* Value */}
-    <span className="text-black font-small">{value}</span>
+// ================= REUSABLE COMPONENTS =================
+
+const Card = ({ title, icon, children }) => (
+  <div className="m-4 p-6 bg-white rounded-xl border border-gray-200 shadow-md">
+    <div className="flex items-center gap-2 mb-6 text-blue-900 font-semibold">
+      {icon}
+      <span>{title}</span>
+    </div>
+    {children}
   </div>
 );
 
-export default Detail;
+const Info = ({ label, value }) => (
+  <div className="flex flex-col gap-1 py-1">
+    <span className="text-blue-900 text-sm">{label}</span>
+    <span className="text-black">{value || "-"}</span>
+  </div>
+);
+
+const Table = ({ title, headers, data, renderRow }) => (
+  <div className="mt-5">
+    {title && <p className="text-blue-900 mb-2">{title}</p>}
+
+    <div className="overflow-hidden mb-10 rounded-lg border border-blue-100 w-full">
+      <table className="w-full table-fixed border-collapse text-sm">
+        {/* HEADER */}
+        <thead className="bg-blue-100 text-black">
+          <tr>
+            {headers.map((h, i) => (
+              <th
+                key={i}
+                className="px-4 py-3 text-left font-semibold border border-blue-100"
+              >
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+
+        {/* BODY */}
+        <tbody>
+          {data?.length > 0 ? (
+            data.map(renderRow)
+          ) : (
+            <tr>
+              <td
+                colSpan={headers.length}
+                className="text-center text-gray-400 py-3"
+              >
+                No Data Available
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  </div>
+);
+
+// small helper class
+// add this in CSS if needed
+// .cell => px-4 py-2 border border-blue-100 text-black

@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import Header from "../components/Header.jsx";
 import BottomNavigation from "../components/BottomNavigation.jsx";
 import SaveFile from "../components/SaveFile.jsx";
@@ -13,16 +13,53 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ArchitectureContext } from "../context/ArchitectureContext";
 
 function Editor() {
+  const { setArchitectureData } = useContext(ArchitectureContext);
+  const [architecture, setArchitecture] = useState(null);
   const navigate = useNavigate();
   const { id } = useParams();
   const [saveFile, setSaveFile] = useState(false);
   const [openFile, setOpenFile] = useState(false);
   const [code, setCode] = useState("");
   const [error, setError] = useState(null);
+  const [loadingRun, setLoadingRun] = useState(false);
   const { setExecutionResult } = useContext(ArchitectureContext);
+
+  useEffect(() => {
+    const fetchDetails = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost/ComputerArchitectureToolkitAPI/api/architecture/get-full/${id}`,
+        );
+
+        const data = res.data;
+
+        setArchitectureData({
+          memorySize: data?.Architecture?.MemorySize || 0,
+          stackSize: data?.Architecture?.StackSize || 0,
+          busSize: data?.Architecture?.BusSize || 0,
+          name: data?.Architecture?.Name || "",
+        });
+        // 🔥 Mapping backend → frontend
+        setArchitecture({
+          name: data?.Architecture?.Name || "",
+          memorySize: data?.Architecture?.MemorySize || "",
+          busSize: data?.Architecture?.BusSize || "",
+          stackSize: data?.Architecture?.StackSize || "",
+        });
+      } catch (err) {
+        console.error(err);
+        setArchitecture(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDetails();
+  }, [id]);
 
   const handleRun = async () => {
     try {
+      setLoadingRun(true);
       setError(null);
 
       const codeArray = code
@@ -53,6 +90,8 @@ function Editor() {
     } catch (err) {
       console.error(err);
       setError("Execution failed");
+    } finally {
+      setLoadingRun(false);
     }
   };
 
@@ -72,13 +111,17 @@ function Editor() {
                 className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white text-xs rounded"
                 onClick={handleRun}
               >
-                <PlayIcon className="h-4 w-4" />
+                {loadingRun ? (
+                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <PlayIcon className="h-4 w-4" />
+                )}
                 Run
               </button>
 
               <button
                 className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white text-xs rounded"
-                onClick={() => navigate("/debugging")}
+                onClick={() => navigate(`/debugging/${id}`)}
               >
                 <ArrowPathIcon className="h-4 w-4" />
                 Compile
@@ -87,7 +130,7 @@ function Editor() {
               <button
                 type="button"
                 onClick={() => setSaveFile(true)}
-                className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 border border-blue-900 text-blue-900 text-xs rounded hover:bg-blue-900 hover:text-white transition"
+                className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 border border-blue-900 bg-blue-900 text-white text-xs rounded hover:bg-blue-900 hover:text-white transition"
               >
                 <ArrowDownTrayIcon className="h-4 w-4" />
                 Save
@@ -98,7 +141,7 @@ function Editor() {
               <button
                 type="button"
                 onClick={() => setOpenFile(true)}
-                className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 border border-blue-900 text-blue-900 text-xs rounded hover:bg-blue-900 hover:text-white transition"
+                className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 border border-blue-900 bg-blue-900 text-white text-xs rounded hover:bg-blue-900 hover:text-white transition"
               >
                 <FolderOpenIcon className="h-4 w-4" />
                 Open
@@ -110,7 +153,7 @@ function Editor() {
             <div className="flex justify-center bg-gray-100">
               <button
                 className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white text-xs rounded"
-                onClick={() => navigate("/compare")}
+                onClick={() => navigate(`/compare/${id}`)}
               >
                 <ArrowPathIcon className="h-4 w-4" />
                 Compare

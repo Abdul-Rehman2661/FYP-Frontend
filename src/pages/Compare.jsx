@@ -3,10 +3,7 @@ import Header from "../components/Header.jsx";
 import BottomNavigation from "../components/BottomNavigation.jsx";
 import SaveFile from "../components/SaveFile.jsx";
 import OpenFile from "../components/OpenFile.jsx";
-import {
-  PlayIcon,
-  FolderOpenIcon,
-} from "@heroicons/react/24/outline";
+import { PlayIcon, FolderOpenIcon } from "@heroicons/react/24/outline";
 import { useParams } from "react-router-dom";
 
 function Compare() {
@@ -24,7 +21,7 @@ function Compare() {
   const [result1, setResult1] = useState(null);
   const [result2, setResult2] = useState(null);
 
-    const [loadingRun, setLoadingRun] = useState(false);
+  const [loadingRun, setLoadingRun] = useState(false);
 
   // Execute API
   const runProgram = async (code, setError, setResult) => {
@@ -43,13 +40,19 @@ function Compare() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(codeArray),
-        }
+        },
       );
 
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data);
+        if (Array.isArray(data)) {
+          setError(data);
+        } else if (data?.Errors) {
+          setError(data.Errors);
+        } else {
+          setError("Execution failed");
+        }
         return;
       }
 
@@ -79,7 +82,6 @@ function Compare() {
 
         <div className="min-h-screen bg-gray-100">
           <div className="w-full mb-8 rounded-xl p-5 space-y-4 lg:max-w-full lg:shadow">
-
             {/* Buttons */}
             <div className="grid grid-cols-2 gap-2 bg-gray-100 p-2">
               <button
@@ -101,7 +103,9 @@ function Compare() {
               <button
                 onClick={() => runProgram(code1, setError1, setResult1)}
                 className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white text-xs rounded hover:bg-blue-800 hover:text-white transition"
-              > {loadingRun ? (
+              >
+                {" "}
+                {loadingRun ? (
                   <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 ) : (
                   <PlayIcon className="h-4 w-4" />
@@ -112,7 +116,9 @@ function Compare() {
               <button
                 onClick={() => runProgram(code2, setError2, setResult2)}
                 className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white text-xs rounded hover:bg-blue-800 hover:text-white transition"
-              > {loadingRun ? (
+              >
+                {" "}
+                {loadingRun ? (
                   <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 ) : (
                   <PlayIcon className="h-4 w-4" />
@@ -226,7 +232,6 @@ function Compare() {
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </div>

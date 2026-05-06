@@ -11,6 +11,7 @@ import {
   CodeBracketIcon,
   CubeIcon,
   CircleStackIcon,
+  DocumentTextIcon,
 } from "@heroicons/react/24/outline";
 import { useContext } from "react";
 import { ArchitectureContext } from "../context/ArchitectureContext";
@@ -55,6 +56,15 @@ function Detail() {
             opcode: i.Opcode || "",
             noOfOperands: i.NumberOfOperands || 2,
             action: i.Action || "",
+            // Preserve all original fields for detailed cards
+            instructionId: i.InstructionID || null,
+            architectureId: i.ArchitectureID || null,
+            instructionFormat: i.InstructionFormat || null,
+            interruptSymbol: i.InterruptSymbol || null,
+            outputRegister: i.OutputRegister || null,
+            inputRegister: i.InputRegister || null,
+            operands: i.Operands || 0,
+            destinationOperand: i.DestinationOperand || null,
           })),
 
           // Not provided by backend → keep empty
@@ -154,46 +164,16 @@ function Detail() {
         />
       </Card>
 
-      {/* ================= INSTRUCTIONS ================= */}
+      {/* ================= NEW: INSTRUCTION DETAILED CARDS ================= */}
       <Card
         title="Instruction Set"
-        icon={<CodeBracketIcon className="w-6 h-6" />}
+        icon={<DocumentTextIcon className="w-6 h-6" />}
       >
-        <Table
-          headers={["Mnemonic", "Opcode", "No of operands"]}
-          data={architecture.instructions}
-          renderRow={(item, i) => (
-            <tr key={i}>
-              <td className="px-4 py-3 border border-blue-100 text-black text-left">
-                {item.mnemonic}
-              </td>
-              <td className="px-4 py-3 border border-blue-100 text-black text-left">
-                {item.opcode}
-              </td>
-              <td className="px-4 py-3 border border-blue-100 text-black text-left">
-                {item.noOfOperands}
-              </td>
-            </tr>
-          )}
-        />
-      </Card>
-
-      {/* ================= ACTION ================= */}
-      <Card title="Action" icon={<CodeBracketIcon className="w-6 h-6" />}>
-        <Table
-          headers={["Mnemonic", "Action"]}
-          data={architecture.instructions}
-          renderRow={(item, i) => (
-            <tr key={i}>
-              <td className="px-4 py-3 border border-blue-100 text-black text-left">
-                {item.mnemonic}
-              </td>
-              <td className="px-4 py-3 border border-blue-100 text-black text-left">
-                {item.action}
-              </td>
-            </tr>
-          )}
-        />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {architecture.instructions.map((instruction, idx) => (
+            <InstructionDetailCard key={idx} instruction={instruction} />
+          ))}
+        </div>
       </Card>
 
       {/* ================= ADDRESSING ================= */}
@@ -286,6 +266,92 @@ const Table = ({ title, headers, data, renderRow }) => (
   </div>
 );
 
-// small helper class
-// add this in CSS if needed
-// .cell => px-4 py-2 border border-blue-100 text-black
+// ================= INSTRUCTION DETAIL CARD COMPONENT =================
+const InstructionDetailCard = ({ instruction }) => {
+  const formatValue = (value) => {
+    if (value === null || value === undefined) return "—";
+    if (typeof value === "string" && value.toUpperCase() === "NULL") return "—";
+    if (value === "") return "—";
+    return String(value);
+  };
+
+  return (
+    <div className="bg-white rounded-xl border border-blue-100 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+      
+      {/* Header (NOW SAME STYLE AS TABLE HEADER) */}
+      <div className="bg-blue-100 px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2 text-blue-900 font-semibold">
+          <CodeBracketIcon className="w-5 h-5" />
+          <span>{instruction.mnemonic}</span>
+        </div>
+
+        <span className="text-xs font-mono text-black">
+          Opcode: {instruction.opcode}
+        </span>
+      </div>
+
+      {/* Body */}
+      <div className="p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+          
+          {/* Left */}
+          <div className="space-y-2">
+            <DetailItem label="Mnemonic" value={instruction.mnemonic} highlight />
+            <DetailItem label="Micro Operation" value={instruction.action} />
+            <DetailItem label="Opcode" value={instruction.opcode} />
+            <DetailItem label="# of Operands" value={instruction.noOfOperands} />
+
+            {instruction.destinationOperand !== null && (
+              <DetailItem
+                label="Destination Operand"
+                value={instruction.destinationOperand}
+              />
+            )}
+          </div>
+
+          {/* Right */}
+          <div className="space-y-2">
+            <DetailItem
+              label="Interrupt Symbol"
+              value={formatValue(instruction.interruptSymbol)}
+            />
+
+            <DetailItem
+              label="Interrupt Registers"
+              value={`Out: ${formatValue(instruction.outputRegister)} / In: ${formatValue(instruction.inputRegister)}`}
+            />
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-4 pt-3 border-t border-blue-100 text-xs text-gray-500 flex justify-between">
+          <span>📋 Full specification</span>
+
+          {instruction.instructionId && (
+            <span className="font-mono text-black">
+              ID: {instruction.instructionId}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const DetailItem = ({ label, value, highlight = false }) => (
+  <div className="flex flex-col gap-1 py-1">
+    <span className="text-blue-900 text-sm">
+      {label}
+    </span>
+
+    <span
+      className={`text-sm break-words ${
+        highlight ? "font-semibold text-black" : "text-black"
+      }`}
+    >
+      {value !== undefined && value !== null && value !== ""
+        ? value
+        : "—"}
+    </span>
+  </div>
+);

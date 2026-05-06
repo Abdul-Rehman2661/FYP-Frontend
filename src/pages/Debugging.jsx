@@ -1,15 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import Header from "../components/Header.jsx";
 import BottomNavigation from "../components/BottomNavigation.jsx";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import React from "react";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { PlayIcon } from "@heroicons/react/24/outline";
+import { ArchitectureContext } from "../context/ArchitectureContext";
 
 function Debugging() {
   const { id } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { setExecutionResult } = useContext(ArchitectureContext);
+
   const [registers, setRegisters] = useState([
     { name: "R1", value: 0 },
     { name: "R2", value: 0 },
@@ -35,11 +41,20 @@ function Debugging() {
   const [error, setError] = useState("");
   const [output, setOutput] = useState("");
 
+  // Get code from location state (passed from Editor)
+  useEffect(() => {
+    if (location.state?.code) {
+      setCode(location.state.code);
+    } else {
+      setCode(`; Write your assembly code in Editor Screen`);
+    }
+  }, [location.state]);
+
   const getInstructions = () => {
     return code
       .split("\n")
       .map((line) => line.trim())
-      .filter((line) => line !== "");
+      .filter((line) => line !== "" && !line.startsWith(";"));
   };
 
   const handleStep = async () => {
@@ -72,15 +87,13 @@ function Debugging() {
         })),
       );
 
-      console.log(res.data);
+      // UPDATE CONTEXT WITH EXECUTION RESULT
+      setExecutionResult(data);
 
       setOutput(JSON.stringify(data));
       setError("");
-
       setStep((prev) => prev + 1);
     } catch (err) {
-      console.log("Error in Debugging:", err);
-
       setError(err.response?.data || "Execution error");
     } finally {
       setLoadingStep(false);
@@ -92,6 +105,7 @@ function Debugging() {
 
     try {
       setLoadingRun(true);
+
       const res = await axios.post(
         `http://localhost/ComputerArchitectureToolkitAPI/api/execution/execute/${id}`,
         instructions,
@@ -113,9 +127,11 @@ function Debugging() {
         })),
       );
 
+      // UPDATE CONTEXT WITH EXECUTION RESULT
+      setExecutionResult(data);
+
       setOutput(JSON.stringify(data));
       setError("");
-
       setStep(instructions.length);
     } catch (err) {
       setError(err.response?.data || "Execution error");
@@ -128,6 +144,9 @@ function Debugging() {
     setStep(0);
     setError("");
     setOutput("");
+    
+    // Reset context as well
+    setExecutionResult(null);
 
     setRegisters([
       { name: "R1", value: 0 },
@@ -148,9 +167,13 @@ function Debugging() {
     ]);
   };
 
+  const instructions = getInstructions();
+  const codeLines = code.split("\n");
+
   return (
     <>
       <Header />
+
       <div className="pt-20 lg:pt-24">
         <h2 className="text-center text-xl font-bold text-blue-900">
           Debugging
@@ -159,13 +182,18 @@ function Debugging() {
         <div className="p-4 bg-gray-100 pb-16 min-h-screen p-6">
           <div className="bg-white rounded-xl shadow border p-6">
             <div className="flex gap-4 sm:gap-2 ">
-              <button className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white hover:bg-blue-800 rounded-lg border border-blue-900 text-xs rounded font-bold">
+              <button 
+                onClick={() => navigate(`/editor/${id}`, { state: { code: code } })}
+                className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white hover:bg-blue-800 rounded-lg border border-blue-900 text-xs rounded font-bold"
+              >
                 <ArrowLeftIcon className="h-4 w-4" />
                 Back
               </button>
+
               <button
                 onClick={handleStep}
-                className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white hover:bg-blue-800 rounded-lg border border-blue-900 text-xs rounded font-bold"
+                disabled={loadingStep || step >= instructions.length}
+                className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white hover:bg-blue-800 rounded-lg border border-blue-900 text-xs rounded font-bold disabled:opacity-50"
               >
                 {loadingStep ? (
                   <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -174,9 +202,11 @@ function Debugging() {
                 )}
                 Step Forward
               </button>
+
               <button
                 onClick={handleRun}
-                className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white hover:bg-blue-800 rounded-lg border border-blue-900 text-xs rounded font-bold"
+                disabled={loadingRun}
+                className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white hover:bg-blue-800 rounded-lg border border-blue-900 text-xs rounded font-bold disabled:opacity-50"
               >
                 {loadingRun ? (
                   <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -185,6 +215,7 @@ function Debugging() {
                 )}
                 Run
               </button>
+
               <button
                 onClick={handleReset}
                 className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white hover:bg-blue-800 rounded-lg border border-blue-900 text-xs rounded font-bold"
@@ -197,15 +228,22 @@ function Debugging() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-5">
               <div className="mt-5">
                 <p className="text-sm text-gray-700 mb-2">Program Display</p>
-                <textarea
-                  value={code}
-                  onChange={(e) => {
-                    setCode(e.target.value);
-                    setStep(0);
-                  }}
-                  className="p-4 rounded-xl bg-gray-100 text-black w-full h-48 focus:ring-gray-300"
-                  placeholder={`Program Display.`}
-                />
+
+                {/* CODE DISPLAY WITH LINE HIGHLIGHTING - ORIGINAL STYLING */}
+                <div className="rounded-xl bg-gray-100 text-black w-full h-48 overflow-auto font-mono text-sm p-4">
+                  {codeLines.map((line, index) => (
+                    <div
+                      key={index}
+                      className={`px-2 py-1 rounded ${
+                        index === step ? "bg-yellow-300" : ""
+                      }`}
+                      style={{ whiteSpace: "pre-wrap" }}
+                    >
+                      <span className="text-gray-500 mr-2">{index + 1}.</span>
+                      <span className="text-blue-900">{line || " "}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="mt-5">
@@ -254,10 +292,10 @@ function Debugging() {
               </div>
             </div>
 
-            <div className="h-full text-black">
+            <div className="h-full text-black mt-5">
               <p>Output</p>
               <div className="border border-gray-300 rounded-lg h-24 w-full bg-gray-100 overflow-y-auto">
-                <p className="text-gray-400 p-4 font-mono">
+                <p className="text-gray-400 p-4 font-mono text-xs">
                   {output || "No Output to display..."}
                 </p>
               </div>
@@ -265,6 +303,7 @@ function Debugging() {
           </div>
         </div>
       </div>
+
       <BottomNavigation />
     </>
   );

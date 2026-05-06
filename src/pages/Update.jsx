@@ -21,11 +21,13 @@ export default function Update() {
 
   const [gpRegister, setGpRegister] = useState("");
   const [gpRegisterList, setGpRegisterList] = useState([]);
+  const [currentGPIndex, setCurrentGPIndex] = useState(0);
 
   const [addressingMode, setAddressingMode] = useState("");
   const [addressingModeCode, setAddressingModeCode] = useState("");
   const [symbol, setSymbol] = useState("");
   const [addressingModeList, setAddressingModeList] = useState([]);
+  const [currentModeIndex, setcurrentModeIndex] = useState(0);
 
   const [opcode, setOpcode] = useState("");
   const [mnemonic, setMnemonic] = useState("");
@@ -33,8 +35,9 @@ export default function Update() {
   const [interruptSymbol, setInterruptSymbol] = useState("");
   const [inputRegister, setInputRegister] = useState("");
   const [outputRegister, setOutputRegister] = useState("");
-  const [addedInstructions, setAddedInstructions] = useState([]);
   const [CPUlist, setCPUlist] = useState([]);
+  const [addedInstructions, setAddedInstructions] = useState([]);
+  const [currentInstructionIndex, setCurrentInstructionIndex] = useState(0);
 
   const [operands, setOperands] = useState([
     { id: 1, type: "Register", selected: false },
@@ -42,119 +45,151 @@ export default function Update() {
 
   const [isInterrupt, setIsInterrupt] = useState(false);
 
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const res = await fetch(
-        `http://localhost/ComputerArchitectureToolkitAPI/api/architecture/get-full/${id}`
-      );
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost/ComputerArchitectureToolkitAPI/api/architecture/get-full/${id}`,
+        );
 
-      const data = await res.json();
+        const data = await res.json();
 
-      console.log("API RESPONSE:", data);
+        console.log("API RESPONSE:", data);
 
-      // ✅ FIXED: Access nested Architecture
-      const arch = data.Architecture;
+        // ✅ FIXED: Access nested Architecture
+        const arch = data.Architecture;
 
-      setArchName(arch?.Name || "");
-      setMemorySize(arch?.MemorySize || "");
-      setStackSize(arch?.StackSize || "");
-      setBusSize(arch?.BusSize || "");
-      setNoOfRegisters(arch?.NumberOfRegisters || "");
-      setNoOfInstructions(arch?.NumberOfInstructions || "");
+        setArchName(arch?.Name || "");
+        setMemorySize(arch?.MemorySize || "");
+        setStackSize(arch?.StackSize || "");
+        setBusSize(arch?.BusSize || "");
+        setNoOfRegisters(arch?.NumberOfRegisters || "");
+        setNoOfInstructions(arch?.NumberOfInstructions || "");
 
-      // ✅ Registers
-      setFlagRegisterList(
-        data.Registers
-          ?.filter((r) => !r.Action) // flag registers
-          .map((r) => ({
-            name: r.Name,
-            Action: r.Action,
-          })) || []
-      );
+        // ✅ Registers
+        setFlagRegisterList(
+          data.Registers?.filter((r) => r.Action) // flag registers
+            .map((r) => ({
+              name: r.Name,
+              Action: r.Action,
+            })) || [],
+        );
 
-      setGpRegisterList(
-        data.Registers
-          ?.filter((r) => r.Action) // GP registers
-          .map((r) => ({
-            name: r.Name,
-          })) || []
-      );
+        setGpRegisterList(
+          data.Registers?.filter((r) => !r.Action) // GP registers
+            .map((r) => ({
+              name: r.Name,
+            })) || [],
+        );
 
-      // ✅ Addressing Modes
-      setAddressingModeList(
-        data.AddressingModes?.map((m) => ({
-          mode: m.AddressingModeName,
-          code: m.AddressingModeCode,
-          sym: m.AddressingModeSymbol,
-        })) || []
-      );
+        // ✅ Addressing Modes
+        setAddressingModeList(
+          data.AddressingModes?.map((m) => ({
+            mode: m.AddressingModeName,
+            code: m.AddressingModeCode,
+            sym: m.AddressingModeSymbol,
+          })) || [],
+        );
 
-      // ✅ Instructions
-      setAddedInstructions(
-        data.Instructions?.map((ins) => ({
-          opcode: ins.Opcode,
-          mnemonics: ins.Mnemonics,
-          action: ins.Action,
-          interruptSymbol: ins.InterruptSymbol,
-          inputRegister: ins.InputRegister,
-          outputRegister: ins.OutputRegister,
-          operands: [], // optional (if not stored)
-        })) || []
-      );
+        // ✅ Instructions
+        setAddedInstructions(
+          data.Instructions?.map((ins) => ({
+            id: ins.InstructionID, // normalize HERE
+            opcode: ins.Opcode,
+            mnemonics: ins.Mnemonics,
+            action: ins.Action,
+            interruptSymbol: ins.InterruptSymbol,
+            inputRegister: ins.InputRegister,
+            outputRegister: ins.OutputRegister,
+            operands: [],
+          })) || [],
+        );
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-    } catch (err) {
-      console.error(err);
+    if (id) fetchData();
+  }, [id]);
+
+  useEffect(() => {
+    if (gpRegisterList.length > 0) {
+      setGpRegister(gpRegisterList[0].name);
     }
+  }, [gpRegisterList]);
+
+  useEffect(() => {
+    if (addressingModeList.length > 0) {
+      const current = addressingModeList[currentModeIndex];
+      setAddressingMode(current.mode);
+      setAddressingModeCode(current.code);
+      setSymbol(current.sym);
+    }
+  }, [addressingModeList, currentModeIndex]);
+
+  useEffect(() => {
+    if (addedInstructions.length > 0) {
+      const current = addedInstructions[currentInstructionIndex];
+
+      setOpcode(current.opcode || "");
+      setMnemonic(current.mnemonics || "");
+      setAction(current.action || "");
+      setInterruptSymbol(current.interruptSymbol || "");
+      setInputRegister(current.inputRegister || "");
+      setOutputRegister(current.outputRegister || "");
+      setOperands(current.operands || []);
+    }
+  }, [addedInstructions, currentInstructionIndex]);
+
+  const buildPayload = () => {
+    return {
+      Architecture: {
+        Name: archName,
+        MemorySize: parseInt(memorySize) || 0,
+        StackSize: parseInt(stackSize) || 0,
+        BusSize: parseInt(busSize) || 0,
+        NumberOfRegisters: parseInt(noOfRegisters) || 0,
+        NumberOfInstructions: parseInt(noOfInstructions) || 0,
+      },
+
+      Registers: [
+        ...flagRegisterList.map((f) => ({
+          Name: f.name,
+          Action: f.Action,
+          Type: "FLAG",
+        })),
+        ...gpRegisterList.map((g) => ({
+          Name: g.name,
+          Type: "GENERAL",
+        })),
+      ],
+
+      Instructions: addedInstructions.map((ins) => ({
+        InstructionID: ins.id || ins.InstructionID,
+
+        Opcode: ins.opcode,
+        Mnemonics: ins.mnemonics,
+        Action: ins.action,
+        InterruptSymbol: ins.interruptSymbol || null,
+        InputRegister: ins.inputRegister || null,
+        OutputRegister: ins.outputRegister || null,
+
+        Operands: JSON.stringify(ins.operands || []),
+        InstructionFormat: ins.operands?.length || 0,
+        NumberOfOperands: ins.operands?.length || 0,
+        DestinationOperand:
+          ins.operands?.findIndex((op) => op.selected) + 1 || 0,
+      })),
+
+      AddressingModes: addressingModeList.map((m) => ({
+        AddressingModeName: m.mode,
+        AddressingModeCode: m.code,
+        AddressingModeSymbol: m.sym,
+      })),
+    };
   };
 
-  if (id) fetchData();
-}, [id]);
-
-const buildPayload = () => {
-  return {
-    Architecture: {
-      Name: archName,
-      MemorySize: parseInt(memorySize) || 0,
-      StackSize: parseInt(stackSize) || 0,
-      BusSize: parseInt(busSize) || 0,
-      NumberOfRegisters: parseInt(noOfRegisters) || 0,
-      NumberOfInstructions: parseInt(noOfInstructions) || 0,
-    },
-
-    Registers: [
-      ...flagRegisterList.map((f) => ({
-        Name: f.name,
-        Action: f.Action,
-        Type: "FLAG",
-      })),
-      ...gpRegisterList.map((g) => ({
-        Name: g.name,
-        Type: "GENERAL",
-      })),
-    ],
-
-    Instructions: addedInstructions.map((ins) => ({
-      Opcode: ins.opcode,
-      Mnemonics: ins.mnemonics,
-      Action: ins.action,
-      InterruptSymbol: ins.interruptSymbol || null,
-      InputRegister: ins.inputRegister || null,
-      OutputRegister: ins.outputRegister || null,
-      Operands: JSON.stringify(ins.operands),
-      InstructionFormat: ins.operands.length,
-      NumberOfOperands: ins.operands.length,
-      DestinationOperand:
-        ins.operands.findIndex((op) => op.selected) + 1,
-    })),
-
-    AddressingModes: addressingModeList.map((m) => ({
-      AddressingModeName: m.mode,
-      AddressingModeCode: m.code,
-      AddressingModeSymbol: m.sym,
-    })),
-  };
-};
+  console.log("FINAL PAYLOAD:", JSON.stringify(buildPayload, null, 2));
 
   const handleCPUAdded = () => {
     if (!archName) return;
@@ -192,7 +227,7 @@ const buildPayload = () => {
 
       if (res.ok) {
         alert("Updated successfully ✅");
-        navigate("/");
+        navigate("/dashboard");
       } else {
         console.error(data);
         alert(data.message || "Update failed ❌");
@@ -210,72 +245,82 @@ const buildPayload = () => {
     if (!flagRegister || !flagAction) return;
 
     setFlagRegisterList([
-  ...flagRegisterList,
-  {
-    name: flagRegister,
-    Action: flagAction,
-  },
-]);
+      ...flagRegisterList,
+      {
+        name: flagRegister,
+        Action: flagAction,
+      },
+    ]);
 
     setFlagRegister("");
     setFlagAction("");
   };
 
-const handleGP = (e) => {
-  e.preventDefault();
-  if (!gpRegister) return;
+  const handleUpdateGP = () => {
+    const updated = [...gpRegisterList];
 
-  setGpRegisterList([
-    ...gpRegisterList,
-    { name: gpRegister },
-  ]);
+    updated[currentGPIndex] = {
+      ...updated[currentGPIndex],
+      name: gpRegister,
+    };
 
-  setGpRegister("");
-};
+    setGpRegisterList(updated);
+  };
 
-const handleModes = (e) => {
-  e.preventDefault();
-  if (!addressingMode || !addressingModeCode || !symbol) return;
+  const handleNextGP = () => {
+    if (gpRegisterList.length === 0) return;
 
-  setAddressingModeList([
-    ...addressingModeList,
-    {
+    const nextIndex = (currentGPIndex + 1) % gpRegisterList.length;
+
+    setCurrentGPIndex(nextIndex);
+    setGpRegister(gpRegisterList[nextIndex].name);
+  };
+
+  const handleNextMode = () => {
+    if (addressingModeList.length === 0) return;
+
+    const nextIndex = (currentModeIndex + 1) % addressingModeList.length;
+
+    setcurrentModeIndex(nextIndex);
+  };
+
+  const handleUpdateMode = () => {
+    const updated = [...addressingModeList];
+
+    updated[currentModeIndex] = {
       mode: addressingMode,
       code: addressingModeCode,
       sym: symbol,
-    },
-  ]);
+    };
 
-  setAddressingMode("");
-  setAddressingModeCode("");
-  setSymbol("");
-};
+    setAddressingModeList(updated);
+  };
 
-const DisplayInstruction = (e) => {
-  e.preventDefault();
+  const handleNextInstruction = () => {
+    if (addedInstructions.length === 0) return;
 
-  if (!opcode || !mnemonic || !action) return;
+    const nextIndex = (currentInstructionIndex + 1) % addedInstructions.length;
 
-setAddedInstructions([
-  ...addedInstructions,
-  {
-    opcode,
-    mnemonics: mnemonic, // ✅ FIX
-    action,
-    interruptSymbol,
-    inputRegister,
-    outputRegister,
-    operands,
-  },
-]);
-  setOpcode("");
-  setMnemonic("");
-  setAction("");
-  setInterruptSymbol("");
-  setInputRegister("");
-  setOutputRegister("");
-  setOperands([{ id: 1, type: "Register", selected: false }]);
-};
+    setCurrentInstructionIndex(nextIndex);
+  };
+
+  const handleUpdateInstruction = () => {
+    const updated = [...addedInstructions];
+
+    updated[currentInstructionIndex] = {
+      ...updated[currentInstructionIndex], // ✅ PRESERVE ID + OLD DATA
+      opcode,
+      mnemonics: mnemonic,
+      action,
+      interruptSymbol,
+      inputRegister,
+      outputRegister,
+      operands,
+    };
+
+    setAddedInstructions(updated);
+  };
+  console.log("Added Instuction", addedInstructions);
 
   const handleAddOperand = () => {
     setOperands([
@@ -488,7 +533,7 @@ setAddedInstructions([
                   />
 
                   {/* Display Flag Registers */}
-                  {/* {flagRegisterList.length > 0 && (
+                  {flagRegisterList.length > 0 && (
                     <div className="bg-gray-100 border mt-4 rounded-sm text-sm">
                       <p className="font-semibold text-blue-900 m-2">
                         Added Flag Registers
@@ -507,7 +552,7 @@ setAddedInstructions([
                         </div>
                       ))}
                     </div>
-                  )} */}
+                  )}
 
                   <div className="flex flex-col sm:flex-row gap-3 mt-4 mb-8">
                     <button
@@ -535,13 +580,20 @@ setAddedInstructions([
                       placeholder="Enter GP Register Name"
                     />
                     {/* Display GP */}
-                    {/* {gpRegisterList.length > 0 && (
+                    {gpRegisterList.length > 0 && (
                       <div className="bg-gray-100 m-2 border rounded-sm">
                         <p className="text-black text-sm m-2 font-semibold text-blue-900">
                           Added General Purpose
                         </p>
                         {gpRegisterList.map((item, index) => (
-                          <div key={index}>
+                          <div
+                            key={index}
+                            onClick={() => {
+                              setCurrentGPIndex(index);
+                              setGpRegister(item.name);
+                            }}
+                            className="cursor-pointer hover:bg-gray-200"
+                          >
                             <span className="flex m-2 mb-3">
                               <p className="mr-1 text-sm text-blue-900">
                                 Name:
@@ -551,16 +603,19 @@ setAddedInstructions([
                           </div>
                         ))}
                       </div>
-                    )} */}
+                    )}
 
                     <div className="flex flex-col sm:flex-row gap-3 mt-4 mb-8">
                       <button
-                        onClick={handleGP}
+                        onClick={handleNextGP}
                         className="w-full sm:w-1/2 h-8 text-white bg-blue-900 rounded-lg mt-4 text-center font-semibold"
                       >
                         NEXT
                       </button>
-                      <button className="w-full sm:w-1/2 h-8 text-white bg-blue-900 rounded-lg mt-4 text-center font-semibold">
+                      <button
+                        onClick={handleUpdateGP}
+                        className="w-full sm:w-1/2 h-8 text-white bg-blue-900 rounded-lg mt-4 text-center font-semibold"
+                      >
                         ADD
                       </button>
                     </div>
@@ -607,14 +662,23 @@ setAddedInstructions([
                       placeholder="Enter Symbol (e.g., #, @, etc.)"
                     />
                     {/* Display Adressing Modes */}
-                    {/* {addressingModeList.length > 0 && (
+                    {addressingModeList.length > 0 && (
                       <div className="bg-gray-100 border mt-4 rounded-sm text-sm">
                         <p className="font-semibold text-blue-900 m-2">
                           Added Addressing Modes
                         </p>
 
                         {addressingModeList.map((item, index) => (
-                          <div key={index} className="text-black m-2">
+                          <div
+                            key={index}
+                            className="text-black m-2"
+                            onClick={() => {
+                              setCurrentModeIndex(index);
+                              setAddressingMode(item.mode);
+                              setAddressingModeCode(item.code);
+                              setSymbol(item.sym);
+                            }}
+                          >
                             <span className="flex ">
                               <p className="text-blue-900 mr-1">Mode:</p>
                               <p>{item.mode}</p>
@@ -630,10 +694,10 @@ setAddedInstructions([
                           </div>
                         ))}
                       </div>
-                    )} */}
+                    )}
 
                     <button
-                      onClick={handleModes}
+                      onClick={handleUpdateMode}
                       className="w-full h-8 mb-4 text-white bg-blue-900 rounded-lg mt-4 text-center font-semibold hover:bg-blue-800 transition"
                     >
                       ADD
@@ -807,15 +871,44 @@ setAddedInstructions([
                   ></textarea>
                 </div>
 
+                <div className="flex flex-col sm:flex-row gap-3 mt-4 mb-8">
+                  <button
+                    onClick={handleNextInstruction}
+                    className="bg-blue-900 text-white py-2 rounded-md w-full sm:w-1/2"
+                  >
+                    Next
+                  </button>
+
+                  <button
+                    onClick={handleUpdateInstruction}
+                    className="bg-blue-900 text-white py-2 rounded-md w-full sm:w-1/2"
+                  >
+                    ADD
+                  </button>
+                </div>
+
                 {/* Added Instructions List */}
-                {/* {addedInstructions.length > 0 && (
+                {addedInstructions.length > 0 && (
                   <div className="mt-6 mb-3 border rounded-md p-4 text-black text-sm bg-gray-50">
                     <h3 className="text-blue-900 font-semibold mb-2">
                       Added Instructions
                     </h3>
 
                     {addedInstructions.map((item, index) => (
-                      <div key={index} className="mb-2">
+                      <div
+                        key={index}
+                        className="mb-2"
+                        onClick={() => {
+                          setCurrentInstructionIndex(index);
+                          setOpcode(item.opcode);
+                          setMnemonic(item.mnemonics);
+                          setAction(item.action);
+                          setInterruptSymbol(item.interruptSymbol);
+                          setInputRegister(item.inputRegister);
+                          setOutputRegister(item.outputRegister);
+                          setOperands(item.operands || []);
+                        }}
+                      >
                         <span className="flex ">
                           <p className="text-blue-900 mr-1">OpCode:</p>
                           <p>{item.opcode}</p>
@@ -860,20 +953,7 @@ setAddedInstructions([
                       </div>
                     ))}
                   </div>
-                )} */}
-
-                <div className="flex flex-col sm:flex-row gap-3 mt-4 mb-8">
-                  <button
-                    onClick={DisplayInstruction}
-                    className="bg-blue-900 text-white py-2 rounded-md w-full sm:w-1/2"
-                  >
-                    Next
-                  </button>
-
-                  <button className="bg-blue-900 text-white py-2 rounded-md w-full sm:w-1/2">
-                    ADD
-                  </button>
-                </div>
+                )}
               </div>
             </div>
           </div>

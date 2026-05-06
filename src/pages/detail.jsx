@@ -277,7 +277,6 @@ const InstructionDetailCard = ({ instruction }) => {
 
   return (
     <div className="bg-white rounded-xl border border-blue-100 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
-      
       {/* Header (NOW SAME STYLE AS TABLE HEADER) */}
       <div className="bg-blue-100 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2 text-blue-900 font-semibold">
@@ -293,24 +292,29 @@ const InstructionDetailCard = ({ instruction }) => {
       {/* Body */}
       <div className="p-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
-          
           {/* Left */}
           <div className="space-y-2">
-            <DetailItem label="Mnemonic" value={instruction.mnemonic} highlight />
+            <DetailItem
+              label="Mnemonic"
+              value={instruction.mnemonic}
+              highlight
+            />
             <DetailItem label="Micro Operation" value={instruction.action} />
             <DetailItem label="Opcode" value={instruction.opcode} />
-            <DetailItem label="# of Operands" value={instruction.noOfOperands} />
+            <DetailItem
+              label="# of Operands"
+              value={instruction.noOfOperands}
+            />
+          </div>
 
+          {/* Right */}
+          <div className="space-y-2">
             {instruction.destinationOperand !== null && (
               <DetailItem
                 label="Destination Operand"
                 value={instruction.destinationOperand}
               />
             )}
-          </div>
-
-          {/* Right */}
-          <div className="space-y-2">
             <DetailItem
               label="Interrupt Symbol"
               value={formatValue(instruction.interruptSymbol)}
@@ -340,18 +344,14 @@ const InstructionDetailCard = ({ instruction }) => {
 
 const DetailItem = ({ label, value, highlight = false }) => (
   <div className="flex flex-col gap-1 py-1">
-    <span className="text-blue-900 text-sm">
-      {label}
-    </span>
+    <span className="text-blue-900 text-sm">{label}</span>
 
     <span
       className={`text-sm break-words ${
         highlight ? "font-semibold text-black" : "text-black"
       }`}
     >
-      {value !== undefined && value !== null && value !== ""
-        ? value
-        : "—"}
+      {value !== undefined && value !== null && value !== "" ? value : "—"}
     </span>
   </div>
 );

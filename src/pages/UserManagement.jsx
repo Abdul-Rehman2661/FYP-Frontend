@@ -6,14 +6,15 @@ import {
   TrashIcon,
   EnvelopeIcon,
   CalendarIcon,
+  UserIcon,
 } from "@heroicons/react/24/outline";
 import Header from "../components/Header.jsx";
+import { toast, Toaster } from "react-hot-toast";
 
 export default function UserManagement() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const [processingId, setProcessingId] = useState(null);
   const navigate = useNavigate();
 
@@ -33,27 +34,21 @@ export default function UserManagement() {
       }
 
       const data = await response.json();
-      console.log("Fetched users:", data); // Debug log
+      console.log("Fetched users:", data);
       setUsers(data);
     } catch (err) {
       console.error("Error fetching users:", err);
-      setError("Failed to load users. Please try again.");
+      toast.error("Failed to load users. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleMakeAdmin = async (userId) => {
-    if (!window.confirm("Are you sure you want to make this user an admin?")) {
-      return;
-    }
-
     setProcessingId(userId);
-    setError("");
-    setSuccessMessage("");
 
     try {
-      console.log(`Making user ${userId} admin...`); // Debug log
+      console.log(`Making user ${userId} admin...`);
       
       const response = await fetch(
         `http://localhost/ComputerArchitectureToolkitAPI/api/auth/make-admin/${userId}`,
@@ -65,42 +60,95 @@ export default function UserManagement() {
         },
       );
 
-      console.log("Response status:", response.status); // Debug log
+      console.log("Response status:", response.status);
       const data = await response.json();
-      console.log("Response data:", data); // Debug log
+      console.log("Response data:", data);
 
       if (response.ok) {
-        setSuccessMessage(data.message || "User role updated successfully!");
-        // Wait a bit before refreshing to let backend process
+        toast.success(data.message || "User role updated to Admin successfully!");
         setTimeout(() => {
           fetchUsers();
         }, 500);
       } else {
-        setError(data.message || `Failed to update user role. Status: ${response.status}`);
+        toast.error(data.message || `Failed to update user role. Status: ${response.status}`);
       }
     } catch (err) {
       console.error("Error making admin:", err);
-      setError("Network error. Please check if the server is running.");
+      toast.error("Network error. Please check if the server is running.");
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleMakeUser = async (userId) => {
+    setProcessingId(userId);
+
+    try {
+      console.log(`Making user ${userId} regular user...`);
+      
+      const response = await fetch(
+        `http://localhost/ComputerArchitectureToolkitAPI/api/auth/make-user/${userId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      console.log("Response status:", response.status);
+      const data = await response.json();
+      console.log("Response data:", data);
+
+      if (response.ok) {
+        toast.success(data.message || "Admin role updated to User successfully!");
+        setTimeout(() => {
+          fetchUsers();
+        }, 500);
+      } else {
+        toast.error(data.message || `Failed to update user role. Status: ${response.status}`);
+      }
+    } catch (err) {
+      console.error("Error making user:", err);
+      toast.error("Network error. Please check if the server is running.");
     } finally {
       setProcessingId(null);
     }
   };
 
   const handleDeleteUser = async (userId) => {
-    if (
-      !window.confirm(
-        "Are you sure you want to delete this user? This action cannot be undone!",
-      )
-    ) {
-      return;
-    }
+    toast((t) => (
+      <div className="flex flex-col gap-2">
+        <p className="text-sm">Are you sure you want to delete this user? This action cannot be undone!</p>
+        <div className="flex gap-2 justify-end">
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+              confirmDeleteUser(userId);
+            }}
+            className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm"
+          >
+            Delete
+          </button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="px-3 py-1 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 text-sm"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: 5000,
+      position: "top-center",
+    });
+  };
 
+  const confirmDeleteUser = async (userId) => {
     setProcessingId(userId);
-    setError("");
-    setSuccessMessage("");
 
     try {
-      console.log(`Deleting user ${userId}...`); // Debug log
+      console.log(`Deleting user ${userId}...`);
       
       const response = await fetch(
         `http://localhost/ComputerArchitectureToolkitAPI/api/auth/delete-user/${userId}`,
@@ -112,22 +160,21 @@ export default function UserManagement() {
         },
       );
 
-      console.log("Response status:", response.status); // Debug log
+      console.log("Response status:", response.status);
       const data = await response.json();
-      console.log("Response data:", data); // Debug log
+      console.log("Response data:", data);
 
       if (response.ok) {
-        setSuccessMessage(data.message || "User deleted successfully!");
-        // Wait a bit before refreshing to let backend process
+        toast.success(data.message || "User deleted successfully!");
         setTimeout(() => {
           fetchUsers();
         }, 500);
       } else {
-        setError(data.message || `Failed to delete user. Status: ${response.status}`);
+        toast.error(data.message || `Failed to delete user. Status: ${response.status}`);
       }
     } catch (err) {
       console.error("Error deleting user:", err);
-      setError("Network error. Please check if the server is running.");
+      toast.error("Network error. Please check if the server is running.");
     } finally {
       setProcessingId(null);
     }
@@ -145,6 +192,30 @@ export default function UserManagement() {
 
   return (
     <div>
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#363636',
+            color: '#fff',
+          },
+          success: {
+            duration: 3000,
+            iconTheme: {
+              primary: '#10B981',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            duration: 4000,
+            iconTheme: {
+              primary: '#EF4444',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
       <Header />
       <div className="min-h-screen bg-gray-100">
         {/* Header */}
@@ -167,20 +238,6 @@ export default function UserManagement() {
 
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 py-8">
-          {/* Error Message */}
-          {error && (
-            <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-              {error}
-            </div>
-          )}
-
-          {/* Success Message */}
-          {successMessage && (
-            <div className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-              {successMessage}
-            </div>
-          )}
-
           {/* Users List */}
           {loading ? (
             <div className="flex justify-center items-center h-64">
@@ -242,11 +299,20 @@ export default function UserManagement() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex gap-2">
-                            {(user.role || user.Role) !== "Admin" && (
+                            {(user.role || user.Role) === "Admin" ? (
+                              <button
+                                onClick={() => handleMakeUser(user.userID || user.UserID)}
+                                disabled={processingId === (user.userID || user.UserID)}
+                                className="flex items-center gap-1 px-3 py-1 bg-gray-600 text-white rounded-md hover:bg-yellow-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                              >
+                                <UserIcon className="h-4 w-4" />
+                                {processingId === (user.userID || user.UserID) ? "Processing..." : "Make User"}
+                              </button>
+                            ) : (
                               <button
                                 onClick={() => handleMakeAdmin(user.userID || user.UserID)}
                                 disabled={processingId === (user.userID || user.UserID)}
-                                className="flex items-center gap-1 px-3 py-1 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                                className="flex items-center gap-1 px-3 py-1 bg-blue-900 text-white rounded-md hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                               >
                                 <ShieldCheckIcon className="h-4 w-4" />
                                 {processingId === (user.userID || user.UserID) ? "Processing..." : "Make Admin"}

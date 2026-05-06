@@ -7,12 +7,14 @@ import { ArchitectureContext } from "../context/ArchitectureContext";
 import { useParams } from "react-router-dom";
 
 function Memory() {
-  const { executionResult, architectureData, setArchitectureData } = useContext(ArchitectureContext);
+  const { executionResult, architectureData, setArchitectureData } =
+    useContext(ArchitectureContext);
   const { id } = useParams();
-  
+
   const [localMemorySize, setLocalMemorySize] = useState(0);
   const [localExecutionResult, setLocalExecutionResult] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [displayMode, setDisplayMode] = useState("full"); // "4", "8", or "full"
 
   // Function to convert byte value to 8 bits
   const byteToBits = (byteValue) => {
@@ -30,13 +32,13 @@ function Memory() {
       if (!architectureData || !architectureData.memorySize) {
         try {
           const response = await fetch(
-            `http://localhost/ComputerArchitectureToolkitAPI/api/architecture/get-full/${id}`
+            `http://localhost/ComputerArchitectureToolkitAPI/api/architecture/get-full/${id}`,
           );
           const data = await response.json();
-          
+
           const memorySz = data?.Architecture?.MemorySize || 0;
           setLocalMemorySize(memorySz);
-          
+
           setArchitectureData({
             memorySize: memorySz,
             stackSize: data?.Architecture?.StackSize || 0,
@@ -49,7 +51,7 @@ function Memory() {
       } else {
         setLocalMemorySize(architectureData.memorySize);
       }
-      
+
       setLoading(false);
     };
 
@@ -66,13 +68,26 @@ function Memory() {
   const memorySummary = localExecutionResult?.MemorySummary || {};
   const stackSummary = localExecutionResult?.StackSummary || {};
   const spIndex = localExecutionResult?.StackPointer || 0;
-  
+
   const ROWS = Number(localMemorySize) || 0;
   const COLS = 8;
 
+  // Get displayed rows based on display mode
+  const getDisplayedRows = () => {
+    if (displayMode === "4") {
+      return Math.min(4, ROWS);
+    } else if (displayMode === "8") {
+      return Math.min(8, ROWS);
+    } else {
+      return ROWS;
+    }
+  };
+
+  const displayedRowCount = getDisplayedRows();
+
   const memoryRows = Array.from(
-    { length: ROWS },
-    (_, i) => `0x${String(i).padStart(2, "0")}`
+    { length: displayedRowCount },
+    (_, i) => `0x${String(i).padStart(2, "0")}`,
   );
   const stackRows = Array.from({ length: 16 }, (_, i) => i);
 
@@ -117,12 +132,74 @@ function Memory() {
             lg:shadow
           "
           >
+            <div className="flex justify-end mb-4">
+              <div className="flex gap-4 bg-gray-100 p-2 rounded-lg">
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input
+                    type="radio"
+                    name="displayMode"
+                    value="4"
+                    checked={displayMode === "4"}
+                    onChange={(e) => setDisplayMode(e.target.value)}
+                    className="w-4 h-4 accent-blue-900"
+                  />
+                  <span
+                    className={
+                      displayMode === "4"
+                        ? "text-blue-900 font-medium"
+                        : "text-gray-600"
+                    }
+                  >
+                    Top 4 Rows
+                  </span>
+                </label>
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input
+                    type="radio"
+                    name="displayMode"
+                    value="8"
+                    checked={displayMode === "8"}
+                    onChange={(e) => setDisplayMode(e.target.value)}
+                    className="w-4 h-4 accent-blue-900"
+                  />
+                  <span
+                    className={
+                      displayMode === "8"
+                        ? "text-blue-900 font-medium"
+                        : "text-gray-600"
+                    }
+                  >
+                    Top 8 Rows
+                  </span>
+                </label>
+                {/* <label className="flex items-center gap-2 text-sm cursor-pointer">
+      <input
+        type="radio"
+        name="displayMode"
+        value="full"
+        checked={displayMode === "full"}
+        onChange={(e) => setDisplayMode(e.target.value)}
+        className="w-4 h-4 accent-blue-900"
+      />
+      <span className={displayMode === "full" ? "text-blue-900 font-medium" : "text-gray-600"}>
+        Full Memory
+      </span>
+    </label> */}
+              </div>
+            </div>
+
             <div className="mb-6">
               <p className="text-sm text-gray-700 mb-2">
-                Memory Value (Memory Size: {localMemorySize} bytes = {localMemorySize * 8} bits)
+                Memory Value (Memory Size: {localMemorySize} bytes ={" "}
+                {localMemorySize * 8} bits)
+                {displayMode !== "full" && (
+                  <span className="ml-2 text-blue-900">
+                    (Showing top {displayedRowCount} of {ROWS} rows)
+                  </span>
+                )}
               </p>
 
-              <div className="border rounded-lg p-3 bg-gray-100 overflow-x-auto">
+              <div className="border rounded-lg p-3 bg-gray-100 overflow-x-auto max-h-[600px] overflow-y-auto">
                 <div className="grid grid-cols-[60px_repeat(8,minmax(60px,1fr))] gap-2">
                   {memoryRows.map((addr, rowIndex) => (
                     <React.Fragment key={rowIndex}>
@@ -139,7 +216,9 @@ function Memory() {
                           <div
                             key={colIndex}
                             className={`h-8 border rounded flex items-center justify-center text-xs ${
-                              bit === 1 ? 'bg-blue-900 text-white font-bold' : 'bg-white text-gray-400'
+                              bit === 1
+                                ? "bg-blue-900 text-white font-bold"
+                                : "bg-white text-gray-400"
                             }`}
                             title={`Address ${addr}, Bit ${7 - colIndex}: ${bit} (Byte value: ${byteValue})`}
                           >
@@ -181,7 +260,11 @@ function Memory() {
                             {value}
                           </div>
 
-                          {index === spIndex && <span className="ml-2 text-xs font-medium text-blue-900 whitespace-nowrap">←SP</span>}
+                          {index === spIndex && (
+                            <span className="ml-2 text-xs font-medium text-blue-900 whitespace-nowrap">
+                              ←SP
+                            </span>
+                          )}
                         </div>
                       );
                     })}

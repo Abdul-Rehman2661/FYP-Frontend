@@ -109,6 +109,8 @@ export default function Instruction() {
     setInstructionData,
   } = useContext(ArchitectureContext);
 
+  
+
   const handleCreate = async () => {
     try {
       const flatRegisters = [
@@ -154,7 +156,7 @@ export default function Instruction() {
       };
 
       const res = await fetch(
-        "http://localhost/ComputerArchitectureToolkitAPI/api/architecture/create-full",
+        `${import.meta.env.VITE_API_BASE_URL}/architecture/create-full`,
         {
           method: "POST",
           headers: {
@@ -190,24 +192,25 @@ export default function Instruction() {
     }
   };
 
-  const safeRegisters =
+  // FIXED: Only get General Purpose Registers (exclude Flag Registers)
+  const generalPurposeRegisters =
     registerData && typeof registerData === "object"
-      ? [
-          ...(registerData.generalPurposeRegisters || []),
-          ...(registerData.flagRegisters || []),
-        ]
+      ? (registerData.generalPurposeRegisters || []).filter(
+          (reg) => !reg.isFlag && reg.isFlag !== 1 && reg.isFlagRegister !== true && reg.isFlagRegister !== 1
+        )
       : [];
 
-  const inputRegisterOptions = safeRegisters.filter(
+  // Use only general purpose registers for dropdowns
+  const inputRegisterOptions = generalPurposeRegisters.filter(
     (reg) => reg.name !== outputRegister,
   );
 
-  const outputRegisterOptions = safeRegisters.filter(
+  const outputRegisterOptions = generalPurposeRegisters.filter(
     (reg) => reg.name !== inputRegister,
   );
 
   console.log("registerData:", registerData);
-  console.log("type:", typeof registerData);
+  console.log("General Purpose Registers:", generalPurposeRegisters);
 
   return (
     <>
@@ -280,7 +283,6 @@ export default function Instruction() {
     ${inputRegister === "" ? "text-gray-500" : "text-black"}`}
                 >
                   <option value="">Select input register</option>
-
                   {inputRegisterOptions.map((reg, i) => (
                     <option key={i} value={reg.name}>
                       {reg.name}
@@ -298,7 +300,6 @@ export default function Instruction() {
     ${outputRegister === "" ? "text-gray-500" : "text-black"}`}
                 >
                   <option value="">Select output register</option>
-
                   {outputRegisterOptions.map((reg, i) => (
                     <option key={i} value={reg.name}>
                       {reg.name}

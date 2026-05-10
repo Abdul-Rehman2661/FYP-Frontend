@@ -16,30 +16,89 @@ function Debugging() {
   const navigate = useNavigate();
   const { setExecutionResult } = useContext(ArchitectureContext);
 
-  const [registers, setRegisters] = useState([
-    { name: "R1", value: 0 },
-    { name: "R2", value: 0 },
-    { name: "R3", value: 0 },
-    { name: "R4", value: 0 },
-    { name: "R5", value: 0 },
-    { name: "PC", value: 0 },
-    { name: "SP", value: 0 },
-    { name: "IR", value: 0 },
-  ]);
-
-  const [flags, setFlags] = useState([
-    { name: "Carry", value: 0 },
-    { name: "Overflow", value: 0 },
-    { name: "Sign", value: 0 },
-    { name: "Zero", value: 0 },
-  ]);
-
+  const [registerMeta, setRegisterMeta] = useState([]);
+  const [registers, setRegisters] = useState([]);
+  
+  // Flag state: [Carry, Overflow, Sign, Zero] - Matches backend indices
+  const [flags, setFlags] = useState([0, 0, 0, 0]);
+  
+  // Track previous flags for highlighting changes
+  const [prevFlags, setPrevFlags] = useState([0, 0, 0, 0]);
+  
   const [loadingStep, setLoadingStep] = useState(false);
   const [loadingRun, setLoadingRun] = useState(false);
   const [code, setCode] = useState("");
   const [step, setStep] = useState(0);
   const [error, setError] = useState("");
   const [output, setOutput] = useState("");
+
+  // Flag index mapping (matches backend C# constants)
+  const FLAG_INDICES = {
+    CARRY: 0,
+    OVERFLOW: 1,
+    SIGN: 2,
+    ZERO: 3
+  };
+
+  // Flag display names and descriptions
+  const flagConfig = [
+    { name: "Carry (CF)", description: "Set on unsigned overflow/borrow", index: FLAG_INDICES.CARRY },
+    { name: "Overflow (OF)", description: "Set on signed overflow", index: FLAG_INDICES.OVERFLOW },
+    { name: "Sign (SF)", description: "Set when result is negative", index: FLAG_INDICES.SIGN },
+    { name: "Zero (ZF)", description: "Set when result is zero", index: FLAG_INDICES.ZERO }
+  ];
+
+  // Helper to check if a flag changed
+  const isFlagChanged = (index) => {
+    return prevFlags[index] !== flags[index];
+  };
+
+  // Get flag style based on value and change status
+  const getFlagStyle = (value, hasChanged) => {
+    if (hasChanged) {
+      return "bg-green-100 text-green-700 border-green-500 font-bold";
+    }
+    return value === 1 
+      ? "bg-blue-100 text-blue-700 border-blue-300 font-bold"
+      : "bg-white text-gray-500 border-gray-200";
+  };
+
+  // Fetch register metadata from API
+  useEffect(() => {
+    if (!id) return;
+    const fetchRegisters = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/architecture/get-full/${id}`,
+        );
+
+        const allRegisters = res.data?.Registers || [];
+        // Filter only general purpose registers (IsFlagRegister === false)
+        const generalRegisters = allRegisters.filter(
+          (r) => r.IsFlagRegister === false
+        );
+        
+        // Sort by RegisterID
+        const sortedGeneral = [...generalRegisters].sort(
+          (a, b) => a.RegisterID - b.RegisterID
+        );
+
+        setRegisterMeta(sortedGeneral);
+        
+        // Initialize registers state with values from metadata
+        setRegisters(
+          sortedGeneral.map((reg) => ({
+            name: reg.Name,
+            value: 0,
+          }))
+        );
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchRegisters();
+  }, [id]);
 
   // Get code from location state (passed from Editor)
   useEffect(() => {
@@ -55,6 +114,20 @@ function Debugging() {
       .split("\n")
       .map((line) => line.trim())
       .filter((line) => line !== "" && !line.startsWith(";"));
+  };
+
+  // Update flags from backend response
+  const updateFlagsFromResponse = (data) => {
+    const newFlags = [
+      data.Flags?.[FLAG_INDICES.CARRY] ? 1 : 0,      // Carry
+      data.Flags?.[FLAG_INDICES.OVERFLOW] ? 1 : 0,  // Overflow
+      data.Flags?.[FLAG_INDICES.SIGN] ? 1 : 0,      // Sign
+      data.Flags?.[FLAG_INDICES.ZERO] ? 1 : 0,      // Zero
+    ];
+    
+    // Save previous flags for highlighting
+    setPrevFlags([...flags]);
+    setFlags(newFlags);
   };
 
   const handleStep = async () => {
@@ -73,24 +146,21 @@ function Debugging() {
 
       const data = res.data;
 
+      // Update general purpose registers
       setRegisters((prev) =>
         prev.map((reg, index) => ({
           ...reg,
-          value: data.Registers?.[index] ?? reg.value,
-        })),
+          value: data.Registers?.[index] !== undefined ? data.Registers[index] : reg.value,
+        }))
       );
 
-      setFlags((prev) =>
-        prev.map((flag, index) => ({
-          ...flag,
-          value: data.Flags?.[index] ?? flag.value,
-        })),
-      );
+      // Update flags with highlighting support
+      updateFlagsFromResponse(data);
 
       // UPDATE CONTEXT WITH EXECUTION RESULT
       setExecutionResult(data);
 
-      setOutput(JSON.stringify(data));
+      setOutput(JSON.stringify(data, null, 2));
       setError("");
       setStep((prev) => prev + 1);
     } catch (err) {
@@ -113,24 +183,21 @@ function Debugging() {
 
       const data = res.data;
 
+      // Update general purpose registers
       setRegisters((prev) =>
         prev.map((reg, index) => ({
           ...reg,
-          value: data.Registers?.[index] ?? reg.value,
-        })),
+          value: data.Registers?.[index] !== undefined ? data.Registers[index] : reg.value,
+        }))
       );
 
-      setFlags((prev) =>
-        prev.map((flag, index) => ({
-          ...flag,
-          value: data.Flags?.[index] ?? flag.value,
-        })),
-      );
+      // Update flags with highlighting support
+      updateFlagsFromResponse(data);
 
       // UPDATE CONTEXT WITH EXECUTION RESULT
       setExecutionResult(data);
 
-      setOutput(JSON.stringify(data));
+      setOutput(JSON.stringify(data, null, 2));
       setError("");
       setStep(instructions.length);
     } catch (err) {
@@ -148,23 +215,17 @@ function Debugging() {
     // Reset context as well
     setExecutionResult(null);
 
-    setRegisters([
-      { name: "R1", value: 0 },
-      { name: "R2", value: 0 },
-      { name: "R3", value: 0 },
-      { name: "R4", value: 0 },
-      { name: "R5", value: 0 },
-      { name: "PC", value: 0 },
-      { name: "SP", value: 0 },
-      { name: "IR", value: 0 },
-    ]);
+    // Reset general purpose registers to 0
+    setRegisters((prev) =>
+      prev.map((reg) => ({
+        ...reg,
+        value: 0,
+      }))
+    );
 
-    setFlags([
-      { name: "Carry", value: 0 },
-      { name: "Overflow", value: 0 },
-      { name: "Sign", value: 0 },
-      { name: "Zero", value: 0 },
-    ]);
+    // Reset flags to 0
+    setPrevFlags([0, 0, 0, 0]);
+    setFlags([0, 0, 0, 0]);
   };
 
   const instructions = getInstructions();
@@ -229,7 +290,7 @@ function Debugging() {
               <div className="mt-5">
                 <p className="text-sm text-gray-700 mb-2">Program Display</p>
 
-                {/* CODE DISPLAY WITH LINE HIGHLIGHTING - ORIGINAL STYLING */}
+                {/* CODE DISPLAY WITH LINE HIGHLIGHTING */}
                 <div className="rounded-xl bg-gray-100 text-black w-full h-48 overflow-auto font-mono text-sm p-4">
                   {codeLines.map((line, index) => (
                     <div
@@ -273,20 +334,34 @@ function Debugging() {
                 </div>
               </div>
 
+              {/* UPDATED FLAG REGISTERS SECTION */}
               <div className="mt-4">
                 <p className="text-sm text-gray-700 mb-2">Flag Registers</p>
                 <div className="border rounded-lg p-4 bg-gray-50">
-                  <div className="grid grid-cols-4 gap-4">
-                    {flags.map((flag, index) => (
-                      <div key={index} className="text-center">
-                        <p className="text-xs text-gray-700 mb-1">
-                          {flag.name}
-                        </p>
-                        <div className="border rounded-md py-2 bg-white text-black text-sm">
-                          {flag.value}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {flagConfig.map((flag) => {
+                      const flagValue = flags[flag.index];
+                      const hasChanged = isFlagChanged(flag.index);
+                      
+                      return (
+                        <div key={flag.name} className="text-center">
+                          <p className="text-xs text-gray-700 mb-1 font-medium">
+                            {flag.name}
+                          </p>
+                          <div
+                            className={`
+                              border rounded-md py-2 text-sm font-mono transition-all duration-300
+                              ${getFlagStyle(flagValue, hasChanged)}
+                            `}
+                          >
+                            {flagValue}
+                          </div>
+                          <p className="text-xs text-gray-400 mt-1 hidden md:block">
+                            {flag.description}
+                          </p>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -295,9 +370,9 @@ function Debugging() {
             <div className="h-full text-black mt-5">
               <p>Output</p>
               <div className="border border-gray-300 rounded-lg h-24 w-full bg-gray-100 overflow-y-auto">
-                <p className="text-gray-400 p-4 font-mono text-xs">
+                <pre className="text-gray-600 p-4 font-mono text-xs whitespace-pre-wrap">
                   {output || "No Output to display..."}
-                </p>
+                </pre>
               </div>
             </div>
           </div>

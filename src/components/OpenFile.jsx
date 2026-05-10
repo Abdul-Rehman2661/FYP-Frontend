@@ -13,7 +13,7 @@ export default function OpenFile({ onClose, architectureId, onSelect }) {
     try {
       // FIXED: Use correct controller (architecture instead of execution)
       const res = await fetch(
-        `http://localhost/ComputerArchitectureToolkitAPI/api/architecture/${architectureId}/codefile/all`
+        `${import.meta.env.VITE_API_BASE_URL}/architecture/${architectureId}/codefile/all`
       );
 
       if (!res.ok) {

@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Header from "../components/Header.jsx";
-import Debug from "../components/debug.jsx";
+import Debug from "./Debugging.jsx";
 import BottomNavigation from "../components/BottomNavigation.jsx";
 import { CpuChipIcon } from "@heroicons/react/24/outline";
 import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
@@ -19,13 +19,13 @@ function Dashboard() {
     const userData = JSON.parse(localStorage.getItem("user") || "{}");
     console.log("User data in Dashboard:", userData); // Debug log
     console.log("User role:", userData.role); // Debug log
-    
+
     // REMOVE THIS FORCED ASSIGNMENT
     // if (!userData.role) {
     //   userData.role = "Admin";
     //   localStorage.setItem("user", JSON.stringify(userData));
     // }
-    
+
     setIsAdmin(userData.role === "Admin");
     fetchArchitectures();
   }, []);
@@ -34,7 +34,7 @@ function Dashboard() {
     try {
       setLoading(true);
       const res = await fetch(
-        "http://localhost/ComputerArchitectureToolkitAPI/api/architecture/all",
+        `${import.meta.env.VITE_API_BASE_URL}/architecture/all`,
       );
       const data = await res.json();
       setArchitectures(data);
@@ -72,9 +72,13 @@ function Dashboard() {
 
           <div className="flex justify-between items-center p-4">
             {/* Show user role badge */}
-            <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
-              isAdmin ? "bg-purple-100 text-purple-800" : "bg-green-100 text-green-800"
-            }`}>
+            <div
+              className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                isAdmin
+                  ? "bg-purple-100 text-purple-800"
+                  : "bg-green-100 text-green-800"
+              }`}
+            >
               Role: {isAdmin ? "Administrator" : "Regular User"}
             </div>
             <button
@@ -125,7 +129,7 @@ function Dashboard() {
                     >
                       Use
                     </button>
-                    
+
                     {/* Update Button - Disabled for Regular Users */}
                     <button
                       onClick={() => {
@@ -135,15 +139,19 @@ function Dashboard() {
                       }}
                       disabled={!isAdmin}
                       className={`flex-1 py-1.5 text-sm rounded transition ${
-                        isAdmin 
-                          ? "bg-blue-900 text-white hover:bg-blue-800 cursor-pointer" 
+                        isAdmin
+                          ? "bg-blue-900 text-white hover:bg-blue-800 cursor-pointer"
                           : "bg-gray-300 text-gray-500 cursor-not-allowed"
                       }`}
-                      title={!isAdmin ? "Only Admin can update architectures" : "Update architecture"}
+                      title={
+                        !isAdmin
+                          ? "Only Admin can update architectures"
+                          : "Update architecture"
+                      }
                     >
                       Update
                     </button>
-                    
+
                     <button
                       onClick={() => navigate(`/detail/${arch.ArchitectureID}`)}
                       className="flex-1 py-1.5 text-sm rounded bg-blue-900 text-white hover:bg-blue-800"

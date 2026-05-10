@@ -49,7 +49,7 @@ export default function Update() {
     const fetchData = async () => {
       try {
         const res = await fetch(
-          `http://localhost/ComputerArchitectureToolkitAPI/api/architecture/get-full/${id}`,
+          `${import.meta.env.VITE_API_BASE_URL}/architecture/get-full/${id}`,
         );
 
         const data = await res.json();
@@ -215,7 +215,7 @@ export default function Update() {
       console.log("Payload:", payload); // 🔥 DEBUG
 
       const res = await fetch(
-        `http://localhost/ComputerArchitectureToolkitAPI/api/architecture/update-full/${id}`,
+        `${import.meta.env.VITE_API_BASE_URL}/architecture/update-full/${id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

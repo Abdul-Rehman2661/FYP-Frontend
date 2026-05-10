@@ -14,7 +14,7 @@ function Memory() {
   const [localMemorySize, setLocalMemorySize] = useState(0);
   const [localExecutionResult, setLocalExecutionResult] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [displayMode, setDisplayMode] = useState("full"); // "4", "8", or "full"
+  const [displayMode, setDisplayMode] = useState("4"); // "4", "8", or "full"
 
   // Function to convert byte value to 8 bits
   const byteToBits = (byteValue) => {
@@ -32,7 +32,7 @@ function Memory() {
       if (!architectureData || !architectureData.memorySize) {
         try {
           const response = await fetch(
-            `http://localhost/ComputerArchitectureToolkitAPI/api/architecture/get-full/${id}`,
+            `${import.meta.env.VITE_API_BASE_URL}/architecture/get-full/${id}`,
           );
           const data = await response.json();
 
@@ -172,19 +172,25 @@ function Memory() {
                     Top 8 Rows
                   </span>
                 </label>
-                {/* <label className="flex items-center gap-2 text-sm cursor-pointer">
-      <input
-        type="radio"
-        name="displayMode"
-        value="full"
-        checked={displayMode === "full"}
-        onChange={(e) => setDisplayMode(e.target.value)}
-        className="w-4 h-4 accent-blue-900"
-      />
-      <span className={displayMode === "full" ? "text-blue-900 font-medium" : "text-gray-600"}>
-        Full Memory
-      </span>
-    </label> */}
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input
+                    type="radio"
+                    name="displayMode"
+                    value="full"
+                    checked={displayMode === "full"}
+                    onChange={(e) => setDisplayMode(e.target.value)}
+                    className="w-4 h-4 accent-blue-900"
+                  />
+                  <span
+                    className={
+                      displayMode === "full"
+                        ? "text-blue-900 font-medium"
+                        : "text-gray-600"
+                    }
+                  >
+                    Full Memory
+                  </span>
+                </label>
               </div>
             </div>
 
@@ -217,8 +223,8 @@ function Memory() {
                             key={colIndex}
                             className={`h-8 border rounded flex items-center justify-center text-xs ${
                               bit === 1
-                                ? "bg-blue-900 text-white font-bold"
-                                : "bg-white text-gray-400"
+                                ? "bg-blue-900 text-blue-900 font-bold"
+                                : "bg-white text-white"
                             }`}
                             title={`Address ${addr}, Bit ${7 - colIndex}: ${bit} (Byte value: ${byteValue})`}
                           >
@@ -256,7 +262,7 @@ function Memory() {
 
                       return (
                         <div key={num} className="flex items-center">
-                          <div className="w-20 h-8 border rounded bg-white flex items-center justify-center text-xs">
+                          <div className="w-20 h-8 border rounded bg-white text-white flex items-center justify-center text-xs">
                             {value}
                           </div>
 

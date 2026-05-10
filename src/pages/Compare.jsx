@@ -35,7 +35,7 @@ function Compare() {
         .filter((line) => line !== "");
 
       const res = await fetch(
-        `http://localhost/ComputerArchitectureToolkitAPI/api/execution/execute/${id}`,
+        `${import.meta.env.VITE_API_BASE_URL}/execution/execute/${id}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

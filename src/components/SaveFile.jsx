@@ -20,7 +20,7 @@ export default function SaveFile({ onClose, architectureId, code }) {
 
       // FIXED: Use correct controller (architecture instead of execution)
       const res = await fetch(
-        `http://localhost/ComputerArchitectureToolkitAPI/api/architecture/${architectureId}/codefile/add`,
+        `${import.meta.env.VITE_API_BASE_URL}/architecture/${architectureId}/codefile/add`,
         {
           method: "POST",
           headers: {

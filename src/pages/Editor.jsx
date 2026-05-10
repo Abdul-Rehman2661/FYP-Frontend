@@ -3,27 +3,62 @@ import Header from "../components/Header.jsx";
 import BottomNavigation from "../components/BottomNavigation.jsx";
 import SaveFile from "../components/SaveFile.jsx";
 import OpenFile from "../components/OpenFile.jsx";
+import CountCycleModal from "../components/CountCycleModal.jsx";
 import {
   PlayIcon,
   ArrowPathIcon,
   FolderOpenIcon,
   ArrowDownTrayIcon,
+  ChartBarIcon,
+  FilmIcon,
 } from "@heroicons/react/24/outline";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArchitectureContext } from "../context/ArchitectureContext";
+import CycleAnimationScreen from "./CycleAnimation.jsx";
+import { calculateCountCycle } from "../utils/countCycle.js";
+import { buildCycleAnimationTrace } from "../utils/cycleAnimationTrace.js";
 
 function Editor() {
-  const { setExecutionResult, setArchitectureData, architectureData } =
-    useContext(ArchitectureContext);
+  const {
+    setExecutionResult,
+    setArchitectureData,
+    architectureData,
+    saveCodeForArchitecture,
+    loadCodeForArchitecture,
+    savedCode,
+  } = useContext(ArchitectureContext);
   const navigate = useNavigate();
   const { id } = useParams();
   const [saveFile, setSaveFile] = useState(false);
   const [openFile, setOpenFile] = useState(false);
+  const [showCountCycle, setShowCountCycle] = useState(false);
   const [code, setCode] = useState();
   const [error, setError] = useState(null);
   const [loadingRun, setLoadingRun] = useState(false);
   const [loadingArchitecture, setLoadingArchitecture] = useState(true);
 
+  const [showAnimation, setShowAnimation] = useState(false);
+  const [cycleTrace, setCycleTrace] = useState([]);
+  const [loadingAnimation, setLoadingAnimation] = useState(false);
+
+  useEffect(() => {
+    if (id) {
+      const savedCodeFromStorage = loadCodeForArchitecture(id);
+      if (savedCodeFromStorage) {
+        setCode(savedCodeFromStorage);
+      } else {
+        // Set default template code
+        setCode();
+      }
+    }
+  }, [id]);
+
+  const handleCodeChange = (newCode) => {
+    setCode(newCode);
+    if (id) {
+      saveCodeForArchitecture(id, newCode);
+    }
+  };
   // Fetch architecture data when component mounts
   useEffect(() => {
     const fetchArchitecture = async () => {
@@ -57,7 +92,7 @@ function Editor() {
   }, [id, setArchitectureData]);
 
   const handleRun = async () => {
-    if (!code.trim()) {
+    if (!code?.trim()) {
       setError(["Please enter some code to execute"]);
       return;
     }
@@ -98,15 +133,115 @@ function Editor() {
       // Set execution result and navigate
       setExecutionResult(data);
 
+      saveCodeForArchitecture(id, code);
+
       // Small delay to ensure state is updated before navigation
       setTimeout(() => {
-        navigate(`/registervis`);
+        navigate(`/regviz/${id}`);
       }, 100);
     } catch (err) {
       console.error(err);
       setError(["Execution failed: " + err.message]);
     } finally {
       setLoadingRun(false);
+    }
+  };
+
+  const handleCountCycle = () => {
+    if (!code?.trim()) {
+      setError(["Please enter some code to analyze"]);
+      return;
+    }
+    setShowCountCycle(true);
+  };
+
+  const handleAnimation = async () => {
+    if (!code?.trim()) {
+      setError(["Please enter some code to animate"]);
+      return;
+    }
+
+    try {
+      setLoadingAnimation(true);
+      setError(null);
+
+      // First, parse the code into array format for execution
+      const codeArray = code
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line !== "" && !line.startsWith(";"));
+
+      // Step 1: Execute the program to get actual execution results with flags
+      const executionResponse = await fetch(
+        `http://localhost/ComputerArchitectureToolkitAPI/api/execution/execute/${id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(codeArray),
+        },
+      );
+
+      const executionData = await executionResponse.json();
+
+      if (!executionResponse.ok) {
+        if (Array.isArray(executionData)) {
+          throw new Error(executionData.join("\n"));
+        } else if (executionData?.Errors) {
+          throw new Error(executionData.Errors.join("\n"));
+        } else {
+          throw new Error("Execution failed");
+        }
+      }
+
+      // Step 2: Fetch architecture with instructions for cycle counting
+      const archResponse = await fetch(
+        `http://localhost/ComputerArchitectureToolkitAPI/api/architecture/get-full/${id}`,
+      );
+      const archData = await archResponse.json();
+
+      if (!archResponse.ok) {
+        throw new Error("Failed to fetch architecture instructions");
+      }
+
+      // Step 3: Prepare architecture object
+      const selectedArchitecture = {
+        ...architectureData,
+        ArchitectureID: id,
+        Instructions: archData?.Instructions || archData?.instructions || [],
+      };
+
+      // Step 4: Calculate cycles first
+      const countResult = calculateCountCycle(code, selectedArchitecture);
+
+      // Step 5: Build animation trace with execution results
+      const trace = buildCycleAnimationTrace({
+        countResult,
+        architecture: selectedArchitecture,
+        executionResult: executionData, // Now executionData is defined!
+      });
+
+      setCycleTrace(trace);
+      setShowAnimation(true);
+    } catch (err) {
+      console.error("Animation error:", err);
+      setError([err.message || "Failed to build animation trace"]);
+    } finally {
+      setLoadingAnimation(false);
+    }
+  };
+
+  const handleNavigateToDebugging = () => {
+    saveCodeForArchitecture(id, code);
+    navigate(`/debugging/${id}`, { state: { code: code } });
+  };
+
+  // ✅ Handle clear editor (optional)
+  const handleClearEditor = () => {
+    if (window.confirm("Are you sure you want to clear all code?")) {
+      setCode("");
+      saveCodeForArchitecture(id, "");
     }
   };
 
@@ -199,7 +334,7 @@ function Editor() {
               )}
             </div>
 
-            <div className="flex justify-center bg-gray-100">
+            <div className="flex justify-center gap-2 bg-gray-100">
               <button
                 className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white text-xs rounded hover:bg-blue-800 transition"
                 onClick={() => navigate(`/compare/${id}`)}
@@ -207,12 +342,42 @@ function Editor() {
                 <ArrowPathIcon className="h-4 w-4" />
                 Compare
               </button>
+
+              <button
+                className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white text-xs rounded hover:bg-blue-800 transition"
+                onClick={handleCountCycle}
+                disabled={loadingAnimation}
+              >
+                <ChartBarIcon className="h-4 w-4" />
+                Count Cycle
+              </button>
+
+              {/* New Animation Button */}
+              <button
+                className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white text-xs rounded hover:bg-blue-800 transition"
+                onClick={handleAnimation}
+                disabled={loadingAnimation}
+              >
+                {loadingAnimation ? (
+                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <FilmIcon className="h-4 w-4" />
+                )}
+                {loadingAnimation ? "Loading..." : "Animation"}
+              </button>
+
+              <button
+                className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-red-700 text-white text-xs rounded hover:bg-red-600 transition"
+                onClick={handleClearEditor}
+              >
+                Clear
+              </button>
             </div>
 
             <div className="flex flex-col lg:flex-row gap-2 lg:gap-5 border rounded-lg bg-white p-3 text-sm font-mono text-gray-500">
               <textarea
                 value={code}
-                onChange={(e) => setCode(e.target.value)}
+                onChange={(e) => handleCodeChange(e.target.value)}
                 className="p-5 lg:m-5 rounded-xl bg-gray-100 w-full h-64 font-mono text-sm"
                 placeholder="Write Assembly code here..."
               />
@@ -241,6 +406,22 @@ function Editor() {
           </div>
         </div>
       </div>
+
+      {/* CountCycle Modal */}
+      <CountCycleModal
+        isOpen={showCountCycle}
+        onClose={() => setShowCountCycle(false)}
+        code={code}
+        architectureId={id}
+        architectureData={architectureData}
+      />
+
+      <CycleAnimationScreen
+        isOpen={showAnimation}
+        onClose={() => setShowAnimation(false)}
+        cycleTrace={cycleTrace}
+        architectureName={architectureData?.name || "Selected Architecture"}
+      />
 
       <BottomNavigation />
     </>

@@ -26,7 +26,7 @@ export default function UserManagement() {
     try {
       setLoading(true);
       const response = await fetch(
-        "http://localhost/ComputerArchitectureToolkitAPI/api/auth/users",
+        `${import.meta.env.VITE_API_BASE_URL}/auth/users`,
       );
 
       if (!response.ok) {
@@ -51,7 +51,7 @@ export default function UserManagement() {
       console.log(`Making user ${userId} admin...`);
       
       const response = await fetch(
-        `http://localhost/ComputerArchitectureToolkitAPI/api/auth/make-admin/${userId}`,
+        `${import.meta.env.VITE_API_BASE_URL}/auth/make-admin/${userId}`,
         {
           method: "PUT",
           headers: {
@@ -87,7 +87,7 @@ export default function UserManagement() {
       console.log(`Making user ${userId} regular user...`);
       
       const response = await fetch(
-        `http://localhost/ComputerArchitectureToolkitAPI/api/auth/make-user/${userId}`,
+        `${import.meta.env.VITE_API_BASE_URL}/auth/make-user/${userId}`,
         {
           method: "PUT",
           headers: {
@@ -151,7 +151,7 @@ export default function UserManagement() {
       console.log(`Deleting user ${userId}...`);
       
       const response = await fetch(
-        `http://localhost/ComputerArchitectureToolkitAPI/api/auth/delete-user/${userId}`,
+        `${import.meta.env.VITE_API_BASE_URL}/auth/delete-user/${userId}`,
         {
           method: "DELETE",
           headers: {

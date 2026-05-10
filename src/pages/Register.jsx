@@ -25,6 +25,7 @@ function Register() {
     const newRecord = {
       name: flagRegister,
       Action: flagAction,
+      isFlagRegister: true,  // Set to true for flag registers
     };
     setFlagRegisterList([...flagRegisterList, newRecord]);
     setFlagRegister("");
@@ -36,6 +37,7 @@ function Register() {
 
     const newRecord = {
       name: gpRegister,
+      isFlagRegister: false,  // Set to false for general purpose registers
     };
 
     setGpRegisterList([...gpRegisterList, newRecord]);
@@ -74,6 +76,7 @@ function Register() {
           <div>
             <span className="text-black">Flag Register</span>
             <input
+              value={flagRegister}
               onChange={(e) => setFlagRegister(e.target.value)}
               className="mt-2 h-8 mb-4 pl-2 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900"
               type="text"
@@ -166,6 +169,7 @@ function Register() {
             <span className="text-black">Addressing Mode</span>
             <select
               onChange={(e) => setAddressingMode(e.target.value)}
+              value={addressingMode}
               className={`mt-2 mb-4 h-8 pl-2 bg-gray-100 w-full text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900
                       ${addressingMode === "" ? "text-gray-500" : "text-black"}`}
             >
@@ -178,6 +182,7 @@ function Register() {
             <span className="text-black">Addressing Mode Code</span>
             <select
               onChange={(e) => setAddressingModeCode(e.target.value)}
+              value={addressingModeCode}
               className={`mt-2 mb-4 h-8 pl-2 bg-gray-100 w-full text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900
                       ${addressingMode === "" ? "text-gray-500" : "text-black"}`}
             >
@@ -190,6 +195,7 @@ function Register() {
 
             <span className="text-black">Symbol</span>
             <input
+              value={symbol}
               onChange={(e) => setSymbol(e.target.value)}
               className="auto-textarea mt-2 pl-2 h-8 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900"
               type="text"
@@ -236,6 +242,18 @@ function Register() {
               const registerPayload = {
                 flagRegisters: flagRegisterList,
                 generalPurposeRegisters: gpRegisterList,
+                // Combine all registers for sending to backend
+                registers: [
+                  ...flagRegisterList.map(reg => ({
+                    ...reg,
+                    isFlagRegister: true
+                  })),
+                  ...gpRegisterList.map(reg => ({
+                    ...reg,
+                    isFlagRegister: false,
+                    Action: "" // Empty action for GP registers
+                  }))
+                ]
               };
 
               setRegisterData(registerPayload);

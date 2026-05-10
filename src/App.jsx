@@ -51,7 +51,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/instruction" element={<Instruction />} />
           <Route path="/compare/:id" element={<Compare />} />
-          <Route path="/registervis" element={<RegisterVisualization />} />
+          <Route path="/regviz/:id" element={<RegisterVisualization />} />
           <Route path="/memory" element={<Memory />} />
           <Route path="/Back" element={<BackButton />} />
           <Route path="/debugging/:id" element={<Debugging />} />

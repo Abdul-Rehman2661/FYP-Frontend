@@ -19,6 +19,7 @@ import { ArchitectureContext } from "../context/ArchitectureContext";
 function Detail() {
   const { id } = useParams();
 
+  const { setRegisterData } = useContext(ArchitectureContext);
   const { setArchitectureData } = useContext(ArchitectureContext);
   const [architecture, setArchitecture] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -27,7 +28,7 @@ function Detail() {
     const fetchDetails = async () => {
       try {
         const res = await axios.get(
-          `http://localhost/ComputerArchitectureToolkitAPI/api/architecture/get-full/${id}`,
+          `${import.meta.env.VITE_API_BASE_URL}/architecture/get-full/${id}`,
         );
 
         const data = res.data;
@@ -38,6 +39,9 @@ function Detail() {
           busSize: data?.Architecture?.BusSize || 0,
           name: data?.Architecture?.Name || "",
         });
+
+        // 🔥 ADD THIS LINE (MAIN FIX)
+        setRegisterData(data?.Registers || []);
         // 🔥 Mapping backend → frontend
         setArchitecture({
           name: data?.Architecture?.Name || "",
@@ -49,6 +53,7 @@ function Detail() {
             name: r.Name || "",
             size: r.RegisterSize || "",
             action: r.Action || "",
+            IsFlagRegister: r.IsFlagRegister,
           })),
 
           instructions: (data?.Instructions || []).map((i) => ({
@@ -100,6 +105,8 @@ function Detail() {
     );
   }
 
+  console.log(architecture.registers);
+
   return (
     <>
       <Header />
@@ -130,27 +137,31 @@ function Detail() {
         icon={<CircleStackIcon className="w-6 h-6" />}
       >
         {/* Flag Registers */}
-        {/* <Table
+        <Table
           title="Flag Registers"
-          headers={["Name", "Size"]}
-          data={architecture.flagRegister}
+          headers={["Name", "Action"]}
+          data={architecture.registers?.filter(
+            (reg) => reg.IsFlagRegister === true,
+          )}
           renderRow={(item, i) => (
             <tr key={i}>
               <td className="px-4 py-3 border border-blue-100 text-black text-left">
                 {item.name}
               </td>
               <td className="px-4 py-3 border border-blue-100 text-black text-left">
-                {item.size}
+                {item.action}
               </td>
             </tr>
           )}
-        /> */}
+        />
 
-        {/* General Registers */}
+        {/* General Purpose Registers */}
         <Table
           title="General Purpose Registers"
           headers={["Name", "Size"]}
-          data={architecture.registers}
+          data={architecture.registers?.filter(
+            (reg) => reg.IsFlagRegister === false,
+          )}
           renderRow={(item, i) => (
             <tr key={i}>
               <td className="px-4 py-3 border border-blue-100 text-black text-left">

@@ -18,13 +18,13 @@ function Debugging() {
 
   const [registerMeta, setRegisterMeta] = useState([]);
   const [registers, setRegisters] = useState([]);
-  
+
   // Flag state: [Carry, Overflow, Sign, Zero] - Matches backend indices
   const [flags, setFlags] = useState([0, 0, 0, 0]);
-  
+
   // Track previous flags for highlighting changes
   const [prevFlags, setPrevFlags] = useState([0, 0, 0, 0]);
-  
+
   const [loadingStep, setLoadingStep] = useState(false);
   const [loadingRun, setLoadingRun] = useState(false);
   const [code, setCode] = useState("");
@@ -37,15 +37,31 @@ function Debugging() {
     CARRY: 0,
     OVERFLOW: 1,
     SIGN: 2,
-    ZERO: 3
+    ZERO: 3,
   };
 
   // Flag display names and descriptions
   const flagConfig = [
-    { name: "Carry (CF)", description: "Set on unsigned overflow/borrow", index: FLAG_INDICES.CARRY },
-    { name: "Overflow (OF)", description: "Set on signed overflow", index: FLAG_INDICES.OVERFLOW },
-    { name: "Sign (SF)", description: "Set when result is negative", index: FLAG_INDICES.SIGN },
-    { name: "Zero (ZF)", description: "Set when result is zero", index: FLAG_INDICES.ZERO }
+    {
+      name: "Carry (CF)",
+      description: "Set on unsigned overflow/borrow",
+      index: FLAG_INDICES.CARRY,
+    },
+    {
+      name: "Overflow (OF)",
+      description: "Set on signed overflow",
+      index: FLAG_INDICES.OVERFLOW,
+    },
+    {
+      name: "Sign (SF)",
+      description: "Set when result is negative",
+      index: FLAG_INDICES.SIGN,
+    },
+    {
+      name: "Zero (ZF)",
+      description: "Set when result is zero",
+      index: FLAG_INDICES.ZERO,
+    },
   ];
 
   // Helper to check if a flag changed
@@ -58,7 +74,7 @@ function Debugging() {
     if (hasChanged) {
       return "bg-green-100 text-green-700 border-green-500 font-bold";
     }
-    return value === 1 
+    return value === 1
       ? "bg-blue-100 text-blue-700 border-blue-300 font-bold"
       : "bg-white text-gray-500 border-gray-200";
   };
@@ -75,22 +91,22 @@ function Debugging() {
         const allRegisters = res.data?.Registers || [];
         // Filter only general purpose registers (IsFlagRegister === false)
         const generalRegisters = allRegisters.filter(
-          (r) => r.IsFlagRegister === false
+          (r) => r.IsFlagRegister === false,
         );
-        
+
         // Sort by RegisterID
         const sortedGeneral = [...generalRegisters].sort(
-          (a, b) => a.RegisterID - b.RegisterID
+          (a, b) => a.RegisterID - b.RegisterID,
         );
 
         setRegisterMeta(sortedGeneral);
-        
+
         // Initialize registers state with values from metadata
         setRegisters(
           sortedGeneral.map((reg) => ({
             name: reg.Name,
             value: 0,
-          }))
+          })),
         );
       } catch (err) {
         console.error(err);
@@ -119,12 +135,12 @@ function Debugging() {
   // Update flags from backend response
   const updateFlagsFromResponse = (data) => {
     const newFlags = [
-      data.Flags?.[FLAG_INDICES.CARRY] ? 1 : 0,      // Carry
-      data.Flags?.[FLAG_INDICES.OVERFLOW] ? 1 : 0,  // Overflow
-      data.Flags?.[FLAG_INDICES.SIGN] ? 1 : 0,      // Sign
-      data.Flags?.[FLAG_INDICES.ZERO] ? 1 : 0,      // Zero
+      data.Flags?.[FLAG_INDICES.CARRY] ? 1 : 0, // Carry
+      data.Flags?.[FLAG_INDICES.OVERFLOW] ? 1 : 0, // Overflow
+      data.Flags?.[FLAG_INDICES.SIGN] ? 1 : 0, // Sign
+      data.Flags?.[FLAG_INDICES.ZERO] ? 1 : 0, // Zero
     ];
-    
+
     // Save previous flags for highlighting
     setPrevFlags([...flags]);
     setFlags(newFlags);
@@ -150,8 +166,11 @@ function Debugging() {
       setRegisters((prev) =>
         prev.map((reg, index) => ({
           ...reg,
-          value: data.Registers?.[index] !== undefined ? data.Registers[index] : reg.value,
-        }))
+          value:
+            data.Registers?.[index] !== undefined
+              ? data.Registers[index]
+              : reg.value,
+        })),
       );
 
       // Update flags with highlighting support
@@ -187,8 +206,11 @@ function Debugging() {
       setRegisters((prev) =>
         prev.map((reg, index) => ({
           ...reg,
-          value: data.Registers?.[index] !== undefined ? data.Registers[index] : reg.value,
-        }))
+          value:
+            data.Registers?.[index] !== undefined
+              ? data.Registers[index]
+              : reg.value,
+        })),
       );
 
       // Update flags with highlighting support
@@ -211,7 +233,7 @@ function Debugging() {
     setStep(0);
     setError("");
     setOutput("");
-    
+
     // Reset context as well
     setExecutionResult(null);
 
@@ -220,7 +242,7 @@ function Debugging() {
       prev.map((reg) => ({
         ...reg,
         value: 0,
-      }))
+      })),
     );
 
     // Reset flags to 0
@@ -243,8 +265,10 @@ function Debugging() {
         <div className="p-4 bg-gray-100 pb-16 min-h-screen p-6">
           <div className="bg-white rounded-xl shadow border p-6">
             <div className="flex gap-4 sm:gap-2 ">
-              <button 
-                onClick={() => navigate(`/editor/${id}`, { state: { code: code } })}
+              <button
+                onClick={() =>
+                  navigate(`/editor/${id}`, { state: { code: code } })
+                }
                 className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white hover:bg-blue-800 rounded-lg border border-blue-900 text-xs rounded font-bold"
               >
                 <ArrowLeftIcon className="h-4 w-4" />
@@ -325,12 +349,33 @@ function Debugging() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-5">
-              <div className="mt-5">
+              {/* <div className="mt-5">
                 <p className="text-sm text-gray-700 mb-2">Error Display</p>
                 <div className="p-4 bg-red-100 rounded-xl bg-gray-100 w-full focus:ring-gray-300">
                   <p className="text-red-500">
                     {error || "No error Detected.."}
                   </p>
+                </div>
+              </div> */}
+
+              <div className="bg-blue-50 rounded-lg p-3 mt-5 lg:w-* w-full">
+                <p className="text-sm font-semibold text-gray-700 mb-1">
+                  Error Display
+                </p>
+                <div className="bg-white border rounded-md p-2 h-20 text-sm overflow-y-auto">
+                  {error ? (
+                    Array.isArray(error) ? (
+                      error.map((e, i) => (
+                        <p key={i} className="text-red-500">
+                          ❌ {e}
+                        </p>
+                      ))
+                    ) : (
+                      <p className="text-red-500">❌ {error}</p>
+                    )
+                  ) : (
+                    <p className="text-green-500"></p>
+                  )}
                 </div>
               </div>
 
@@ -342,7 +387,7 @@ function Debugging() {
                     {flagConfig.map((flag) => {
                       const flagValue = flags[flag.index];
                       const hasChanged = isFlagChanged(flag.index);
-                      
+
                       return (
                         <div key={flag.name} className="text-center">
                           <p className="text-xs text-gray-700 mb-1 font-medium">

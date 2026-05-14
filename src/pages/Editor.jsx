@@ -3,7 +3,6 @@ import Header from "../components/Header.jsx";
 import BottomNavigation from "../components/BottomNavigation.jsx";
 import SaveFile from "../components/SaveFile.jsx";
 import OpenFile from "../components/OpenFile.jsx";
-import CountCycleModal from "../components/CountCycleModal.jsx";
 import {
   PlayIcon,
   ArrowPathIcon,
@@ -31,7 +30,6 @@ function Editor() {
   const { id } = useParams();
   const [saveFile, setSaveFile] = useState(false);
   const [openFile, setOpenFile] = useState(false);
-  const [showCountCycle, setShowCountCycle] = useState(false);
   const [code, setCode] = useState();
   const [error, setError] = useState(null);
   const [loadingRun, setLoadingRun] = useState(false);
@@ -40,6 +38,12 @@ function Editor() {
   const [showAnimation, setShowAnimation] = useState(false);
   const [cycleTrace, setCycleTrace] = useState([]);
   const [loadingAnimation, setLoadingAnimation] = useState(false);
+
+  // Count Cycle states
+  const [loadingCycle, setLoadingCycle] = useState(false);
+  const [cycleResult, setCycleResult] = useState(null);
+  const [cycleError, setCycleError] = useState(null);
+  const [showCycleResult, setShowCycleResult] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -147,12 +151,43 @@ function Editor() {
     }
   };
 
-  const handleCountCycle = () => {
+  const handleCountCycle = async () => {
+    setShowCycleResult(true);
     if (!code?.trim()) {
       setError(["Please enter some code to analyze"]);
       return;
     }
-    setShowCountCycle(true);
+
+    try {
+      setLoadingCycle(true);
+      setCycleError(null);
+
+      // Fetch instructions for this architecture
+      const response = await fetch(
+        `http://localhost/ComputerArchitectureToolkitAPI/api/architecture/get-full/${id}`,
+      );
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch architecture instructions");
+      }
+
+      // Prepare architecture object with instructions
+      const selectedArchitecture = {
+        ...architectureData,
+        ArchitectureID: id,
+        Instructions: data?.Instructions || data?.instructions || [],
+      };
+
+      // Calculate cycles
+      const cycleResult = calculateCountCycle(code, selectedArchitecture);
+      setCycleResult(cycleResult);
+    } catch (err) {
+      console.error("Cycle calculation error:", err);
+      setCycleError(err.message || "Failed to calculate cycles");
+    } finally {
+      setLoadingCycle(false);
+    }
   };
 
   const handleAnimation = async () => {
@@ -242,6 +277,8 @@ function Editor() {
     if (window.confirm("Are you sure you want to clear all code?")) {
       setCode("");
       saveCodeForArchitecture(id, "");
+      setCycleResult(null);
+      setCycleError(null);
     }
   };
 
@@ -343,17 +380,21 @@ function Editor() {
                 Compare
               </button>
 
-              <button
+              {/* <button
                 className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white text-xs rounded hover:bg-blue-800 transition"
                 onClick={handleCountCycle}
-                disabled={loadingAnimation}
+                disabled={loadingCycle}
               >
-                <ChartBarIcon className="h-4 w-4" />
-                Count Cycle
-              </button>
+                {loadingCycle ? (
+                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <ChartBarIcon className="h-4 w-4" />
+                )}
+                {loadingCycle ? "Calculating..." : "Count Cycle"}
+              </button> */}
 
               {/* New Animation Button */}
-              <button
+              {/* <button
                 className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white text-xs rounded hover:bg-blue-800 transition"
                 onClick={handleAnimation}
                 disabled={loadingAnimation}
@@ -364,7 +405,7 @@ function Editor() {
                   <FilmIcon className="h-4 w-4" />
                 )}
                 {loadingAnimation ? "Loading..." : "Animation"}
-              </button>
+              </button> */}
 
               <button
                 className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-red-700 text-white text-xs rounded hover:bg-red-600 transition"
@@ -398,23 +439,85 @@ function Editor() {
                       <p className="text-red-500">❌ {error}</p>
                     )
                   ) : (
-                    <p className="text-green-500">✓ No errors</p>
+                    <p className="text-green-500"></p>
                   )}
                 </div>
               </div>
             </div>
+
+            {/* Count Cycle Results Section */}
+            {showCycleResult && (
+              <div className="border rounded-lg bg-white p-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <ChartBarIcon className="h-5 w-5 text-blue-900" />
+                  Count Cycle Results
+                </h3>
+
+                {loadingCycle && (
+                  <div className="flex flex-col items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-900 mb-3"></div>
+                    <p className="text-gray-600 text-sm">
+                      Calculating cycles...
+                    </p>
+                  </div>
+                )}
+
+                {cycleError && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <p className="text-red-600 font-semibold text-sm">Error:</p>
+                    <pre className="text-xs text-red-500 mt-2 whitespace-pre-wrap">
+                      {cycleError}
+                    </pre>
+                  </div>
+                )}
+
+                {cycleResult && !loadingCycle && (
+                  <div className="mb-20 space-y-4">
+                    <div className="text-center py-6">
+                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
+                        <svg
+                          className="w-8 h-8 text-green-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      </div>
+
+                      <p className="text-gray-700 text-base mb-1">
+                        Program Executed in
+                      </p>
+
+                      <p className="text-4xl font-bold text-blue-900 mb-2">
+                        {cycleResult.totalCycles}
+                      </p>
+
+                      <p className="text-gray-500 text-sm">
+                        cycle{cycleResult.totalCycles !== 1 ? "s" : ""}
+                      </p>
+                    </div>
+
+                    <div className="bg-gray-50 rounded-lg p-3 text-center">
+                      <p className="text-xs text-gray-500">
+                        Total Instructions:
+                        <span className="font-semibold text-gray-700">
+                          {cycleResult.instructionCount}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
-
-      {/* CountCycle Modal */}
-      <CountCycleModal
-        isOpen={showCountCycle}
-        onClose={() => setShowCountCycle(false)}
-        code={code}
-        architectureId={id}
-        architectureData={architectureData}
-      />
 
       <CycleAnimationScreen
         isOpen={showAnimation}

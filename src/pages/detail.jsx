@@ -176,16 +176,51 @@ function Detail() {
       </Card>
 
       {/* ================= NEW: INSTRUCTION DETAILED CARDS ================= */}
-      <Card
-        title="Instruction Set"
-        icon={<DocumentTextIcon className="w-6 h-6" />}
-      >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {architecture.instructions.map((instruction, idx) => (
-            <InstructionDetailCard key={idx} instruction={instruction} />
-          ))}
-        </div>
-      </Card>
+<Card
+  title="Instruction Set"
+  icon={<DocumentTextIcon className="w-6 h-6" />}
+>
+  <div className="overflow-x-auto">
+    <table className="w-full border-collapse">
+      <thead className="bg-blue-100">
+        <tr>
+          <th className="px-4 py-3 text-left font-semibold text-blue-900">Mnemonic</th>
+          <th className="px-4 py-3 text-left font-semibold text-blue-900">Opcode</th>
+          <th className="px-4 py-3 text-left font-semibold text-blue-900">Micro Operation</th>
+          <th className="px-4 py-3 text-left font-semibold text-blue-900"># of Operands</th>
+          <th className="px-4 py-3 text-left font-semibold text-blue-900">Destination Operand</th>
+          <th className="px-4 py-3 text-left font-semibold text-blue-900">Interrupt Symbol</th>
+          <th className="px-4 py-3 text-left font-semibold text-blue-900">Output Register</th>
+          <th className="px-4 py-3 text-left font-semibold text-blue-900">Input Register</th>
+        </tr>
+      </thead>
+      <tbody>
+        {architecture.instructions.map((instruction, idx) => (
+          <tr key={idx} className="border-b border-blue-100 hover:bg-blue-50/50 transition-all duration-200">
+            <td className="px-4 py-3 font-semibold text-black">{instruction.mnemonic}</td>
+            <td className="px-4 py-3 font-mono text-sm text-black">{instruction.opcode}</td>
+            <td className="px-4 py-3 text-sm text-black">{instruction.action || "—"}</td>
+            <td className="px-4 py-3 text-sm text-black">{instruction.noOfOperands || "—"}</td>
+            <td className="px-4 py-3 text-sm text-black">
+              {instruction.destinationOperand !== null ? instruction.destinationOperand : "—"}
+            </td>
+            <td className="px-4 py-3 text-sm text-black">
+              {instruction.interruptSymbol && instruction.interruptSymbol !== "NULL" 
+                ? instruction.interruptSymbol 
+                : "—"}
+            </td>
+            <td className="px-4 py-3 text-sm text-black">
+              {instruction.outputRegister || "—"}
+            </td>
+            <td className="px-4 py-3 text-sm text-black">
+              {instruction.inputRegister || "—"}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</Card>
 
       {/* ================= ADDRESSING ================= */}
       <Card

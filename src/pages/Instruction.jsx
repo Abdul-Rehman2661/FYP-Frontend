@@ -25,6 +25,17 @@ export default function Instruction() {
     { id: 1, type: "Register", selected: false },
   ]);
 
+  const {
+    architectureData,
+    registerData,
+    addressingModesData,
+    setInstructionData,
+  } = useContext(ArchitectureContext);
+
+  // Get the maximum number of instructions from architecture data
+  const maxInstructions = architectureData?.noOfInstructions || 0;
+  const currentInstructionsCount = addedInstructions.length;
+
   useEffect(() => {
     if (inputRegister && inputRegister === outputRegister) {
       setOutputRegister("");
@@ -38,10 +49,53 @@ export default function Instruction() {
   }, [outputRegister]);
 
   const DisplayInstruction = () => {
-    if (!opcode || !mnemonic || !action) return;
+    // Check if adding this instruction would exceed the limit
+    if (currentInstructionsCount + 1 > maxInstructions) {
+      toast.error(`Cannot add more instructions. Maximum limit is ${maxInstructions} instructions (${currentInstructionsCount} already added).`);
+      return;
+    }
+
+    // Validation only for Opcode, Mnemonic, and Action
+    if (!opcode || !opcode.trim()) {
+      toast.error("Please enter Opcode");
+      return;
+    }
+    
+    if (!mnemonic || !mnemonic.trim()) {
+      toast.error("Please enter Mnemonic");
+      return;
+    }
+    
+    if (!action || !action.trim()) {
+      toast.error("Please enter Action (Java Code)");
+      return;
+    }
+
+    // Check for duplicate opcode
+    const isDuplicateOpcode = addedInstructions.some(
+      (item) => item.opcode.toLowerCase() === opcode.trim().toLowerCase()
+    );
+    
+    if (isDuplicateOpcode) {
+      toast.error(`Opcode "${opcode}" already exists. Please use a unique opcode.`);
+      return;
+    }
+    
+    // Check for duplicate mnemonic
+    const isDuplicateMnemonic = addedInstructions.some(
+      (item) => item.mnemonic.toLowerCase() === mnemonic.trim().toLowerCase()
+    );
+    
+    if (isDuplicateMnemonic) {
+      toast.error(`Mnemonic "${mnemonic}" already exists. Please use a unique mnemonic.`);
+      return;
+    }
 
     if (isInterrupt) {
-      if (!interruptSymbol || !inputRegister || !outputRegister) return;
+      if (!interruptSymbol || !inputRegister || !outputRegister) {
+        toast.error("Please fill all interrupt instruction fields");
+        return;
+      }
     }
 
     const newRecord = {
@@ -68,6 +122,7 @@ export default function Instruction() {
     setOutputRegister("");
     setOperands([{ id: 1, type: "Register", selected: false }]);
 
+    toast.success(`Instruction "${mnemonic}" added successfully! (${currentInstructionsCount + 1}/${maxInstructions} instructions used)`);
     console.log("New Record:", newRecord);
   };
 
@@ -102,16 +157,13 @@ export default function Instruction() {
     setOperands(operands.filter((op) => op.id !== id));
   };
 
-  const {
-    architectureData,
-    registerData,
-    addressingModesData,
-    setInstructionData,
-  } = useContext(ArchitectureContext);
-
-  
-
   const handleCreate = async () => {
+    // Validate that at least one instruction is added
+    if (addedInstructions.length === 0) {
+      toast.error("Please add at least one instruction before creating architecture");
+      return;
+    }
+    
     try {
       const flatRegisters = [
         ...(registerData.flagRegisters || []),
@@ -219,6 +271,17 @@ export default function Instruction() {
         <h2 className="text-blue-900 text-xl text-center font-bold">
           Instruction Design
         </h2>
+        
+        {/* Show Instruction Limit Info */}
+        {maxInstructions > 0 && (
+          <div className="mt-4 mb-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-sm text-blue-900">
+              <span className="font-semibold">Instruction Limit:</span> You can add up to {maxInstructions} instructions. 
+              Currently added: <span className="font-semibold">{currentInstructionsCount}</span>/{maxInstructions}
+            </p>
+          </div>
+        )}
+        
         <div className="mt-4 mb-20 bg-white shadow p-4 rounded-xl">
           <div className="mb-6">
             <span className="text-black">Interrupt Instruction</span>
@@ -239,6 +302,7 @@ export default function Instruction() {
               <input
                 className="mt-2 h-8 mb-5 pl-2 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900 "
                 type="text"
+                value={opcode}
                 onChange={(e) => setOpcode(e.target.value)}
                 placeholder="Enter Instruction Code e.g (01)"
               />
@@ -383,11 +447,11 @@ export default function Instruction() {
           {addedInstructions.length > 0 && (
             <div className="mt-6 mb-3 border rounded-md p-4 text-black text-sm bg-gray-50">
               <h3 className="text-blue-900 font-semibold mb-2">
-                Added Instructions
+                Added Instructions ({addedInstructions.length}/{maxInstructions})
               </h3>
 
               {addedInstructions.map((item, index) => (
-                <div key={index} className="mb-2">
+                <div key={index} className="mb-2 border-b border-gray-200 pb-2">
                   <span className="flex ">
                     <p className="text-blue-900 mr-1">OpCode:</p>
                     <p>{item.opcode}</p>
@@ -405,17 +469,17 @@ export default function Instruction() {
 
                   <span className="flex ">
                     <p className="text-blue-900 mr-1">Interrupt Symbol:</p>
-                    <p>{item.interruptSymbol}</p>
+                    <p>{item.interruptSymbol || "—"}</p>
                   </span>
 
                   <span className="flex ">
                     <p className="text-blue-900 mr-1">Input Register:</p>
-                    <p>{item.inputRegister}</p>
+                    <p>{item.inputRegister || "—"}</p>
                   </span>
 
                   <span className="flex ">
                     <p className="text-blue-900 mr-1">Output Register:</p>
-                    <p>{item.outputRegister}</p>
+                    <p>{item.outputRegister || "—"}</p>
                   </span>
 
                   <p className="flex text-black mb-4">
@@ -432,12 +496,17 @@ export default function Instruction() {
             </div>
           )}
 
-          {/* ADD Button */}
+          {/* ADD Button - Disable if max limit reached */}
           <button
             onClick={DisplayInstruction}
-            className="w-full bg-blue-900 text-white py-2 rounded-md mt-4 hover:bg-blue-800"
+            disabled={currentInstructionsCount >= maxInstructions && maxInstructions > 0}
+            className={`w-full py-2 rounded-md mt-4 transition ${
+              currentInstructionsCount >= maxInstructions && maxInstructions > 0
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-900 hover:bg-blue-800 text-white"
+            }`}
           >
-            ADD
+            ADD {currentInstructionsCount >= maxInstructions && maxInstructions > 0 && "(Limit Reached)"}
           </button>
 
           {/* Create Architecture Button */}

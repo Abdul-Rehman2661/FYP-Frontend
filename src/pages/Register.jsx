@@ -4,6 +4,7 @@ import BottomNavigation from "../components/BottomNavigation.jsx";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useContext } from "react";
 import { ArchitectureContext } from "../context/ArchitectureContext.jsx";
+import { toast, Toaster } from "react-hot-toast";
 
 function Register() {
   const [flagRegister, setFlagRegister] = useState("");
@@ -15,57 +16,193 @@ function Register() {
   const [addressingModeList, setAddressingModeList] = useState([]);
   const [gpRegister, setGpRegister] = useState("");
   const [gpRegisterList, setGpRegisterList] = useState([]);
-  const { setRegisterData, setAddressingModesData } =
+  const { setRegisterData, setAddressingModesData, architectureData } =
     useContext(ArchitectureContext);
 
   const navigate = useNavigate();
 
+  // Get the maximum number of registers from architecture data
+  const maxRegisters = architectureData?.noOfRegisters || 0;
+  const currentTotalRegisters = flagRegisterList.length + gpRegisterList.length;
+
   const handleAddedFR = () => {
     if (!flagRegister || !flagAction) return;
+    
+    // Check if adding this flag register would exceed the limit
+    if (currentTotalRegisters + 1 > maxRegisters) {
+      toast.error(`Cannot add more registers. Maximum limit is ${maxRegisters} registers (${currentTotalRegisters} already added).`);
+      return;
+    }
+    
     const newRecord = {
       name: flagRegister,
       Action: flagAction,
-      isFlagRegister: true,  // Set to true for flag registers
+      isFlagRegister: true,
     };
     setFlagRegisterList([...flagRegisterList, newRecord]);
     setFlagRegister("");
     setFlagAction("");
+    toast.success(`Flag Register "${flagRegister}" added. (${currentTotalRegisters + 1}/${maxRegisters} registers used)`);
   };
 
+  // Validation for General Purpose Register
   const handleGP = () => {
-    if (!gpRegister) return;
+    if (!gpRegister.trim()) {
+      toast.error("Please enter General Purpose Register name");
+      return;
+    }
+
+    // Check if adding this GP register would exceed the limit
+    if (currentTotalRegisters + 1 > maxRegisters) {
+      toast.error(`Cannot add more registers. Maximum limit is ${maxRegisters} registers (${currentTotalRegisters} already added).`);
+      return;
+    }
+
+    // Check for duplicate GP register
+    const isDuplicate = gpRegisterList.some(
+      (item) => item.name.toLowerCase() === gpRegister.trim().toLowerCase(),
+    );
+
+    if (isDuplicate) {
+      toast.error(`General Purpose Register "${gpRegister}" already exists`);
+      return;
+    }
 
     const newRecord = {
       name: gpRegister,
-      isFlagRegister: false,  // Set to false for general purpose registers
+      isFlagRegister: false,
     };
-
     setGpRegisterList([...gpRegisterList, newRecord]);
     setGpRegister("");
+    toast.success(`General Purpose Register "${gpRegister}" added. (${currentTotalRegisters + 1}/${maxRegisters} registers used)`);
   };
 
+  // Validation for Addressing Modes
   const handleModes = () => {
-    if (!addressingMode || !addressingModeCode || !symbol) return;
+    if (!addressingMode) {
+      toast.error("Please select Addressing Mode");
+      return;
+    }
+
+    if (!addressingModeCode) {
+      toast.error("Please select Addressing Mode Code");
+      return;
+    }
+
+    if (!symbol.trim()) {
+      toast.error("Please enter Symbol (e.g., #, @, etc.)");
+      return;
+    }
+
+    // Check for duplicate addressing mode
+    const isDuplicate = addressingModeList.some(
+      (item) =>
+        item.mode.toLowerCase() === addressingMode.toLowerCase() &&
+        item.code === addressingModeCode,
+    );
+
+    if (isDuplicate) {
+      toast.error(
+        `Addressing Mode "${addressingMode}" with code "${addressingModeCode}" already exists`,
+      );
+      return;
+    }
 
     const newRecord = {
       mode: addressingMode,
       code: addressingModeCode,
       sym: symbol,
     };
-
     setAddressingModeList([...addressingModeList, newRecord]);
     setAddressingMode("");
     setAddressingModeCode("");
     setSymbol("");
+    toast.success(`Addressing Mode "${addressingMode}" added successfully`);
+  };
+
+  // Validation for Next button
+  const handleNext = () => {
+    // Check if at least one general purpose register is added
+    if (gpRegisterList.length === 0) {
+      toast.error("Please add at least one General Purpose Register");
+      return;
+    }
+
+    // Check if at least one addressing mode is added
+    if (addressingModeList.length === 0) {
+      toast.error("Please add at least one Addressing Mode");
+      return;
+    }
+
+    const registerPayload = {
+      flagRegisters: flagRegisterList,
+      generalPurposeRegisters: gpRegisterList,
+      registers: [
+        ...flagRegisterList.map((reg) => ({
+          ...reg,
+          isFlagRegister: true,
+        })),
+        ...gpRegisterList.map((reg) => ({
+          ...reg,
+          isFlagRegister: false,
+          Action: "",
+        })),
+      ],
+    };
+
+    setRegisterData(registerPayload);
+    setAddressingModesData(addressingModeList);
+
+    console.log("Register Data:", registerPayload);
+    console.log("Addressing Modes:", addressingModeList);
+
+    toast.success("Proceeding to next step...");
+    setTimeout(() => {
+      navigate("/instruction");
+    }, 500);
   };
 
   return (
     <>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: "#363636",
+            color: "#fff",
+          },
+          success: {
+            duration: 3000,
+            iconTheme: {
+              primary: "#10B981",
+              secondary: "#fff",
+            },
+          },
+          error: {
+            duration: 4000,
+            iconTheme: {
+              primary: "#EF4444",
+              secondary: "#fff",
+            },
+          },
+        }}
+      />
       <Header />
       <div className="pt-20 lg:pt-24 pb-16">
         <h2 className="text-blue-900 text-xl text-center font-bold">
           Register Design
         </h2>
+        
+        {/* Show Register Limit Info */}
+        {maxRegisters > 0 && (
+          <div className="mx-6 mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-sm text-blue-900">
+              <span className="font-semibold">Register Limit:</span> You can add up to {maxRegisters} registers total 
+              (Flag + General Purpose). Currently added: <span className="font-semibold">{currentTotalRegisters}</span>/{maxRegisters}
+            </p>
+          </div>
+        )}
 
         {/* Add Register Card */}
         <div className="m-6 p-6 shadow-md rounded-xl bg-white border border-gray-200">
@@ -95,7 +232,7 @@ function Register() {
             {flagRegisterList.length > 0 && (
               <div className="bg-gray-100 border mt-4 rounded-sm text-sm">
                 <p className="font-semibold text-blue-900 m-2">
-                  Added Flag Registers
+                  Added Flag Registers ({flagRegisterList.length})
                 </p>
 
                 {flagRegisterList.map((item, index) => (
@@ -137,7 +274,7 @@ function Register() {
             {gpRegisterList.length > 0 && (
               <div className="bg-gray-100 m-2 border rounded-sm">
                 <p className="text-black text-sm m-2 font-semibold text-blue-900">
-                  Added General Purpose
+                  Added General Purpose ({gpRegisterList.length})
                 </p>
                 {gpRegisterList.map((item, index) => (
                   <div key={index}>
@@ -205,11 +342,14 @@ function Register() {
             {addressingModeList.length > 0 && (
               <div className="bg-gray-100 border mt-4 rounded-sm text-sm">
                 <p className="font-semibold text-blue-900 m-2">
-                  Added Addressing Modes
+                  Added Addressing Modes ({addressingModeList.length})
                 </p>
 
                 {addressingModeList.map((item, index) => (
-                  <div key={index} className="text-black m-2">
+                  <div
+                    key={index}
+                    className="text-black m-2 border-t border-gray-300 pt-2"
+                  >
                     <span className="flex ">
                       <p className="text-blue-900 mr-1">Mode:</p>
                       <p>{item.mode}</p>
@@ -238,33 +378,7 @@ function Register() {
         <div className="p-4">
           <button
             className="w-full h-10 text-white bg-blue-900 rounded-lg text-center font-semibold hover:bg-blue-800 transition"
-            onClick={() => {
-              const registerPayload = {
-                flagRegisters: flagRegisterList,
-                generalPurposeRegisters: gpRegisterList,
-                // Combine all registers for sending to backend
-                registers: [
-                  ...flagRegisterList.map(reg => ({
-                    ...reg,
-                    isFlagRegister: true
-                  })),
-                  ...gpRegisterList.map(reg => ({
-                    ...reg,
-                    isFlagRegister: false,
-                    Action: "" // Empty action for GP registers
-                  }))
-                ]
-              };
-
-              setRegisterData(registerPayload);
-
-              setAddressingModesData(addressingModeList);
-
-              console.log("Register Data:", registerPayload);
-              console.log("Addressing Modes:", addressingModeList);
-
-              navigate("/instruction");
-            }}
+            onClick={handleNext}
           >
             Next
           </button>

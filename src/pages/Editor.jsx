@@ -95,61 +95,97 @@ function Editor() {
     }
   }, [id, setArchitectureData]);
 
-  const handleRun = async () => {
-    if (!code?.trim()) {
-      setError(["Please enter some code to execute"]);
+const handleRun = async () => {
+  if (!code?.trim()) {
+    setError(["Please enter some code to execute"]);
+    return;
+  }
+
+  try {
+    setLoadingRun(true);
+    setError(null);
+
+    const codeArray = code
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line !== "" && !line.startsWith(";"));
+
+    const res = await fetch(
+      `http://localhost/ComputerArchitectureToolkitAPI/api/execution/execute/${id}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(codeArray),
+      },
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      if (Array.isArray(data)) {
+        setError(data);
+      } else if (data?.Errors) {
+        setError(data.Errors);
+      } else {
+        setError(["Execution failed"]);
+      }
       return;
     }
 
-    try {
-      setLoadingRun(true);
-      setError(null);
+    setExecutionResult(data);
+    saveCodeForArchitecture(id, code);
 
-      const codeArray = code
-        .split("\n")
-        .map((line) => line.trim())
-        .filter((line) => line !== "" && !line.startsWith(";"));
-
-      const res = await fetch(
-        `http://localhost/ComputerArchitectureToolkitAPI/api/execution/execute/${id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(codeArray),
-        },
-      );
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        if (Array.isArray(data)) {
-          setError(data);
-        } else if (data?.Errors) {
-          setError(data.Errors);
-        } else {
-          setError(["Execution failed"]);
-        }
-        return;
+    // EXTRACT THE ACTUAL RESULT FROM REGISTER CHANGES
+    let simpleOutput = "";
+    
+    // Parse the instruction to know which register to read
+    const firstLine = codeArray[0];
+    const parts = firstLine.split(/\s+/);
+    const mnemonic = parts[0].toUpperCase();
+    const destRegister = parts[1]?.replace(',', '');
+    
+    // Check if response contains updated register values
+    if (data.registers && destRegister) {
+      // Get the updated value of destination register
+      const updatedValue = data.registers[destRegister];
+      if (updatedValue !== undefined) {
+        simpleOutput = String(updatedValue);
       }
-
-      // Set execution result and navigate
-      setExecutionResult(data);
-
-      saveCodeForArchitecture(id, code);
-
-      // Small delay to ensure state is updated before navigation
-      setTimeout(() => {
-        navigate(`/regviz/${id}`);
-      }, 100);
-    } catch (err) {
-      console.error(err);
-      setError(["Execution failed: " + err.message]);
-    } finally {
-      setLoadingRun(false);
     }
-  };
+    // Check if response contains results array
+    else if (data.results && Array.isArray(data.results)) {
+      simpleOutput = data.results[0];
+    }
+    // Check if response contains direct result
+    else if (data.result !== undefined) {
+      simpleOutput = String(data.result);
+    }
+    // Check if response contains output
+    else if (data.output) {
+      simpleOutput = data.output;
+    }
+    // Fallback
+    else {
+      simpleOutput = "No result available";
+    }
+
+    navigate(`/regviz/${id}`, { 
+      state: { 
+        executionOutput: simpleOutput,
+        code: code,
+        registers: data.registers // Pass registers for visualization
+      } 
+    });
+    
+  } catch (err) {
+    console.error(err);
+    setError(["Execution failed: " + err.message]);
+  } finally {
+    setLoadingRun(false);
+  }
+};
 
   const handleCountCycle = async () => {
     setShowCycleResult(true);
@@ -407,12 +443,12 @@ function Editor() {
                 {loadingAnimation ? "Loading..." : "Animation"}
               </button> */}
 
-              <button
+              {/* <button
                 className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-red-700 text-white text-xs rounded hover:bg-red-600 transition"
                 onClick={handleClearEditor}
               >
                 Clear
-              </button>
+              </button> */}
             </div>
 
             <div className="flex flex-col lg:flex-row gap-2 lg:gap-5 border rounded-lg bg-white p-3 text-sm font-mono text-gray-500">

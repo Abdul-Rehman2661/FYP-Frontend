@@ -25,6 +25,7 @@ function Debugging() {
   // Track previous flags for highlighting changes
   const [prevFlags, setPrevFlags] = useState([0, 0, 0, 0]);
 
+  const { executionResult, userCode } = useContext(ArchitectureContext);
   const [loadingStep, setLoadingStep] = useState(false);
   const [loadingRun, setLoadingRun] = useState(false);
   const [code, setCode] = useState("");
@@ -189,6 +190,49 @@ function Debugging() {
     }
   };
 
+  const handleBack = async () => {
+    const instructions = getInstructions();
+
+    if (step >= instructions.length) return;
+
+    const partial = instructions.slice(0, step - 1);
+
+    try {
+      setLoadingStep(true);
+      const res = await axios.post(
+        `http://localhost/ComputerArchitectureToolkitAPI/api/execution/execute/${id}`,
+        partial,
+      );
+
+      const data = res.data;
+
+      // Update general purpose registers
+      setRegisters((prev) =>
+        prev.map((reg, index) => ({
+          ...reg,
+          value:
+            data.Registers?.[index] !== undefined
+              ? data.Registers[index]
+              : reg.value,
+        })),
+      );
+
+      // Update flags with highlighting support
+      updateFlagsFromResponse(data);
+
+      // UPDATE CONTEXT WITH EXECUTION RESULT
+      setExecutionResult(data);
+
+      setOutput(JSON.stringify(data, null, 2));
+      setError("");
+      setStep((prev) => prev - 1);
+    } catch (err) {
+      setError(err.response?.data || "Execution error");
+    } finally {
+      setLoadingStep(false);
+    }
+  };
+
   const handleRun = async () => {
     const instructions = getInstructions();
 
@@ -253,6 +297,61 @@ function Debugging() {
   const instructions = getInstructions();
   const codeLines = code.split("\n");
 
+    const getOutputValue = () => {
+    if (!executionResult?.Registers || !registerMeta.length) return null;
+    
+    const generalRegisters = registerMeta.filter(r => r.IsFlagRegister === false);
+    
+    // Method 1: Get destination register from last instruction (if userCode is available)
+    if (userCode && userCode.length > 0) {
+      const lastLine = userCode[userCode.length - 1];
+      const parts = lastLine.trim().split(/\s+/);
+      const operands = parts.slice(1).join(' ').split(',');
+      const firstOperand = operands[0]?.trim();
+      
+      // Check if first operand is a register
+      const destRegister = generalRegisters.find(r => r.Name === firstOperand);
+      if (destRegister) {
+        const index = generalRegisters.findIndex(r => r.Name === firstOperand);
+        if (index !== -1 && executionResult.Registers[index] !== undefined) {
+          return {
+            value: executionResult.Registers[index],
+            register: firstOperand,
+            description: `${firstOperand} = ${executionResult.Registers[index]}`
+          };
+        }
+      }
+    }
+    
+    // Method 2: Fallback - Get last non-zero register
+    for (let i = executionResult.Registers.length - 1; i >= 0; i--) {
+      if (executionResult.Registers[i] !== 0) {
+        const registerName = generalRegisters[i]?.Name || `R${i+1}`;
+        return {
+          value: executionResult.Registers[i],
+          register: registerName,
+          description: `${registerName} = ${executionResult.Registers[i]}`
+        };
+      }
+    }
+    
+    // Method 3: Get first register with value
+    for (let i = 0; i < executionResult.Registers.length; i++) {
+      if (executionResult.Registers[i] !== 0) {
+        const registerName = generalRegisters[i]?.Name || `R${i+1}`;
+        return {
+          value: executionResult.Registers[i],
+          register: registerName,
+          description: `${registerName} = ${executionResult.Registers[i]}`
+        };
+      }
+    }
+    
+    return null;
+  };
+
+  const outputResult = getOutputValue();
+
   return (
     <>
       <Header />
@@ -266,9 +365,10 @@ function Debugging() {
           <div className="bg-white rounded-xl shadow border p-6">
             <div className="flex gap-4 sm:gap-2 ">
               <button
-                onClick={() =>
-                  navigate(`/editor/${id}`, { state: { code: code } })
-                }
+              onClick={handleBack}
+                // onClick={() =>
+                //   navigate(`/editor/${id}`, { state: { code: code } })
+                // }
                 className="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white hover:bg-blue-800 rounded-lg border border-blue-900 text-xs rounded font-bold"
               >
                 <ArrowLeftIcon className="h-4 w-4" />
@@ -412,12 +512,43 @@ function Debugging() {
               </div>
             </div>
 
-            <div className="h-full text-black mt-5">
-              <p>Output</p>
-              <div className="border border-gray-300 rounded-lg h-24 w-full bg-gray-100 overflow-y-auto">
-                <pre className="text-gray-600 p-4 font-mono text-xs whitespace-pre-wrap">
-                  {output || "No Output to display..."}
-                </pre>
+            <div className="h-full mt-6">
+              <p className="text-gray-800 mb-2 font-semibold">Output / Result</p>
+              <div className="border border-gray-300 rounded-lg bg-gray-100 overflow-y-auto">
+                <div className="p-4">
+                  {outputResult ? (
+                    <div className="">
+                      <div className="mb-3">
+                        {/* <span className="text-gray-500 text-sm font-mono">
+                          Last Affected Register: <span className="font-bold text-blue-600">{outputResult.register}</span>
+                        </span> */}
+                      </div>
+                      <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                        <span className="text-3xl font-semibold text-black">
+                          {outputResult.value}
+                        </span>
+                        {/* <p className="text-gray-600 font-mono text-sm mt-3">
+                          {outputResult.description}
+                        </p> */}
+                      </div>
+                      
+                      {/* Show last instruction details if available */}
+                      {/* {executionResult?.InstructionDetails && executionResult.InstructionDetails.length > 0 && (
+                        <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                          <p className="text-xs text-gray-500 font-mono">
+                            Last Instruction: {executionResult.InstructionDetails[executionResult.InstructionDetails.length - 1]?.AssemblyCode || "N/A"}
+                          </p>
+                        </div>
+                      )} */}
+                    </div>
+                  ) : (
+                    <div className="flex h-32">
+                      <span className="text-gray-400 font-mono">
+                        No output to display.
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

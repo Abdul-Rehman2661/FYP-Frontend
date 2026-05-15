@@ -69,6 +69,9 @@ function Detail() {
             outputRegister: i.OutputRegister || null,
             inputRegister: i.InputRegister || null,
             operands: i.Operands || 0,
+            Operand1: i.Operand1 || null,
+            Operand2: i.Operand2 || null,
+            Operand3: i.Operand3 || null,
             destinationOperand: i.DestinationOperand || null,
           })),
 
@@ -176,52 +179,247 @@ function Detail() {
       </Card>
 
       {/* ================= NEW: INSTRUCTION DETAILED CARDS ================= */}
-<Card
-  title="Instruction Set"
-  icon={<DocumentTextIcon className="w-6 h-6" />}
->
-  <div className="overflow-x-auto">
-    <table className="w-full border-collapse">
-      <thead className="bg-blue-100">
-        <tr>
-          <th className="px-4 py-3 text-left font-semibold text-blue-900">Mnemonic</th>
-          <th className="px-4 py-3 text-left font-semibold text-blue-900">Opcode</th>
-          <th className="px-4 py-3 text-left font-semibold text-blue-900">Micro Operation</th>
-          <th className="px-4 py-3 text-left font-semibold text-blue-900"># of Operands</th>
-          <th className="px-4 py-3 text-left font-semibold text-blue-900">Destination Operand</th>
-          <th className="px-4 py-3 text-left font-semibold text-blue-900">Interrupt Symbol</th>
-          <th className="px-4 py-3 text-left font-semibold text-blue-900">Output Register</th>
-          <th className="px-4 py-3 text-left font-semibold text-blue-900">Input Register</th>
-        </tr>
-      </thead>
-      <tbody>
-        {architecture.instructions.map((instruction, idx) => (
-          <tr key={idx} className="border-b border-blue-100 hover:bg-blue-50/50 transition-all duration-200">
-            <td className="px-4 py-3 font-semibold text-black">{instruction.mnemonic}</td>
-            <td className="px-4 py-3 font-mono text-sm text-black">{instruction.opcode}</td>
-            <td className="px-4 py-3 text-sm text-black">{instruction.action || "—"}</td>
-            <td className="px-4 py-3 text-sm text-black">{instruction.noOfOperands || "—"}</td>
-            <td className="px-4 py-3 text-sm text-black">
-              {instruction.destinationOperand !== null ? instruction.destinationOperand : "—"}
-            </td>
-            <td className="px-4 py-3 text-sm text-black">
-              {instruction.interruptSymbol && instruction.interruptSymbol !== "NULL" 
-                ? instruction.interruptSymbol 
-                : "—"}
-            </td>
-            <td className="px-4 py-3 text-sm text-black">
-              {instruction.outputRegister || "—"}
-            </td>
-            <td className="px-4 py-3 text-sm text-black">
-              {instruction.inputRegister || "—"}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-</Card>
+      <Card
+        title="Instruction Set"
+        icon={<DocumentTextIcon className="w-6 h-6" />}
+      >
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse border border-blue-200">
+            <thead className="bg-blue-100">
+              <tr className="border-b border-blue-200">
+                <th className="px-4 py-3 text-left font-semibold text-blue-900 border-r border-blue-200">
+                  Mnemonic
+                </th>
+                <th className="px-4 py-3 text-left font-semibold text-blue-900 border-r border-blue-200">
+                  Opcode
+                </th>
+                <th className="px-4 py-3 text-left font-semibold text-blue-900 border-r border-blue-200">
+                  Micro Operation
+                </th>
+                <th className="px-4 py-3 text-left font-semibold text-blue-900 border-r border-blue-200">
+                  # of Operands
+                </th>
+                <th className="px-4 py-3 text-left font-semibold text-blue-900 border-r border-blue-200">
+                  Destination Operand
+                </th>
+                {/* <th className="px-4 py-3 text-left font-semibold text-blue-900 border-r border-blue-200">Interrupt Symbol</th>
+          <th className="px-4 py-3 text-left font-semibold text-blue-900 border-r border-blue-200">Output Register</th>
+          <th className="px-4 py-3 text-left font-semibold text-blue-900 border-r border-blue-200">Input Register</th> */}
+                <th className="px-4 py-3 text-left font-semibold text-blue-900 border-r border-blue-200">
+                  Operand 1
+                </th>
+                <th className="px-4 py-3 text-left font-semibold text-blue-900 border-r border-blue-200">
+                  Operand 2
+                </th>
+                <th className="px-4 py-3 text-left font-semibold text-blue-900 border-r border-blue-200">
+                  Operand 3
+                </th>
+                <th className="px-4 py-3 text-center font-semibold text-blue-900">
+                  Affected Flags
+                  <div className="grid grid-cols-4 gap-1 mt-1 text-xs">
+                    <span className="font-medium">Zero</span>
+                    <span className="font-medium">Carry</span>
+                    <span className="font-medium">Sign</span>
+                    <span className="font-medium">Overflow</span>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {architecture.instructions.map((instruction, idx) => {
+                // Function to analyze micro operation and determine affected flags
+                const getAffectedFlagsFromMicroOp = (microOp) => {
+                  const flags = { Zero: 0, Carry: 0, Sign: 0, OverFlow: 0 };
 
+                  if (!microOp) return flags;
+
+                  const upperMicroOp = microOp.toUpperCase();
+
+                  // Check for ADDITION operations
+                  if (
+                    upperMicroOp.includes("+") ||
+                    upperMicroOp.includes("ADD") ||
+                    upperMicroOp.includes("PLUS") ||
+                    upperMicroOp.includes("SUM") ||
+                    upperMicroOp.includes("INCREMENT")
+                  ) {
+                    flags.Zero = 1;
+                    flags.Carry = 1;
+                    flags.Sign = 1;
+                    flags.OverFlow = 1;
+                  }
+
+                  // Check for SUBTRACTION operations
+                  if (
+                    upperMicroOp.includes("-") ||
+                    upperMicroOp.includes("SUB") ||
+                    upperMicroOp.includes("MINUS") ||
+                    upperMicroOp.includes("DECREMENT") ||
+                    upperMicroOp.includes("DIFFERENCE")
+                  ) {
+                    flags.Zero = 1;
+                    flags.Carry = 1;
+                    flags.Sign = 1;
+                    flags.OverFlow = 1;
+                  }
+
+                  // Check for MULTIPLICATION operations
+                  if (
+                    upperMicroOp.includes("*") ||
+                    upperMicroOp.includes("MUL") ||
+                    upperMicroOp.includes("MULTIPLY") ||
+                    upperMicroOp.includes("TIMES")
+                  ) {
+                    flags.Zero = 1;
+                    flags.Carry = 1;
+                    flags.Sign = 1;
+                    flags.OverFlow = 1;
+                  }
+
+                  // Check for DIVISION operations
+                  if (
+                    upperMicroOp.includes("/") ||
+                    upperMicroOp.includes("DIV") ||
+                    upperMicroOp.includes("DIVIDE")
+                  ) {
+                    flags.Zero = 1;
+                    flags.Carry = 0;
+                    flags.Sign = 1;
+                    flags.OverFlow = 1;
+                  }
+
+                  // Check for LOGICAL operations
+                  if (
+                    upperMicroOp.includes("AND") ||
+                    upperMicroOp.includes("OR") ||
+                    upperMicroOp.includes("XOR") ||
+                    upperMicroOp.includes("NOT")
+                  ) {
+                    flags.Zero = 1;
+                    flags.Sign = 1;
+                    // Carry and Overflow remain 0 for logical operations
+                  }
+
+                  // Check for SHIFT operations
+                  if (
+                    upperMicroOp.includes("SHL") ||
+                    upperMicroOp.includes("SHR") ||
+                    upperMicroOp.includes("ROL") ||
+                    upperMicroOp.includes("ROR") ||
+                    upperMicroOp.includes("SHIFT")
+                  ) {
+                    flags.Carry = 1;
+                    flags.Zero = 1;
+                    flags.Sign = 1;
+                  }
+
+                  // Check for COMPARE operations
+                  if (
+                    upperMicroOp.includes("CMP") ||
+                    upperMicroOp.includes("COMPARE") ||
+                    upperMicroOp.includes("EQ") ||
+                    upperMicroOp.includes("NE")
+                  ) {
+                    flags.Zero = 1;
+                    flags.Carry = 1;
+                    flags.Sign = 1;
+                    flags.OverFlow = 1;
+                  }
+
+                  // Check for MOVE/LOAD operations
+                  if (
+                    (upperMicroOp.includes("MOV") ||
+                      upperMicroOp.includes("LOAD") ||
+                      upperMicroOp.includes("STORE") ||
+                      upperMicroOp.includes(":=") ||
+                      upperMicroOp.includes("=")) &&
+                    !upperMicroOp.includes("+") &&
+                    !upperMicroOp.includes("-")
+                  ) {
+                    flags.Zero = 1;
+                    // Only zero flag affected
+                  }
+
+                  return flags;
+                };
+
+                const affectedFlags = getAffectedFlagsFromMicroOp(
+                  instruction.action,
+                );
+
+                return (
+                  <tr
+                    key={idx}
+                    className={`border-b border-blue-200 hover:bg-blue-50/50 transition-all duration-200 ${idx % 2 === 0 ? "bg-white" : "bg-blue-50/30"}`}
+                  >
+                    <td className="px-4 py-3 font-semibold text-black border-r border-blue-200">
+                      {instruction.mnemonic}
+                    </td>
+                    <td className="px-4 py-3 font-mono text-sm text-black border-r border-blue-200">
+                      {instruction.opcode}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-black border-r border-blue-200">
+                      {instruction.action || "—"}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-black border-r border-blue-200">
+                      {instruction.noOfOperands || "—"}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-black border-r border-blue-200">
+                      {instruction.destinationOperand !== null
+                        ? instruction.destinationOperand
+                        : "—"}
+                    </td>
+                    {/* <td className="px-4 py-3 text-sm text-black border-r border-blue-200">
+                {instruction.interruptSymbol && instruction.interruptSymbol !== "NULL" 
+                  ? instruction.interruptSymbol 
+                  : "—"}
+              </td>
+              <td className="px-4 py-3 text-sm text-black border-r border-blue-200">
+                {instruction.outputRegister || "—"}
+              </td>
+              <td className="px-4 py-3 text-sm text-black border-r border-blue-200">
+                {instruction.inputRegister || "—"}
+              </td> */}
+                    <td className="px-4 py-3 text-sm text-black border-r border-blue-200">
+                      {instruction.Operand1 || "—"}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-black border-r border-blue-200">
+                      {instruction.Operand2 || "—"}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-black border-r border-blue-200">
+                      {instruction.Operand3 || "—"}
+                    </td>
+                    <td className="px-4 py-3 text-center border-r border-blue-200">
+                      <div className="grid grid-cols-4 gap-2">
+                        <div
+                          className={`text-center font-mono font-bold ${affectedFlags.Zero === 1 ? "text-green-600" : "text-red-500"}`}
+                        >
+                          {affectedFlags.Zero}
+                        </div>
+                        <div
+                          className={`text-center font-mono font-bold ${affectedFlags.Carry === 1 ? "text-green-600" : "text-red-500"}`}
+                        >
+                          {affectedFlags.Carry}
+                        </div>
+                        <div
+                          className={`text-center font-mono font-bold ${affectedFlags.Sign === 1 ? "text-green-600" : "text-red-500"}`}
+                        >
+                          {affectedFlags.Sign}
+                        </div>
+                        <div
+                          className={`text-center font-mono font-bold ${affectedFlags.OverFlow === 1 ? "text-green-600" : "text-red-500"}`}
+                        >
+                          {affectedFlags.OverFlow}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </Card>
       {/* ================= ADDRESSING ================= */}
       <Card
         title="Addressing Modes"
@@ -321,10 +519,129 @@ const InstructionDetailCard = ({ instruction }) => {
     return String(value);
   };
 
+  // Function to analyze micro operation and determine affected flags
+  const getAffectedFlagsFromMicroOp = (microOp) => {
+    const flags = { Zero: 0, Carry: 0, Sign: 0, OverFlow: 0 };
+
+    if (!microOp) return flags;
+
+    const upperMicroOp = microOp.toUpperCase();
+
+    // Check for ADDITION operations
+    if (
+      upperMicroOp.includes("+") ||
+      upperMicroOp.includes("ADD") ||
+      upperMicroOp.includes("PLUS") ||
+      upperMicroOp.includes("SUM") ||
+      upperMicroOp.includes("INCREMENT")
+    ) {
+      flags.Zero = 1;
+      flags.Carry = 1;
+      flags.Sign = 1;
+      flags.OverFlow = 1;
+    }
+
+    // Check for SUBTRACTION operations
+    if (
+      upperMicroOp.includes("-") ||
+      upperMicroOp.includes("SUB") ||
+      upperMicroOp.includes("MINUS") ||
+      upperMicroOp.includes("DECREMENT") ||
+      upperMicroOp.includes("DIFFERENCE")
+    ) {
+      flags.Zero = 1;
+      flags.Carry = 1;
+      flags.Sign = 1;
+      flags.OverFlow = 1;
+    }
+
+    // Check for MULTIPLICATION operations
+    if (
+      upperMicroOp.includes("*") ||
+      upperMicroOp.includes("MUL") ||
+      upperMicroOp.includes("MULTIPLY") ||
+      upperMicroOp.includes("TIMES")
+    ) {
+      flags.Zero = 1;
+      flags.Carry = 1;
+      flags.Sign = 1;
+      flags.OverFlow = 1;
+    }
+
+    // Check for DIVISION operations
+    if (
+      upperMicroOp.includes("/") ||
+      upperMicroOp.includes("DIV") ||
+      upperMicroOp.includes("DIVIDE")
+    ) {
+      flags.Zero = 1;
+      flags.Carry = 0;
+      flags.Sign = 1;
+      flags.OverFlow = 1;
+    }
+
+    // Check for LOGICAL operations
+    if (
+      upperMicroOp.includes("AND") ||
+      upperMicroOp.includes("OR") ||
+      upperMicroOp.includes("XOR") ||
+      upperMicroOp.includes("NOT")
+    ) {
+      flags.Zero = 1;
+      flags.Sign = 1;
+    }
+
+    // Check for SHIFT operations
+    if (
+      upperMicroOp.includes("SHL") ||
+      upperMicroOp.includes("SHR") ||
+      upperMicroOp.includes("ROL") ||
+      upperMicroOp.includes("ROR") ||
+      upperMicroOp.includes("SHIFT")
+    ) {
+      flags.Carry = 1;
+      flags.Zero = 1;
+      flags.Sign = 1;
+    }
+
+    // Check for COMPARE operations
+    if (
+      upperMicroOp.includes("CMP") ||
+      upperMicroOp.includes("COMPARE") ||
+      upperMicroOp.includes("EQ") ||
+      upperMicroOp.includes("NE")
+    ) {
+      flags.Zero = 1;
+      flags.Carry = 1;
+      flags.Sign = 1;
+      flags.OverFlow = 1;
+    }
+
+    // Check for MOVE/LOAD operations
+    if (
+      (upperMicroOp.includes("MOV") ||
+        upperMicroOp.includes("LOAD") ||
+        upperMicroOp.includes("STORE") ||
+        upperMicroOp.includes(":=") ||
+        upperMicroOp.includes("=")) &&
+      !upperMicroOp.includes("+") &&
+      !upperMicroOp.includes("-")
+    ) {
+      flags.Zero = 1;
+    }
+
+    return flags;
+  };
+
+  const affectedFlags = getAffectedFlagsFromMicroOp(instruction.action);
+  const flagsAffectedList = Object.entries(affectedFlags)
+    .filter(([_, value]) => value === 1)
+    .map(([flag]) => flag);
+
   return (
     <div className="bg-white rounded-xl border border-blue-100 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
-      {/* Header (NOW SAME STYLE AS TABLE HEADER) */}
-      <div className="bg-blue-100 px-4 py-3 flex items-center justify-between">
+      {/* Header */}
+      <div className="bg-blue-100 px-4 py-3 flex items-center justify-between border-b border-blue-200">
         <div className="flex items-center gap-2 text-blue-900 font-semibold">
           <CodeBracketIcon className="w-5 h-5" />
           <span>{instruction.mnemonic}</span>
@@ -338,7 +655,7 @@ const InstructionDetailCard = ({ instruction }) => {
       {/* Body */}
       <div className="p-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
-          {/* Left */}
+          {/* Left Column */}
           <div className="space-y-2">
             <DetailItem
               label="Mnemonic"
@@ -353,7 +670,7 @@ const InstructionDetailCard = ({ instruction }) => {
             />
           </div>
 
-          {/* Right */}
+          {/* Right Column */}
           <div className="space-y-2">
             {instruction.destinationOperand !== null && (
               <DetailItem
@@ -370,6 +687,59 @@ const InstructionDetailCard = ({ instruction }) => {
               label="Interrupt Registers"
               value={`Out: ${formatValue(instruction.outputRegister)} / In: ${formatValue(instruction.inputRegister)}`}
             />
+
+            <div className="flex flex-col gap-2 py-1">
+              <span className="text-blue-900 text-sm font-semibold">
+                Affected Flags
+              </span>
+              <div className="grid grid-cols-4 gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="text-center">
+                  <div className="text-xs text-gray-600 font-medium mb-1">
+                    Zero
+                  </div>
+                  <div
+                    className={`text-lg font-mono font-bold ${affectedFlags.Zero === 1 ? "text-green-600" : "text-red-500"}`}
+                  >
+                    {affectedFlags.Zero}
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xs text-gray-600 font-medium mb-1">
+                    Carry
+                  </div>
+                  <div
+                    className={`text-lg font-mono font-bold ${affectedFlags.Carry === 1 ? "text-green-600" : "text-red-500"}`}
+                  >
+                    {affectedFlags.Carry}
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xs text-gray-600 font-medium mb-1">
+                    Sign
+                  </div>
+                  <div
+                    className={`text-lg font-mono font-bold ${affectedFlags.Sign === 1 ? "text-green-600" : "text-red-500"}`}
+                  >
+                    {affectedFlags.Sign}
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xs text-gray-600 font-medium mb-1">
+                    Overflow
+                  </div>
+                  <div
+                    className={`text-lg font-mono font-bold ${affectedFlags.OverFlow === 1 ? "text-green-600" : "text-red-500"}`}
+                  >
+                    {affectedFlags.OverFlow}
+                  </div>
+                </div>
+              </div>
+              {flagsAffectedList.length > 0 && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Affected: {flagsAffectedList.join(", ")}
+                </p>
+              )}
+            </div>
           </div>
         </div>
 

@@ -6,7 +6,7 @@ import { TrashIcon } from "@heroicons/react/24/outline";
 
 export default function Update() {
   const navigate = useNavigate();
-  const { id } = useParams(); // ✅ FIXED
+  const { id } = useParams();
 
   const [archName, setArchName] = useState("");
   const [memorySize, setMemorySize] = useState("");
@@ -56,7 +56,6 @@ export default function Update() {
 
         console.log("API RESPONSE:", data);
 
-        // ✅ FIXED: Access nested Architecture
         const arch = data.Architecture;
 
         setArchName(arch?.Name || "");
@@ -66,23 +65,24 @@ export default function Update() {
         setNoOfRegisters(arch?.NumberOfRegisters || "");
         setNoOfInstructions(arch?.NumberOfInstructions || "");
 
-        // ✅ Registers
+        // ✅ Fixed: Registers with proper fields
         setFlagRegisterList(
-          data.Registers?.filter((r) => r.Action) // flag registers
-            .map((r) => ({
-              name: r.Name,
-              Action: r.Action,
-            })) || [],
+          data.Registers?.filter((r) => r.IsFlagRegister).map((r) => ({
+            name: r.Name,
+            Action: r.Action,
+            RegisterSize: r.RegisterSize,
+            RegisterCode: r.RegisterCode,
+          })) || [],
         );
 
         setGpRegisterList(
-          data.Registers?.filter((r) => !r.Action) // GP registers
-            .map((r) => ({
-              name: r.Name,
-            })) || [],
+          data.Registers?.filter((r) => !r.IsFlagRegister).map((r) => ({
+            name: r.Name,
+            RegisterSize: r.RegisterSize,
+            RegisterCode: r.RegisterCode,
+          })) || [],
         );
 
-        // ✅ Addressing Modes
         setAddressingModeList(
           data.AddressingModes?.map((m) => ({
             mode: m.AddressingModeName,
@@ -91,18 +91,38 @@ export default function Update() {
           })) || [],
         );
 
-        // ✅ Instructions
+        // ✅ Fixed: Instructions with proper operands mapping
         setAddedInstructions(
-          data.Instructions?.map((ins) => ({
-            id: ins.InstructionID, // normalize HERE
-            opcode: ins.Opcode,
-            mnemonics: ins.Mnemonics,
-            action: ins.Action,
-            interruptSymbol: ins.InterruptSymbol,
-            inputRegister: ins.InputRegister,
-            outputRegister: ins.OutputRegister,
-            operands: [],
-          })) || [],
+          data.Instructions?.map((ins) => {
+            let operandsList = [];
+            if (ins.Operands) {
+              if (typeof ins.Operands === "string") {
+                try {
+                  operandsList = JSON.parse(ins.Operands);
+                } catch (e) {
+                  operandsList = [];
+                }
+              } else if (Array.isArray(ins.Operands)) {
+                operandsList = ins.Operands;
+              }
+            }
+
+            return {
+              mnemonics: ins.Mnemonics,
+              opcode: ins.Opcode,
+              action: ins.Action,
+              interruptSymbol: ins.InterruptSymbol,
+              inputRegister: ins.InputRegister,
+              outputRegister: ins.OutputRegister,
+              operands: operandsList,
+              destinationOperand: ins.DestinationOperand,
+              numberOfOperands: ins.NumberOfOperands,
+              instructionFormat: ins.InstructionFormat,
+              operand1: ins.Operand1,
+              operand2: ins.Operand2,
+              operand3: ins.Operand3,
+            };
+          }) || [],
         );
       } catch (err) {
         console.error(err);
@@ -128,7 +148,10 @@ export default function Update() {
   }, [addressingModeList, currentModeIndex]);
 
   useEffect(() => {
-    if (addedInstructions.length > 0) {
+    if (
+      addedInstructions.length > 0 &&
+      currentInstructionIndex < addedInstructions.length
+    ) {
       const current = addedInstructions[currentInstructionIndex];
 
       setOpcode(current.opcode || "");
@@ -137,7 +160,24 @@ export default function Update() {
       setInterruptSymbol(current.interruptSymbol || "");
       setInputRegister(current.inputRegister || "");
       setOutputRegister(current.outputRegister || "");
-      setOperands(current.operands || []);
+
+      const operandsList = current.operands || [];
+      setOperands(
+        operandsList.length > 0
+          ? operandsList
+          : [{ id: 1, type: "Register", selected: false }],
+      );
+
+      setIsInterrupt(!!current.interruptSymbol);
+    } else if (addedInstructions.length === 0) {
+      setOpcode("");
+      setMnemonic("");
+      setAction("");
+      setInterruptSymbol("");
+      setInputRegister("");
+      setOutputRegister("");
+      setOperands([{ id: 1, type: "Register", selected: false }]);
+      setIsInterrupt(false);
     }
   }, [addedInstructions, currentInstructionIndex]);
 
@@ -152,44 +192,55 @@ export default function Update() {
         NumberOfInstructions: parseInt(noOfInstructions) || 0,
       },
 
+      // ✅ Fixed: Registers with all required fields
       Registers: [
-        ...flagRegisterList.map((f) => ({
+        ...flagRegisterList.map((f, idx) => ({
           Name: f.name,
-          Action: f.Action,
-          Type: "FLAG",
+          RegisterSize: f.RegisterSize || 32,
+          RegisterCode: f.RegisterCode || `F${idx}`,
+          Action: f.Action || "Flag register",
+          IsFlagRegister: true,
         })),
-        ...gpRegisterList.map((g) => ({
+        ...gpRegisterList.map((g, idx) => ({
           Name: g.name,
-          Type: "GENERAL",
+          RegisterSize: g.RegisterSize || 32,
+          RegisterCode: g.RegisterCode || `R${idx}`,
+          Action: "General purpose register",
+          IsFlagRegister: false,
         })),
       ],
 
-      Instructions: addedInstructions.map((ins) => ({
-        InstructionID: ins.id || ins.InstructionID,
+      // ✅ Fixed: Instructions with proper payload structure
+      Instructions: addedInstructions.map((ins) => {
+        const operandsList = ins.operands || [];
+        const destIndex = operandsList.findIndex((op) => op.selected);
 
-        Opcode: ins.opcode,
-        Mnemonics: ins.mnemonics,
-        Action: ins.action,
-        InterruptSymbol: ins.interruptSymbol || null,
-        InputRegister: ins.inputRegister || null,
-        OutputRegister: ins.outputRegister || null,
-
-        Operands: JSON.stringify(ins.operands || []),
-        InstructionFormat: ins.operands?.length || 0,
-        NumberOfOperands: ins.operands?.length || 0,
-        DestinationOperand:
-          ins.operands?.findIndex((op) => op.selected) + 1 || 0,
-      })),
+        return {
+          Mnemonics: ins.mnemonics,
+          Opcode: ins.opcode,
+          Operands: operandsList,
+          DestinationOperand: destIndex + 1,
+          NumberOfOperands: operandsList.length,
+          Action: ins.action,
+          InstructionFormat: operandsList.length,
+          Operand1: operandsList[0]?.type || null,
+          Operand2: operandsList[1]?.type || null,
+          Operand3: operandsList[2]?.type || null,
+          InterruptSymbol: ins.interruptSymbol || null,
+          InputRegister: ins.inputRegister || null,
+          OutputRegister: ins.outputRegister || null,
+        };
+      }),
 
       AddressingModes: addressingModeList.map((m) => ({
         AddressingModeName: m.mode,
         AddressingModeCode: m.code,
-        AddressingModeSymbol: m.sym,
+        AddressingModeSymbol: m.sym || "",
       })),
     };
   };
 
-  console.log("FINAL PAYLOAD:", JSON.stringify(buildPayload, null, 2));
+  console.log("FINAL PAYLOAD:", JSON.stringify(buildPayload(), null, 2));
 
   const handleCPUAdded = () => {
     if (!archName) return;
@@ -207,12 +258,11 @@ export default function Update() {
     ]);
   };
 
-  // ✅ UPDATE API
   const handleUpdate = async () => {
     try {
       const payload = buildPayload();
 
-      console.log("Payload:", payload); // 🔥 DEBUG
+      console.log("Payload:", payload);
 
       const res = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/architecture/update-full/${id}`,
@@ -230,15 +280,13 @@ export default function Update() {
         navigate("/dashboard");
       } else {
         console.error(data);
-        alert(data.message || "Update failed ❌");
+        alert(data.message || data.ExceptionMessage || "Update failed ❌");
       }
     } catch (err) {
       console.error(err);
       alert("Server error ❌");
     }
   };
-
-  // ================= HANDLERS =================
 
   const handleAddedFR = (e) => {
     e.preventDefault();
@@ -249,6 +297,8 @@ export default function Update() {
       {
         name: flagRegister,
         Action: flagAction,
+        RegisterSize: 32,
+        RegisterCode: `F${flagRegisterList.length}`,
       },
     ]);
 
@@ -299,28 +349,38 @@ export default function Update() {
   const handleNextInstruction = () => {
     if (addedInstructions.length === 0) return;
 
-    const nextIndex = (currentInstructionIndex + 1) % addedInstructions.length;
+    // Save current instruction before moving
+    if (mnemonic || opcode) {
+      handleUpdateInstruction();
+    }
 
+    const nextIndex = (currentInstructionIndex + 1) % addedInstructions.length;
     setCurrentInstructionIndex(nextIndex);
   };
 
   const handleUpdateInstruction = () => {
-    const updated = [...addedInstructions];
+    if (!mnemonic && !opcode) return;
 
-    updated[currentInstructionIndex] = {
-      ...updated[currentInstructionIndex], // ✅ PRESERVE ID + OLD DATA
-      opcode,
+    const updated = [...addedInstructions];
+    const instructionData = {
       mnemonics: mnemonic,
-      action,
-      interruptSymbol,
-      inputRegister,
-      outputRegister,
-      operands,
+      opcode: opcode,
+      action: action,
+      interruptSymbol: isInterrupt ? interruptSymbol : null,
+      inputRegister: isInterrupt ? inputRegister : null,
+      outputRegister: isInterrupt ? outputRegister : null,
+      operands: isInterrupt ? [] : operands,
     };
+
+    if (currentInstructionIndex < updated.length) {
+      updated[currentInstructionIndex] = instructionData;
+    } else {
+      updated.push(instructionData);
+      setCurrentInstructionIndex(updated.length - 1);
+    }
 
     setAddedInstructions(updated);
   };
-  console.log("Added Instuction", addedInstructions);
 
   const handleAddOperand = () => {
     setOperands([
@@ -510,63 +570,10 @@ export default function Update() {
               </h2>
 
               <div>
-                <div className="flex items-center gap-2 mb-6 text-black font-semibold">
-                  <span>Add Flag Registers</span>
-                </div>
+                {/* Flag Registers Section */}
+                <div className="mb-6"></div>
 
-                <div>
-                  <span className="text-black">Flag Register</span>
-                  <input
-                    value={flagRegister}
-                    onChange={(e) => setFlagRegister(e.target.value)}
-                    className="mt-2 h-8 mb-4 pl-2 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900"
-                    type="text"
-                    placeholder="Enter Flag Register Name"
-                  />
-
-                  <span className="text-black">Flag Register Action</span>
-                  <textarea
-                    value={flagAction}
-                    onChange={(e) => setFlagAction(e.target.value)}
-                    className="auto-textarea h-20 mt-2 pl-2 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900"
-                    placeholder="//Write Java Code here for Logic of Flag Register"
-                  />
-
-                  {/* Display Flag Registers */}
-                  {flagRegisterList.length > 0 && (
-                    <div className="bg-gray-100 border mt-4 rounded-sm text-sm">
-                      <p className="font-semibold text-blue-900 m-2">
-                        Added Flag Registers
-                      </p>
-
-                      {flagRegisterList.map((item, index) => (
-                        <div key={index} className="text-black m-2">
-                          <span className="flex ">
-                            <p className="text-blue-900 mr-1">Name:</p>
-                            <p>{item.name}</p>
-                          </span>
-                          <span className="flex mb-3">
-                            <p className="text-blue-900 mr-1">Action:</p>
-                            <p>{item.Action}</p>
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="flex flex-col sm:flex-row gap-3 mt-4 mb-8">
-                    <button
-                      onClick={handleAddedFR}
-                      className="w-full sm:w-1/2 h-8 text-white bg-blue-900 rounded-lg mt-4 text-center font-semibold"
-                    >
-                      NEXT
-                    </button>
-                    <button className="w-full sm:w-1/2 h-8 text-white bg-blue-900 rounded-lg mt-4 text-center font-semibold">
-                      ADD
-                    </button>
-                  </div>
-                </div>
-
+                {/* GP Registers Section */}
                 <div>
                   <div>
                     <span className="text-black font-semibold">
@@ -622,6 +629,7 @@ export default function Update() {
                   </div>
                 </div>
 
+                {/* Addressing Modes Section */}
                 <div>
                   <div className="flex items-center gap-2 mb-6 text-black font-semibold">
                     <span>Add Addressing Modes</span>
@@ -643,9 +651,10 @@ export default function Update() {
 
                     <span className="text-black">Addressing Mode Code</span>
                     <select
+                      value={addressingModeCode}
                       onChange={(e) => setAddressingModeCode(e.target.value)}
                       className={`mt-2 mb-4 h-8 pl-2 bg-gray-100 w-full text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900
-                      ${addressingMode === "" ? "text-gray-500" : "text-black"}`}
+                      ${addressingModeCode === "" ? "text-gray-500" : "text-black"}`}
                     >
                       <option value="">Select Addressing Mode Code</option>
                       <option value="00">00</option>
@@ -656,12 +665,13 @@ export default function Update() {
 
                     <span className="text-black">Symbol</span>
                     <input
+                      value={symbol}
                       onChange={(e) => setSymbol(e.target.value)}
                       className="auto-textarea mt-2 pl-2 h-8 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900"
                       type="text"
                       placeholder="Enter Symbol (e.g., #, @, etc.)"
                     />
-                    {/* Display Adressing Modes */}
+                    {/* Display Addressing Modes */}
                     {addressingModeList.length > 0 && (
                       <div className="bg-gray-100 border mt-4 rounded-sm text-sm">
                         <p className="font-semibold text-blue-900 m-2">
@@ -718,17 +728,23 @@ export default function Update() {
               </h2>
 
               <div>
-                <div className="mb-4">
+                {/* Interrupt Instruction Checkbox */}
+                {/* <div className="mb-4">
                   <span className="text-black">Interrupt Instruction</span>
                   <input
                     type="checkbox"
                     checked={isInterrupt}
                     onChange={(e) => {
                       setIsInterrupt(e.target.checked);
+                      if (e.target.checked) {
+                        setOperands([]);
+                      } else {
+                        setOperands([{ id: 1, type: "Register", selected: false }]);
+                      }
                     }}
                     className="bg-white ml-2 h-4 w-4"
                   />
-                </div>
+                </div> */}
 
                 {/* Opcode & Mnemonics */}
                 <div className="flex flex-col md:flex-row gap-4">
@@ -771,6 +787,7 @@ export default function Update() {
                         <option value="">Select interrupt symbol</option>
                         <option value="IN">IN (Input)</option>
                         <option value="OUT">OUT (Output)</option>
+                        <option value="INT">INT (Interrupt)</option>
                       </select>
                     </div>
 
@@ -779,9 +796,17 @@ export default function Update() {
                       <select
                         className={`mt-2 mb-4 h-8 pl-2 bg-gray-100 w-full text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900
                                     ${inputRegister === "" ? "text-gray-500" : "text-black"}`}
+                        value={inputRegister}
                         onChange={(e) => setInputRegister(e.target.value)}
                       >
                         <option value="">Select input register</option>
+                        {[...flagRegisterList, ...gpRegisterList].map(
+                          (reg, idx) => (
+                            <option key={idx} value={reg.name}>
+                              {reg.name}
+                            </option>
+                          ),
+                        )}
                       </select>
                     </div>
 
@@ -790,9 +815,17 @@ export default function Update() {
                       <select
                         className={`mt-2 mb-4 h-8 pl-2 bg-gray-100 w-full text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900
                                     ${outputRegister === "" ? "text-gray-500" : "text-black"}`}
+                        value={outputRegister}
                         onChange={(e) => setOutputRegister(e.target.value)}
                       >
                         <option value="">Select output register</option>
+                        {[...flagRegisterList, ...gpRegisterList].map(
+                          (reg, idx) => (
+                            <option key={idx} value={reg.name}>
+                              {reg.name}
+                            </option>
+                          ),
+                        )}
                       </select>
                     </div>
                   </>
@@ -867,7 +900,7 @@ export default function Update() {
                     value={action}
                     onChange={(e) => setAction(e.target.value)}
                     placeholder="// Write Java Code Here"
-                    className="w-full border rounded-md p-2 h-24 border bg-gray-100 text-black rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900"
+                    className="w-full border rounded-md p-2 h-24 bg-gray-100 text-black text-sm focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900"
                   ></textarea>
                 </div>
 
@@ -897,16 +930,22 @@ export default function Update() {
                     {addedInstructions.map((item, index) => (
                       <div
                         key={index}
-                        className="mb-2"
+                        className="mb-2 cursor-pointer hover:bg-gray-100 p-2 rounded"
                         onClick={() => {
                           setCurrentInstructionIndex(index);
                           setOpcode(item.opcode);
                           setMnemonic(item.mnemonics);
                           setAction(item.action);
-                          setInterruptSymbol(item.interruptSymbol);
-                          setInputRegister(item.inputRegister);
-                          setOutputRegister(item.outputRegister);
-                          setOperands(item.operands || []);
+                          setInterruptSymbol(item.interruptSymbol || "");
+                          setInputRegister(item.inputRegister || "");
+                          setOutputRegister(item.outputRegister || "");
+                          const operandsList = item.operands || [];
+                          setOperands(
+                            operandsList.length > 0
+                              ? operandsList
+                              : [{ id: 1, type: "Register", selected: false }],
+                          );
+                          setIsInterrupt(!!item.interruptSymbol);
                         }}
                       >
                         <span className="flex ">
@@ -943,12 +982,13 @@ export default function Update() {
 
                         <div className="flex text-black mb-4">
                           <p className="text-blue-900 mr-1">Operands:</p>{" "}
-                          {item.operands.map((op, i) => (
-                            <span key={i}>
-                              {op.type}
-                              {op.selected ? " (Dest)" : ""}{" "}
-                            </span>
-                          ))}
+                          {item.operands &&
+                            item.operands.map((op, i) => (
+                              <span key={i}>
+                                {op.type}
+                                {op.selected ? " (Dest)" : ""}{" "}
+                              </span>
+                            ))}
                         </div>
                       </div>
                     ))}

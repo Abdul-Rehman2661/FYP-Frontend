@@ -8,6 +8,7 @@ export const ArchitectureProvider = ({ children }) => {
   const [addressingModesData, setAddressingModesData] = useState([]);
   const [instructionData, setInstructionData] = useState([]);
   const [executionResult, setExecutionResult] = useState(null);
+  const [userCode, setUserCode] = useState(null); // ADD THIS
   
   const [savedCode, setSavedCode] = useState("");
   const [currentArchitectureId, setCurrentArchitectureId] = useState(null);
@@ -74,6 +75,8 @@ export const ArchitectureProvider = ({ children }) => {
         setInstructionData,
         executionResult,
         setExecutionResult,
+        userCode,          
+        setUserCode,        
         savedCode,
         setSavedCode,
         currentArchitectureId,

@@ -205,7 +205,7 @@ function Register() {
         )}
 
         {/* Add Register Card */}
-        <div className="m-6 p-6 shadow-md rounded-xl bg-white border border-gray-200">
+        {/* <div className="m-6 p-6 shadow-md rounded-xl bg-white border border-gray-200">
           <div className="flex items-center gap-2 mb-6 text-black font-semibold">
             <span>Add Flag Registers</span>
           </div>
@@ -228,7 +228,6 @@ function Register() {
               placeholder="//Write Java Code here for Logic of Flag Register"
             />
 
-            {/* Display Flag Registers */}
             {flagRegisterList.length > 0 && (
               <div className="bg-gray-100 border mt-4 rounded-sm text-sm">
                 <p className="font-semibold text-blue-900 m-2">
@@ -257,7 +256,7 @@ function Register() {
               ADD
             </button>
           </div>
-        </div>
+        </div> */}
 
         {/* GP Register Card */}
         <div className="m-6 p-6 shadow-md rounded-xl bg-white border border-gray-200">

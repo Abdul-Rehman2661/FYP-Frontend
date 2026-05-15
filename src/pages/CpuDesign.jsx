@@ -53,8 +53,15 @@ export default function CpuDesign() {
       toast.error("Memory Size must be a positive number");
       return false;
     }
+    
+    // New restriction: Minimum memory size is 256
+    if (memSize < 256) {
+      toast.error("Memory Size must be at least 256 bytes");
+      return false;
+    }
+    
     if (!isPowerOfTwo(memSize)) {
-      toast.error("Memory Size must be a power of 2 (2, 4, 8, 16, 32, 64, etc.)");
+      toast.error("Memory Size must be a power of 2 (256, 512, 1024, 2048, 4096, etc.)");
       return false;
     }
 
@@ -127,6 +134,23 @@ export default function CpuDesign() {
     }
   };
 
+  // Optional: Add input validation to prevent values below 256
+  const handleMemorySizeChange = (e) => {
+    const value = e.target.value;
+    if (value === "") {
+      setMemorySize("");
+      return;
+    }
+    
+    const numValue = parseInt(value);
+    if (!isNaN(numValue) && numValue < 256 && numValue > 0) {
+      toast.error("Minimum memory size is 256 bytes", {
+        duration: 2000,
+      });
+    }
+    setMemorySize(value);
+  };
+
   return (
     <>
       <Toaster 
@@ -189,17 +213,18 @@ export default function CpuDesign() {
               <div className="space-y-4 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
                 <div>
                   <label className="text-sm text-black">
-                    Memory Size 
+                    Memory Size
                   </label>
                   <input
                     type="number"
-                    onChange={(e) => setMemorySize(e.target.value)}
+                    onChange={handleMemorySizeChange}
                     placeholder="Enter memory size(byte)"
+                    min="256"
                     className="mt-1 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm
                       focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900"
                   />
                   {/* <p className="text-xs text-gray-500 mt-1">
-                    Must be a power of 2 (2, 4, 8, 16, 32, 64, 128...)
+                    Minimum 256 bytes, must be a power of 2 (256, 512, 1024, 2048, 4096...)
                   </p> */}
                 </div>
 

@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 import Header from "../components/Header.jsx";
 import BottomNavigation from "../components/BottomNavigation.jsx";
@@ -10,32 +11,33 @@ function RegisterVisualization() {
 
   console.log("Arch Id:", id);
 
-  const { executionResult } = useContext(ArchitectureContext);
+  const { executionResult, userCode } = useContext(ArchitectureContext);
   const [registerMeta, setRegisterMeta] = useState([]);
   const registers = executionResult?.Registers || [];
   const flags = executionResult?.Flags || [];
-  const [output, setOutput] = useState("");
+  const location = useLocation();
+  const { code } = location.state || {};
 
   // Flag Index Mapping (matches backend)
   const FLAG_INDICES = {
     CARRY: 0,
     OVERFLOW: 1,
     SIGN: 2,
-    ZERO: 3
+    ZERO: 3,
   };
 
   // Get flag values with correct mapping
   const getFlagValue = (flagName) => {
     if (!flags || flags.length === 0) return 0;
-    
-    switch(flagName.toLowerCase()) {
-      case 'carry':
+
+    switch (flagName.toLowerCase()) {
+      case "carry":
         return flags[FLAG_INDICES.CARRY] ? 1 : 0;
-      case 'overflow':
+      case "overflow":
         return flags[FLAG_INDICES.OVERFLOW] ? 1 : 0;
-      case 'sign':
+      case "sign":
         return flags[FLAG_INDICES.SIGN] ? 1 : 0;
-      case 'zero':
+      case "zero":
         return flags[FLAG_INDICES.ZERO] ? 1 : 0;
       default:
         return 0;
@@ -81,10 +83,66 @@ function RegisterVisualization() {
 
   // Display flag status with color coding
   const getFlagStyle = (value) => {
-    return value === 1 
-      ? "bg-green-100 text-green-700 border-green-300 font-bold" 
+    return value === 1
+      ? "bg-green-100 text-green-700 border-green-300 font-bold"
       : "bg-white text-gray-500 border-gray-200";
   };
+
+  // NEW: Get output value from last affected register
+  const getOutputValue = () => {
+    if (!executionResult?.Registers || !registerMeta.length) return null;
+    
+    const generalRegisters = registerMeta.filter(r => r.IsFlagRegister === false);
+    
+    // Method 1: Get destination register from last instruction (if userCode is available)
+    if (userCode && userCode.length > 0) {
+      const lastLine = userCode[userCode.length - 1];
+      const parts = lastLine.trim().split(/\s+/);
+      const operands = parts.slice(1).join(' ').split(',');
+      const firstOperand = operands[0]?.trim();
+      
+      // Check if first operand is a register
+      const destRegister = generalRegisters.find(r => r.Name === firstOperand);
+      if (destRegister) {
+        const index = generalRegisters.findIndex(r => r.Name === firstOperand);
+        if (index !== -1 && executionResult.Registers[index] !== undefined) {
+          return {
+            value: executionResult.Registers[index],
+            register: firstOperand,
+            description: `${firstOperand} = ${executionResult.Registers[index]}`
+          };
+        }
+      }
+    }
+    
+    // Method 2: Fallback - Get last non-zero register
+    for (let i = executionResult.Registers.length - 1; i >= 0; i--) {
+      if (executionResult.Registers[i] !== 0) {
+        const registerName = generalRegisters[i]?.Name || `R${i+1}`;
+        return {
+          value: executionResult.Registers[i],
+          register: registerName,
+          description: `${registerName} = ${executionResult.Registers[i]}`
+        };
+      }
+    }
+    
+    // Method 3: Get first register with value
+    for (let i = 0; i < executionResult.Registers.length; i++) {
+      if (executionResult.Registers[i] !== 0) {
+        const registerName = generalRegisters[i]?.Name || `R${i+1}`;
+        return {
+          value: executionResult.Registers[i],
+          register: registerName,
+          description: `${registerName} = ${executionResult.Registers[i]}`
+        };
+      }
+    }
+    
+    return null;
+  };
+
+  const outputResult = getOutputValue();
 
   return (
     <>
@@ -98,7 +156,6 @@ function RegisterVisualization() {
         <div className="p-4 bg-gray-50 pb-16 min-h-screen">
           <div className="bg-white rounded-xl shadow border p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              
               {/* LEFT COLUMN: General Purpose Registers */}
               <div>
                 <p className="text-sm text-gray-700 mb-2 font-semibold">
@@ -126,7 +183,7 @@ function RegisterVisualization() {
                 </div>
               </div>
 
-              {/* RIGHT COLUMN: Default Static Flag Registers (Side by Side with General Purpose) */}
+              {/* RIGHT COLUMN: Default Static Flag Registers */}
               <div>
                 <p className="text-sm text-gray-700 mb-2 font-semibold">
                   Flag Registers
@@ -135,117 +192,94 @@ function RegisterVisualization() {
                   <div className="grid grid-cols-4 gap-4">
                     {/* Carry Flag (CF) */}
                     <div className="text-center">
-                      <p className="text-xs text-gray-700 mb-1 font-medium">Carry (CF)</p>
-                      <div className={`border rounded-md py-2 text-sm font-mono transition-all duration-300 ${getFlagStyle(getFlagValue('carry'))}`}>
-                        {getFlagValue('carry')}
+                      <p className="text-xs text-gray-700 mb-1 font-medium">
+                        Carry 
+                      </p>
+                      <div
+                        className={`border rounded-md py-2 text-sm font-mono transition-all duration-300 ${getFlagStyle(getFlagValue("carry"))}`}
+                      >
+                        {getFlagValue("carry")}
                       </div>
                     </div>
 
                     {/* Overflow Flag (OF) */}
                     <div className="text-center">
-                      <p className="text-xs text-gray-700 mb-1 font-medium">Overflow (OF)</p>
-                      <div className={`border rounded-md py-2 text-sm font-mono transition-all duration-300 ${getFlagStyle(getFlagValue('overflow'))}`}>
-                        {getFlagValue('overflow')}
+                      <p className="text-xs text-gray-700 mb-1 font-medium">
+                        Overflow 
+                      </p>
+                      <div
+                        className={`border rounded-md py-2 text-sm font-mono transition-all duration-300 ${getFlagStyle(getFlagValue("overflow"))}`}
+                      >
+                        {getFlagValue("overflow")}
                       </div>
                     </div>
 
                     {/* Sign Flag (SF) */}
                     <div className="text-center">
-                      <p className="text-xs text-gray-700 mb-1 font-medium">Sign (SF)</p>
-                      <div className={`border rounded-md py-2 text-sm font-mono transition-all duration-300 ${getFlagStyle(getFlagValue('sign'))}`}>
-                        {getFlagValue('sign')}
+                      <p className="text-xs text-gray-700 mb-1 font-medium">
+                        Sign
+                      </p>
+                      <div
+                        className={`border rounded-md py-2 text-sm font-mono transition-all duration-300 ${getFlagStyle(getFlagValue("sign"))}`}
+                      >
+                        {getFlagValue("sign")}
                       </div>
                     </div>
 
                     {/* Zero Flag (ZF) */}
                     <div className="text-center">
-                      <p className="text-xs text-gray-700 mb-1 font-medium">Zero (ZF)</p>
-                      <div className={`border rounded-md py-2 text-sm font-mono transition-all duration-300 ${getFlagStyle(getFlagValue('zero'))}`}>
-                        {getFlagValue('zero')}
+                      <p className="text-xs text-gray-700 mb-1 font-medium">
+                        Zero
+                      </p>
+                      <div
+                        className={`border rounded-md py-2 text-sm font-mono transition-all duration-300 ${getFlagStyle(getFlagValue("zero"))}`}
+                      >
+                        {getFlagValue("zero")}
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-
-              {/* ============================================================ */}
-              {/* DYNAMIC FLAG REGISTER CODE - COMMENTED FOR FUTURE USE */}
-              {/* ============================================================ */}
-              
-              {/* <div>
-                <p className="text-sm text-gray-700 mb-2 font-semibold">
-                  Flag Registers (Dynamic)
-                </p>
-                <div className="border rounded-lg p-4 bg-gray-50">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {sortedFlagMeta.map((register) => {
-                      // Map backend flag name to our flag array index
-                      let flagValue = 0;
-                      const flagName = register.Name.toLowerCase();
-                      
-                      if (flagName === 'carry' || flagName === 'cf' || flagName === 'c') {
-                        flagValue = flags[FLAG_INDICES.CARRY] ? 1 : 0;
-                      } else if (flagName === 'overflow' || flagName === 'of' || flagName === 'o') {
-                        flagValue = flags[FLAG_INDICES.OVERFLOW] ? 1 : 0;
-                      } else if (flagName === 'sign' || flagName === 'sf' || flagName === 's') {
-                        flagValue = flags[FLAG_INDICES.SIGN] ? 1 : 0;
-                      } else if (flagName === 'zero' || flagName === 'zf' || flagName === 'z') {
-                        flagValue = flags[FLAG_INDICES.ZERO] ? 1 : 0;
-                      }
-                      
-                      return (
-                        <div key={register.RegisterID} className="text-center">
-                          <p className="text-xs text-gray-700 mb-1 font-medium">
-                            {register.Name}
-                          </p>
-                          <div className={`border rounded-md py-2 text-sm font-mono transition-all duration-300 ${getFlagStyle(flagValue)}`}>
-                            {flagValue}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div> */}
-             
-              {/* ============================================================ */}
-
             </div>
 
-            {/* Flag Status Cards with Descriptions */}
-            {/* <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className={`p-3 rounded-lg border transition-all duration-300 ${getFlagStyle(getFlagValue('carry'))}`}>
-                <p className="text-xs font-semibold">Carry Flag (CF)</p>
-                <p className="text-lg font-bold">{getFlagValue('carry')}</p>
-                <p className="text-xs text-gray-500 mt-1">Set on unsigned overflow</p>
-              </div>
-              
-              <div className={`p-3 rounded-lg border transition-all duration-300 ${getFlagStyle(getFlagValue('overflow'))}`}>
-                <p className="text-xs font-semibold">Overflow Flag (OF)</p>
-                <p className="text-lg font-bold">{getFlagValue('overflow')}</p>
-                <p className="text-xs text-gray-500 mt-1">Set on signed overflow</p>
-              </div>
-              
-              <div className={`p-3 rounded-lg border transition-all duration-300 ${getFlagStyle(getFlagValue('sign'))}`}>
-                <p className="text-xs font-semibold">Sign Flag (SF)</p>
-                <p className="text-lg font-bold">{getFlagValue('sign')}</p>
-                <p className="text-xs text-gray-500 mt-1">Set when result is negative</p>
-              </div>
-              
-              <div className={`p-3 rounded-lg border transition-all duration-300 ${getFlagStyle(getFlagValue('zero'))}`}>
-                <p className="text-xs font-semibold">Zero Flag (ZF)</p>
-                <p className="text-lg font-bold">{getFlagValue('zero')}</p>
-                <p className="text-xs text-gray-500 mt-1">Set when result is zero</p>
-              </div>
-            </div> */}
-
-            {/* Output Section */}
+            {/* Output Section - Display result from last affected register */}
             <div className="h-full mt-6">
-              <p className="text-gray-800 mb-2 font-semibold">Output</p>
-              <div className="border border-gray-300 rounded-lg h-48 w-full bg-gray-100 overflow-y-auto">
-                <p className="p-4 text-gray-600 font-mono">
-                  {output || "No Output to display..."}
-                </p>
+              <p className="text-gray-800 mb-2 font-semibold">Output / Result</p>
+              <div className="border border-gray-300 rounded-lg bg-gray-100 overflow-y-auto">
+                <div className="p-4">
+                  {outputResult ? (
+                    <div className="">
+                      <div className="mb-3">
+                        {/* <span className="text-gray-500 text-sm font-mono">
+                          Last Affected Register: <span className="font-bold text-blue-600">{outputResult.register}</span>
+                        </span> */}
+                      </div>
+                      <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                        <span className="text-3xl font-semibold text-black">
+                          {outputResult.value}
+                        </span>
+                        {/* <p className="text-gray-600 font-mono text-sm mt-3">
+                          {outputResult.description}
+                        </p> */}
+                      </div>
+                      
+                      {/* Show last instruction details if available */}
+                      {/* {executionResult?.InstructionDetails && executionResult.InstructionDetails.length > 0 && (
+                        <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                          <p className="text-xs text-gray-500 font-mono">
+                            Last Instruction: {executionResult.InstructionDetails[executionResult.InstructionDetails.length - 1]?.AssemblyCode || "N/A"}
+                          </p>
+                        </div>
+                      )} */}
+                    </div>
+                  ) : (
+                    <div className="flex h-32">
+                      <span className="text-gray-400 font-mono">
+                        No output to display.
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

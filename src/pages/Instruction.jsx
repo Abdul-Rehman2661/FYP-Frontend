@@ -469,7 +469,7 @@ export default function Instruction() {
         </h2>
 
         {/* Show Instruction Limit Info */}
-        {maxInstructions > 0 && (
+        {/* {maxInstructions > 0 && (
           <div className="mt-4 mb-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
             <p className="text-sm text-blue-900">
               <span className="font-semibold">Instruction Limit:</span> You can
@@ -478,11 +478,11 @@ export default function Instruction() {
               {maxInstructions}
             </p>
           </div>
-        )}
+        )} */}
 
         <div className="mt-4 mb-20 bg-white shadow p-4 rounded-xl">
           {/* Interrupt Checkbox */}
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -500,7 +500,7 @@ export default function Instruction() {
               />
               <span className="text-black">Interrupt Instruction</span>
             </label>
-          </div>
+          </div> */}
 
           {/* Opcode & Mnemonics */}
           <div className="flex flex-col md:flex-row gap-4">
@@ -565,6 +565,7 @@ export default function Instruction() {
                       <option value="Register">Register</option>
                       <option value="Immediate">Immediate</option>
                       <option value="Memory">Memory</option>
+                      <option value="Memory">Indirect</option>
                     </select>
 
                     <label className="flex items-center gap-2 cursor-pointer">
@@ -608,7 +609,7 @@ export default function Instruction() {
           )}
 
           {/* Interrupt Instruction Fields */}
-          {isInterrupt && (
+          {/* {isInterrupt && (
             <div className="mt-4 space-y-4">
               <div>
                 <span className="text-black">Interrupt Symbol</span>
@@ -655,7 +656,7 @@ export default function Instruction() {
                 </select>
               </div>
             </div>
-          )}
+          )} */}
 
           {/* Action */}
           <div className="mt-4">
@@ -669,7 +670,7 @@ export default function Instruction() {
           </div>
 
           {/* ================= LIVE CYCLE COUNT PREVIEW ================= */}
-          <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          {/* <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <h3 className="text-sm font-bold text-blue-900 mb-2 text-center">
               Clock Cycle Count
             </h3>
@@ -711,7 +712,7 @@ export default function Instruction() {
                 )}
               </>
             )}
-          </div>
+          </div> */}
 
           {/* Added Instructions List */}
           {addedInstructions.length > 0 && (

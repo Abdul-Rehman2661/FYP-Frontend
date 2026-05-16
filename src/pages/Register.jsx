@@ -195,14 +195,14 @@ function Register() {
         </h2>
         
         {/* Show Register Limit Info */}
-        {maxRegisters > 0 && (
+        {/* {maxRegisters > 0 && (
           <div className="mx-6 mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
             <p className="text-sm text-blue-900">
               <span className="font-semibold">Register Limit:</span> You can add up to {maxRegisters} registers total 
               (Flag + General Purpose). Currently added: <span className="font-semibold">{currentTotalRegisters}</span>/{maxRegisters}
             </p>
           </div>
-        )}
+        )} */}
 
         {/* Add Register Card */}
         {/* <div className="m-6 p-6 shadow-md rounded-xl bg-white border border-gray-200">
@@ -332,10 +332,18 @@ function Register() {
             <span className="text-black">Symbol</span>
             <input
               value={symbol}
-              onChange={(e) => setSymbol(e.target.value)}
+              onChange={(e) => {
+                // Only allow max 1 character
+                const newValue = e.target.value;
+                if (newValue.length <= 1) {
+                  setSymbol(newValue);
+                }
+                // If user tries to add 2nd character, just don't update state - no toast
+              }}
               className="auto-textarea mt-2 pl-2 h-8 w-full border bg-gray-100 text-black rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 border-gray-400 focus:ring-blue-900"
               type="text"
               placeholder="Enter Symbol (e.g., #, @, etc.)"
+              maxLength={1}
             />
             {/* Display Adressing Modes */}
             {addressingModeList.length > 0 && (

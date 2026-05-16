@@ -140,7 +140,7 @@ function Detail() {
         icon={<CircleStackIcon className="w-6 h-6" />}
       >
         {/* Flag Registers */}
-        <Table
+        {/* <Table
           title="Flag Registers"
           headers={["Name", "Action"]}
           data={architecture.registers?.filter(
@@ -156,7 +156,7 @@ function Detail() {
               </td>
             </tr>
           )}
-        />
+        /> */}
 
         {/* General Purpose Registers */}
         <Table
